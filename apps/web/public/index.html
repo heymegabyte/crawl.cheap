@@ -12,11 +12,12 @@
 <meta property="og:description" content="Firecrawl-compatible. Cloudflare-powered. Half the core API price." />
 <meta property="og:url" content="https://crawl.cheap/" />
 <meta property="og:site_name" content="crawl.cheap" />
-<meta property="og:image" content="https://crawl.cheap/assets/crawl-cheap-mark.svg" />
-<meta name="twitter:card" content="summary" />
-<meta name="twitter:image" content="https://crawl.cheap/assets/crawl-cheap-mark.svg" />
+<meta property="og:image" content="https://crawl.cheap/assets/crawl-cheap-logo.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://crawl.cheap/assets/crawl-cheap-logo.png" />
 <meta name="theme-color" content="#060610" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23060610'/%3E%3Cpath d='M16 6 24.7 11 24.7 21 16 26 7.3 21 7.3 11Z' fill='none' stroke='%232bb8d6' stroke-opacity='.4' stroke-width='1'/%3E%3Cpath d='M7.3 21 16 16 16 6 24.7 11' fill='none' stroke='%2300E5FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='16' r='1.8' fill='%239EF6FF'/%3E%3Ccircle cx='24.7' cy='11' r='3.5' fill='%237C3AED'/%3E%3Ccircle cx='24.7' cy='11' r='2.3' fill='%2300E5FF'/%3E%3Ccircle cx='24.7' cy='11' r='1' fill='%23fff'/%3E%3C/svg%3E" />
+<link rel="icon" type="image/png" href="/assets/crawl-cheap-icon-64.png" />
+<link rel="apple-touch-icon" href="/assets/crawl-cheap-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
@@ -59,10 +60,13 @@
   /* Nav */
   nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(6,6,16,.6);
     border-bottom:1px solid var(--line)}
-  nav .wrap{display:flex;align-items:center;gap:28px;height:64px}
-  .brand{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:700;font-size:20px}
+  nav .wrap{display:flex;align-items:center;gap:28px;height:96px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:700;font-size:20px;line-height:1}
   .brand .accent{background:linear-gradient(90deg,var(--cyan),var(--cyan2));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .crawl-mark{width:27px;height:27px;filter:drop-shadow(0 0 7px rgba(0,229,255,.55))}
+  .brand-icon{width:40px;height:40px;border-radius:11px;display:block;flex:none;filter:drop-shadow(0 0 10px rgba(0,229,255,.25))}
+  nav .brand{font-size:30px;gap:14px;letter-spacing:-.5px}
+  nav .brand-icon{width:72px;height:72px;border-radius:18px}
+  footer .brand-icon{width:38px;height:38px}
   nav .links{display:flex;gap:22px;margin-left:auto;align-items:center;color:var(--mut);font-size:14px}
   nav .links a:hover{color:var(--ink)}
   nav .links .hide-sm{display:inline}
@@ -204,8 +208,8 @@
 <body>
 <nav><div class="wrap">
   <a class="brand" href="/">
-    <svg class="crawl-mark" viewBox="0 0 32 32"><path d="M16 6 24.7 11 24.7 21 16 26 7.3 21 7.3 11Z" fill="none" stroke="#2bb8d6" stroke-opacity=".35" stroke-width="1"/><path d="M7.3 21 16 16 16 6 24.7 11" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.8" fill="#9ef6ff"/><circle cx="24.7" cy="11" r="3.4" fill="#7c3aed"/><circle cx="24.7" cy="11" r="2.2" fill="#00e5ff"/><circle cx="24.7" cy="11" r=".9" fill="#fff"/></svg>
-    crawl<span class="accent">.cheap</span>
+    <img class="brand-icon" src="/assets/crawl-cheap-icon.png" width="72" height="72" alt="crawl.cheap" />
+    <span class="wm">crawl<span class="accent">.cheap</span></span>
   </a>
   <div class="links">
     <a class="hide-sm" href="#features">Features</a>
@@ -406,7 +410,7 @@
 </div></section>
 
 <footer><div class="wrap">
-  <a class="brand" href="/"><svg class="crawl-mark" viewBox="0 0 32 32"><path d="M16 6 24.7 11 24.7 21 16 26 7.3 21 7.3 11Z" fill="none" stroke="#2bb8d6" stroke-opacity=".35" stroke-width="1"/><path d="M7.3 21 16 16 16 6 24.7 11" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.8" fill="#9ef6ff"/><circle cx="24.7" cy="11" r="3.4" fill="#7c3aed"/><circle cx="24.7" cy="11" r="2.2" fill="#00e5ff"/><circle cx="24.7" cy="11" r=".9" fill="#fff"/></svg> crawl<span class="accent">.cheap</span></a>
+  <a class="brand" href="/"><img class="brand-icon" src="/assets/crawl-cheap-icon.png" width="38" height="38" alt="crawl.cheap" /> <span class="wm">crawl<span class="accent">.cheap</span></span></a>
   <span>The web data engine for AI.</span>
   <a href="https://github.com/heymegabyte/crawl.cheap" style="margin-left:auto">GitHub</a>
   <a href="https://api.crawl.cheap">API</a>
