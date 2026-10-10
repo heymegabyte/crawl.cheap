@@ -32,7 +32,7 @@
     {
       "binding": "DB",
       "database_name": "crawl-cheap",
-      "database_id": "928ae85c-221a-4c65-8bee-5ce4322b308b",
+      "database_id": "d65e6d6f-712e-4a05-a37a-89e4e850e291",
       "migrations_dir": "migrations",
     },
   ],
