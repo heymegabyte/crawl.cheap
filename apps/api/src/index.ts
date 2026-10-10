@@ -133,8 +133,8 @@ app.get('/', (c) =>
     tagline:
       'The web data engine for AI. Firecrawl-compatible. Cloudflare-powered. Half the price.',
     version: '0.1.0',
-    documentation: 'https://docs.crawl.cheap',
-    dashboard: 'https://app.crawl.cheap',
+    documentation: 'https://github.com/heymegabyte/crawl.cheap#readme',
+    dashboard: 'https://crawl.cheap/app/',
     source: 'https://github.com/heymegabyte/crawl.cheap',
     compatibility: { firecrawl: FIRECRAWL_COMPAT.apiVersion, pinnedAt: FIRECRAWL_COMPAT.pinnedAt },
     endpoints: {
