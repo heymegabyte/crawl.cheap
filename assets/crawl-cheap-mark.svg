@@ -1,22 +1,71 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 180" role="img" aria-label="crawl.cheap — the web data engine for AI">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 812 200" role="img" aria-label="crawl.cheap — the web data engine for AI">
   <defs>
-    <linearGradient id="flame" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0" stop-color="#FF5722"/>
-      <stop offset="0.55" stop-color="#FF8A3D"/>
-      <stop offset="1" stop-color="#FFC24B"/>
-    </linearGradient>
-    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="0">
+    <linearGradient id="cc-cyan" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#00E5FF"/>
       <stop offset="1" stop-color="#50AAE3"/>
     </linearGradient>
+    <linearGradient id="cc-trav" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="0.5" stop-color="#00E5FF"/>
+      <stop offset="1" stop-color="#9EF6FF"/>
+    </linearGradient>
+    <radialGradient id="cc-head" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.35" stop-color="#9EF6FF"/>
+      <stop offset="0.75" stop-color="#00E5FF"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </radialGradient>
+    <radialGradient id="cc-tile" cx="0.28" cy="0.2" r="1.1">
+      <stop offset="0" stop-color="#0d1430"/>
+      <stop offset="0.55" stop-color="#080816"/>
+      <stop offset="1" stop-color="#060610"/>
+    </radialGradient>
+    <filter id="cc-glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="2.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="cc-glow-lg" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="5.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
-  <rect width="640" height="180" rx="20" fill="#060610"/>
-  <!-- flame mark -->
-  <g transform="translate(54 34)">
-    <path d="M56 8 C40 30 60 44 42 74 C36 84 22 84 20 68 C8 80 10 112 36 112 C66 112 80 86 70 58 C64 40 70 24 56 8 Z" fill="url(#flame)"/>
-    <circle cx="44" cy="92" r="12" fill="#00E5FF" opacity="0.9"/>
+
+  <rect width="812" height="200" rx="26" fill="url(#cc-tile)"/>
+  <rect x="0.5" y="0.5" width="811" height="199" rx="25.5" fill="none" stroke="#ffffff" stroke-opacity="0.06"/>
+
+  <!-- crawl glyph: a data mesh traversed by a glowing crawler -->
+  <g>
+    <!-- faint scan ring -->
+    <circle cx="104" cy="100" r="64" fill="none" stroke="#00E5FF" stroke-opacity="0.10" stroke-width="1" stroke-dasharray="2 7"/>
+    <!-- mesh edges (the web being crawled) -->
+    <g stroke="#2bb8d6" stroke-opacity="0.22" stroke-width="1.4">
+      <path d="M104 54 L144 77 L144 123 L104 146 L64 123 L64 77 Z"/>
+      <path d="M104 100 L104 54 M104 100 L144 77 M104 100 L144 123 M104 100 L104 146 M104 100 L64 123 M104 100 L64 77"/>
+    </g>
+    <!-- dim mesh nodes -->
+    <g fill="#4fd3ea" fill-opacity="0.45">
+      <circle cx="144" cy="123" r="3.2"/>
+      <circle cx="104" cy="146" r="3.2"/>
+      <circle cx="64"  cy="77"  r="3.2"/>
+    </g>
+    <!-- bright traversal path: lower-left → center → top → head (forward/up motion) -->
+    <path d="M64 123 L104 100 L104 54 L144 77" fill="none" stroke="url(#cc-trav)" stroke-width="4"
+          stroke-linecap="round" stroke-linejoin="round" filter="url(#cc-glow)"/>
+    <!-- traversed nodes -->
+    <g fill="#9EF6FF" filter="url(#cc-glow)">
+      <circle cx="64"  cy="123" r="4"/>
+      <circle cx="104" cy="100" r="4.5"/>
+      <circle cx="104" cy="54"  r="4"/>
+    </g>
+    <!-- comet trail + crawler head -->
+    <path d="M142 80.5 L146 73.5 L118 62 Z" fill="#00E5FF" fill-opacity="0.5" filter="url(#cc-glow)"/>
+    <circle cx="144" cy="77" r="9" fill="url(#cc-head)" filter="url(#cc-glow-lg)"/>
+    <circle cx="144" cy="77" r="9" fill="none" stroke="#ffffff" stroke-opacity="0.65" stroke-width="1"/>
   </g>
+
   <!-- wordmark -->
-  <text x="150" y="86" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="56" font-weight="800" fill="#F4F7FB">crawl.cheap<tspan fill="url(#cyan)">.ink</tspan></text>
-  <text x="152" y="124" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="500" fill="#8A93A6">The web data engine for AI · Firecrawl-compatible · Cloudflare-powered</text>
+  <text x="212" y="104" font-family="'Space Grotesk','Segoe UI',system-ui,-apple-system,Arial,sans-serif"
+        font-size="64" font-weight="700" letter-spacing="-1.5" fill="#EEF2F7">crawl<tspan fill="url(#cc-cyan)">.cheap</tspan></text>
+  <text x="214" y="138" font-family="'Space Grotesk','Segoe UI',system-ui,-apple-system,Arial,sans-serif"
+        font-size="15" font-weight="500" letter-spacing="0.3" fill="#828DA3">The web data engine for AI · Firecrawl-compatible · Cloudflare-native</text>
 </svg>

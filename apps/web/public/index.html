@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:image" content="https://crawl.cheap/assets/crawl-cheap-mark.svg" />
 <meta name="theme-color" content="#060610" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23060610'/%3E%3Cpath d='M18 4C13 11 20 15 13 24c-3 4-9 2-8-5-4 5-2 12 6 12 9 0 12-9 8-16-2-4-1-8-1-11z' fill='%23FF8A3D'/%3E%3Ccircle cx='13' cy='23' r='3.4' fill='%2300E5FF'/%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23060610'/%3E%3Cpath d='M16 6 24.7 11 24.7 21 16 26 7.3 21 7.3 11Z' fill='none' stroke='%232bb8d6' stroke-opacity='.4' stroke-width='1'/%3E%3Cpath d='M7.3 21 16 16 16 6 24.7 11' fill='none' stroke='%2300E5FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='16' r='1.8' fill='%239EF6FF'/%3E%3Ccircle cx='24.7' cy='11' r='3.5' fill='%237C3AED'/%3E%3Ccircle cx='24.7' cy='11' r='2.3' fill='%2300E5FF'/%3E%3Ccircle cx='24.7' cy='11' r='1' fill='%23fff'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
@@ -26,7 +26,9 @@
 <style>
   :root{
     --bg:#060610; --bg2:#0b0b1a; --ink:#eef2f7; --mut:#9aa3b5; --faint:#7b8498;
-    --cyan:#00e5ff; --cyan2:#50aae3; --flame1:#ff5722; --flame2:#ff8a3d; --flame3:#ffc24b; --violet:#7c3aed;
+    --cyan:#00e5ff; --cyan2:#50aae3; --violet:#7c3aed;
+    /* accent ramp — cool cyan→violet (was fuego orange; kept var names for brevity) */
+    --flame1:#7c3aed; --flame2:#2b8fe0; --flame3:#00e5ff;
     --line:rgba(255,255,255,.09); --glass:rgba(255,255,255,.035); --glass2:rgba(255,255,255,.055);
     --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
     --disp:'Space Grotesk',system-ui,sans-serif;
@@ -39,7 +41,7 @@
   body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
     background:
       radial-gradient(60vw 60vw at 12% -10%, rgba(0,229,255,.14), transparent 60%),
-      radial-gradient(55vw 55vw at 100% 8%, rgba(255,87,34,.13), transparent 55%),
+      radial-gradient(55vw 55vw at 100% 8%, rgba(80,170,227,.13), transparent 55%),
       radial-gradient(50vw 50vw at 50% 120%, rgba(124,58,237,.12), transparent 60%)}
   body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.035;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
@@ -53,8 +55,8 @@
     border-bottom:1px solid var(--line)}
   nav .wrap{display:flex;align-items:center;gap:28px;height:64px}
   .brand{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:700;font-size:20px}
-  .brand .ink-accent{background:linear-gradient(90deg,var(--cyan),var(--cyan2));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .flame-mark{width:26px;height:26px;filter:drop-shadow(0 0 6px rgba(255,138,61,.6))}
+  .brand .accent{background:linear-gradient(90deg,var(--cyan),var(--cyan2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .crawl-mark{width:27px;height:27px;filter:drop-shadow(0 0 7px rgba(0,229,255,.55))}
   nav .links{display:flex;gap:22px;margin-left:auto;align-items:center;color:var(--mut);font-size:14px}
   nav .links a:hover{color:var(--ink)}
   nav .links .hide-sm{display:inline}
@@ -62,8 +64,8 @@
   .btn{display:inline-flex;align-items:center;gap:8px;border-radius:11px;padding:11px 18px;font-weight:600;
     font-size:14px;cursor:pointer;border:1px solid transparent;transition:transform .15s ease,box-shadow .2s ease,background .2s}
   .btn:hover{transform:translateY(-1px)}
-  .btn-primary{background:linear-gradient(100deg,var(--flame1),var(--flame2) 55%,var(--flame3));color:#1a0b02;
-    box-shadow:0 8px 30px -8px rgba(255,120,40,.55)}
+  .btn-primary{background:linear-gradient(100deg,var(--cyan),var(--cyan2));color:#04141c;
+    box-shadow:0 8px 30px -8px rgba(0,229,255,.45)}
   .btn-ghost{background:var(--glass);border-color:var(--line);color:var(--ink)}
   .btn-ghost:hover{border-color:var(--cyan);box-shadow:0 0 0 1px rgba(0,229,255,.3)}
 
@@ -78,7 +80,7 @@
   .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);animation:pulse 2s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
   h1.hero{font-size:clamp(2.6rem,6vw,4.6rem);margin:22px 0 0;max-width:15ch;text-wrap:balance}
-  h1.hero .grad{background:linear-gradient(100deg,var(--flame2),var(--flame3) 40%,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  h1.hero .grad{background:linear-gradient(100deg,var(--cyan),#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
   .sub{font-size:clamp(1.05rem,2.2vw,1.35rem);color:var(--mut);margin:20px 0 0;max-width:52ch;text-wrap:pretty}
   .cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
   .stats{display:flex;gap:30px;flex-wrap:wrap;margin-top:40px;color:var(--mut);font-size:13.5px}
@@ -117,7 +119,7 @@
   .tile p{color:var(--mut);font-size:.94rem;margin:9px 0 0}
   .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:15px;
     background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25)}
-  .tile.flame .ic{background:rgba(255,138,61,.12);border-color:rgba(255,138,61,.3)}
+  .tile.flame .ic{background:rgba(124,58,237,.14);border-color:rgba(124,58,237,.33)}
 
   /* Compat strip */
   .diff{font:600 14px/2 var(--mono);background:#0a0a16;border:1px solid var(--line);border-radius:14px;padding:20px;overflow:auto;margin-top:18px}
@@ -193,8 +195,8 @@
 <body>
 <nav><div class="wrap">
   <a class="brand" href="/">
-    <svg class="flame-mark" viewBox="0 0 32 32"><path d="M18 4C13 11 20 15 13 24c-3 4-9 2-8-5-4 5-2 12 6 12 9 0 12-9 8-16-2-4-1-8-1-11z" fill="#ff8a3d"/><circle cx="13" cy="23" r="3.4" fill="#00e5ff"/></svg>
-    crawl.cheap<span class="ink-accent">.ink</span>
+    <svg class="crawl-mark" viewBox="0 0 32 32"><path d="M16 6 24.7 11 24.7 21 16 26 7.3 21 7.3 11Z" fill="none" stroke="#2bb8d6" stroke-opacity=".35" stroke-width="1"/><path d="M7.3 21 16 16 16 6 24.7 11" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.8" fill="#9ef6ff"/><circle cx="24.7" cy="11" r="3.4" fill="#7c3aed"/><circle cx="24.7" cy="11" r="2.2" fill="#00e5ff"/><circle cx="24.7" cy="11" r=".9" fill="#fff"/></svg>
+    crawl<span class="accent">.cheap</span>
   </a>
   <div class="links">
     <a class="hide-sm" href="#features">Features</a>
@@ -395,7 +397,7 @@
 </div></section>
 
 <footer><div class="wrap">
-  <a class="brand" href="/"><svg class="flame-mark" viewBox="0 0 32 32"><path d="M18 4C13 11 20 15 13 24c-3 4-9 2-8-5-4 5-2 12 6 12 9 0 12-9 8-16-2-4-1-8-1-11z" fill="#ff8a3d"/><circle cx="13" cy="23" r="3.4" fill="#00e5ff"/></svg> crawl.cheap<span class="ink-accent">.ink</span></a>
+  <a class="brand" href="/"><svg class="crawl-mark" viewBox="0 0 32 32"><path d="M16 6 24.7 11 24.7 21 16 26 7.3 21 7.3 11Z" fill="none" stroke="#2bb8d6" stroke-opacity=".35" stroke-width="1"/><path d="M7.3 21 16 16 16 6 24.7 11" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.8" fill="#9ef6ff"/><circle cx="24.7" cy="11" r="3.4" fill="#7c3aed"/><circle cx="24.7" cy="11" r="2.2" fill="#00e5ff"/><circle cx="24.7" cy="11" r=".9" fill="#fff"/></svg> crawl<span class="accent">.cheap</span></a>
   <span>The web data engine for AI.</span>
   <a href="https://github.com/heymegabyte/crawl.cheap" style="margin-left:auto">GitHub</a>
   <a href="https://api.crawl.cheap">API</a>

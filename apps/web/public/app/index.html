@@ -6,20 +6,20 @@
 <script>document.documentElement.className = 'js';</script>
 <title>Console · crawl.cheap</title>
 <meta name="robots" content="noindex" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23060610'/%3E%3Cpath d='M18 4C13 11 20 15 13 24c-3 4-9 2-8-5-4 5-2 12 6 12 9 0 12-9 8-16-2-4-1-8-1-11z' fill='%23FF8A3D'/%3E%3Ccircle cx='13' cy='23' r='3.4' fill='%2300E5FF'/%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23060610'/%3E%3Cpath d='M16 6 24.7 11 24.7 21 16 26 7.3 21 7.3 11Z' fill='none' stroke='%232bb8d6' stroke-opacity='.4' stroke-width='1'/%3E%3Cpath d='M7.3 21 16 16 16 6 24.7 11' fill='none' stroke='%2300E5FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='16' r='1.8' fill='%239EF6FF'/%3E%3Ccircle cx='24.7' cy='11' r='3.5' fill='%237C3AED'/%3E%3Ccircle cx='24.7' cy='11' r='2.3' fill='%2300E5FF'/%3E%3Ccircle cx='24.7' cy='11' r='1' fill='%23fff'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 <style>
-  :root{--bg:#060610;--ink:#eef2f7;--mut:#9aa3b5;--faint:#7b8498;--cyan:#00e5ff;--cyan2:#50aae3;--flame1:#ff5722;--flame2:#ff8a3d;--flame3:#ffc24b;--violet:#7c3aed;--line:rgba(255,255,255,.09);--glass:rgba(255,255,255,.04);--glass2:rgba(255,255,255,.06);--mono:'JetBrains Mono',ui-monospace,monospace;--disp:'Space Grotesk',system-ui,sans-serif;--sans:system-ui,-apple-system,'Segoe UI',sans-serif}
+  :root{--bg:#060610;--ink:#eef2f7;--mut:#9aa3b5;--faint:#7b8498;--cyan:#00e5ff;--cyan2:#50aae3;--flame1:#7c3aed;--flame2:#2b8fe0;--flame3:#00e5ff;--violet:#7c3aed;--line:rgba(255,255,255,.09);--glass:rgba(255,255,255,.04);--glass2:rgba(255,255,255,.06);--mono:'JetBrains Mono',ui-monospace,monospace;--disp:'Space Grotesk',system-ui,sans-serif;--sans:system-ui,-apple-system,'Segoe UI',sans-serif}
   *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
-  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.4;background:radial-gradient(50vw 50vw at 90% -10%,rgba(255,87,34,.12),transparent 55%),radial-gradient(55vw 55vw at 5% 0,rgba(0,229,255,.12),transparent 60%)}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.4;background:radial-gradient(50vw 50vw at 90% -10%,rgba(124,58,237,.14),transparent 55%),radial-gradient(55vw 55vw at 5% 0,rgba(0,229,255,.12),transparent 60%)}
   .wrap{max-width:1000px;margin:0 auto;padding:0 22px;position:relative;z-index:1}
   a{color:var(--cyan);text-decoration:none}h1,h2,h3{font-family:var(--disp);letter-spacing:-.02em;margin:0}
   code,pre,.mono{font-family:var(--mono)}
   nav{border-bottom:1px solid var(--line);backdrop-filter:blur(12px);background:rgba(6,6,16,.6);position:sticky;top:0;z-index:30}
   nav .wrap{display:flex;align-items:center;gap:16px;height:60px}
   .brand{display:flex;align-items:center;gap:9px;font-family:var(--disp);font-weight:700;font-size:18px;color:var(--ink)}
-  .brand svg{width:24px;height:24px;filter:drop-shadow(0 0 6px rgba(255,138,61,.6))}
+  .brand svg{width:25px;height:25px;filter:drop-shadow(0 0 7px rgba(0,229,255,.55))}
   .brand .a{background:linear-gradient(90deg,var(--cyan),var(--cyan2));-webkit-background-clip:text;background-clip:text;color:transparent}
   nav .sp{margin-left:auto}nav a.home{color:var(--mut);font-size:14px}
   h1.t{font-size:clamp(1.7rem,4vw,2.3rem);margin:34px 0 4px}.sub{color:var(--mut);margin:0 0 26px}
@@ -32,7 +32,7 @@
   input.grow{flex:1;min-width:220px}
   .btn{border:1px solid transparent;border-radius:10px;padding:11px 16px;font-weight:600;font-size:14px;cursor:pointer;transition:transform .12s,box-shadow .2s}
   .btn:hover{transform:translateY(-1px)}.btn:disabled{opacity:.5;cursor:default;transform:none}
-  .btn-p{background:linear-gradient(100deg,var(--flame1),var(--flame2) 55%,var(--flame3));color:#1a0b02;box-shadow:0 8px 26px -10px rgba(255,120,40,.5)}
+  .btn-p{background:linear-gradient(100deg,var(--cyan),var(--cyan2));color:#04141c;box-shadow:0 8px 26px -10px rgba(0,229,255,.45)}
   .btn-g{background:var(--glass);border-color:var(--line);color:var(--ink)}.btn-g:hover{border-color:var(--cyan)}
   .pill{font:600 11px var(--mono);padding:4px 9px;border-radius:999px;background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25)}
   .keybox{font:600 14px var(--mono);background:#0a0a16;border:1px solid var(--line);border-radius:10px;padding:12px 14px;word-break:break-all;color:var(--flame3)}
@@ -54,7 +54,7 @@
 </head>
 <body>
 <nav><div class="wrap">
-  <a class="brand" href="/"><svg viewBox="0 0 32 32"><path d="M18 4C13 11 20 15 13 24c-3 4-9 2-8-5-4 5-2 12 6 12 9 0 12-9 8-16-2-4-1-8-1-11z" fill="#ff8a3d"/><circle cx="13" cy="23" r="3.4" fill="#00e5ff"/></svg> crawl.cheap<span class="a">.ink</span></a>
+  <a class="brand" href="/"><svg viewBox="0 0 32 32"><path d="M16 6 24.7 11 24.7 21 16 26 7.3 21 7.3 11Z" fill="none" stroke="#2bb8d6" stroke-opacity=".35" stroke-width="1"/><path d="M7.3 21 16 16 16 6 24.7 11" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.8" fill="#9ef6ff"/><circle cx="24.7" cy="11" r="3.4" fill="#7c3aed"/><circle cx="24.7" cy="11" r="2.2" fill="#00e5ff"/><circle cx="24.7" cy="11" r=".9" fill="#fff"/></svg> crawl<span class="a">.cheap</span></a>
   <span class="pill">console</span>
   <span class="sp"></span>
   <a class="home" href="/">← home</a>
