@@ -9,13 +9,15 @@
   "workers_dev": false,
   "preview_urls": false,
 
+  "routes": [{ "pattern": "api.crawl.cheap", "custom_domain": true }],
+
   "triggers": { "crons": ["*/15 * * * *"] },
   "vars": {
     "DEMO_MODE": "true",
-    "SERVICE_ORIGIN": "https://crawl-cheap-api.manhattan.workers.dev",
+    "SERVICE_ORIGIN": "https://api.crawl.cheap",
     "USER_AGENT": "crawlcheapbot/0.1 (+https://crawl.cheap/bot)",
     "SEARCH_PROVIDER": "exa",
-    "WEBHOOK_SECRET": "whsec_crawlcheap_demo_override_in_prod",
+    // WEBHOOK_SECRET is a real secret in prod (wrangler secret put) — never a committed var.
   },
 
   "ai": { "binding": "AI" },
