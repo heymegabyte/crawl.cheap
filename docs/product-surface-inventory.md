@@ -1,6 +1,6 @@
 # Product Surface Inventory
 
-> **Purpose:** enumerate every Firecrawl surface `fuegol.ink` must reach compatibility with, each
+> **Purpose:** enumerate every Firecrawl surface `crawl.cheap` must reach compatibility with, each
 > with an explicit status. This is the master checklist; the deeper rationale lives in
 > `docs/firecrawl-compatibility.md`, and the pass-by-pass record lives in `docs/convergence-log.md`.
 
@@ -89,9 +89,9 @@ stateless **`createMcpHandler`** (`McpAgent` is legacy).
 
 **Status: all ⛔** (next increment). Planned endpoints:
 
-- `mcp.fuegol.ink/v2/mcp` — full profile
-- `mcp.fuegol.ink/v2/mcp-search` — the frozen 9-tool search profile
-- `mcp.fuegol.ink/mcp` — documented alias
+- `mcp.crawl.cheap/v2/mcp` — full profile
+- `mcp.crawl.cheap/v2/mcp-search` — the frozen 9-tool search profile
+- `mcp.crawl.cheap/mcp` — documented alias
 
 ### Profiles
 
@@ -140,20 +140,20 @@ Profile membership columns: **Full** (every tool), **Search** (search-only-9), *
 
 ## Other surfaces
 
-| Surface        | Host              | Status     |
-| -------------- | ----------------- | ---------- |
-| Website        | `fuegol.ink`      | ⛔ planned |
-| Dashboard      | `app.fuegol.ink`  | ⛔ planned |
-| Docs           | `docs.fuegol.ink` | ⛔ planned |
-| TypeScript SDK | —                 | ⛔ planned |
-| Python SDK     | —                 | ⛔ planned |
-| CLI            | —                 | ⛔ planned |
+| Surface        | Host               | Status     |
+| -------------- | ------------------ | ---------- |
+| Website        | `crawl.cheap`      | ⛔ planned |
+| Dashboard      | `app.crawl.cheap`  | ⛔ planned |
+| Docs           | `docs.crawl.cheap` | ⛔ planned |
+| TypeScript SDK | —                  | ⛔ planned |
+| Python SDK     | —                  | ⛔ planned |
+| CLI            | —                  | ⛔ planned |
 
 ## Compatibility definition
 
 An existing Firecrawl client should only need to:
 
-1. **Change the base URL** to `api.fuegol.ink`, and
-2. **Use a NEW fuegol key** — never its existing `fc-` key.
+1. **Change the base URL** to `api.crawl.cheap`, and
+2. **Use a NEW crawl.cheap key** — never its existing `fc-` key.
 
 No other code changes. That is the compatibility bar every surface above is measured against.

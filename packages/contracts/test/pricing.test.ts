@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
-  FUEGO_PLANS,
+  CRAWLCHEAP_PLANS,
   FIRECRAWL_PLANS,
-  FUEGO_STANDALONE_PACKS,
+  CRAWLCHEAP_STANDALONE_PACKS,
   PREMIUM_UNIT_COST_USD,
   MARGIN_FLOOR,
   RISK_MULTIPLIER,
@@ -22,11 +22,11 @@ const EPS = 1e-9;
 /** Every paid lot's net $/credit — the full set premium pricing must survive. */
 function allLotRates(): { label: string; rate: number }[] {
   const out: { label: string; rate: number }[] = [];
-  for (const p of Object.values(FUEGO_PLANS)) {
+  for (const p of Object.values(CRAWLCHEAP_PLANS)) {
     if (p.priceMonthly && p.credits)
       out.push({ label: p.label, rate: netRevenuePerCredit(p.priceMonthly, p.credits) });
   }
-  for (const pack of FUEGO_STANDALONE_PACKS) {
+  for (const pack of CRAWLCHEAP_STANDALONE_PACKS) {
     out.push({ label: `$${pack.usd} pack`, rate: netRevenuePerCredit(pack.usd, pack.credits) });
   }
   return out;
@@ -36,7 +36,7 @@ describe('core pricing is exactly half of Firecrawl month-to-month', () => {
   for (const key of ['hobby', 'standard', 'growth', 'scale'] as const) {
     it(`${key}: price is 50% of Firecrawl, credits identical`, () => {
       const f = FIRECRAWL_PLANS[key];
-      const u = FUEGO_PLANS[key];
+      const u = CRAWLCHEAP_PLANS[key];
       expect(u.priceMonthly).toBeCloseTo(f.monthly / 2, 6);
       expect(u.credits).toBe(f.credits);
     });
@@ -45,7 +45,7 @@ describe('core pricing is exactly half of Firecrawl month-to-month', () => {
   it('subscriber $5 top-ups give at least double the competitor credits', () => {
     const book = pricingBook();
     for (const tier of ['hobby', 'standard', 'growth', 'scale'] as const) {
-      expect(book.topupPer5Usd.fuego[tier]).toBeGreaterThanOrEqual(
+      expect(book.topupPer5Usd.crawlcheap[tier]).toBeGreaterThanOrEqual(
         book.topupPer5Usd.firecrawl[tier] * 2,
       );
     }
@@ -54,7 +54,10 @@ describe('core pricing is exactly half of Firecrawl month-to-month', () => {
 
 describe('worst-case lot basis', () => {
   it('lowest net revenue per credit is the Scale subscription (deepest discount)', () => {
-    const scale = netRevenuePerCredit(FUEGO_PLANS.scale.priceMonthly!, FUEGO_PLANS.scale.credits!);
+    const scale = netRevenuePerCredit(
+      CRAWLCHEAP_PLANS.scale.priceMonthly!,
+      CRAWLCHEAP_PLANS.scale.credits!,
+    );
     expect(lowestNetRevenuePerCredit()).toBeCloseTo(scale, 10);
     // and it is genuinely the minimum across every other paid lot
     for (const { rate } of allLotRates()) expect(rate).toBeGreaterThanOrEqual(scale - EPS);
@@ -62,7 +65,7 @@ describe('worst-case lot basis', () => {
 
   it('free / promotional credits never lower the worst case (they fund nothing)', () => {
     expect(netRevenuePerCredit(0, 1_000)).toBe(Infinity);
-    expect(FUEGO_PLANS.free.priceMonthly).toBe(0);
+    expect(CRAWLCHEAP_PLANS.free.priceMonthly).toBe(0);
   });
 
   it('stripe fee is the conservative 2.9% + $0.30', () => {
@@ -156,7 +159,7 @@ describe('preflight quote', () => {
     expect(q.usd.perCredit).toBeCloseTo(49.5 / 100_000, 10);
   });
 
-  it('a Fuego-exclusive premium op is not a Firecrawl parity SKU', () => {
+  it('a crawl.cheap-exclusive premium op is not a Firecrawl parity SKU', () => {
     const q = computeQuote({ operation: 'ai_search_query' });
     expect(q.comparedToFirecrawl.credits).toBe(0);
     expect(q.credits).toBeGreaterThan(0);

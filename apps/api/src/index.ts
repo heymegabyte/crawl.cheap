@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/cloudflare';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { FIRECRAWL_COMPAT, CORE_CREDIT_COSTS } from '@fuegol/contracts';
+import { FIRECRAWL_COMPAT, CORE_CREDIT_COSTS } from '@crawlcheap/contracts';
 import type { Env } from './env';
 import { principal, type Vars } from './lib/auth';
 import scrapeRoute from './routes/scrape';
@@ -51,9 +51,9 @@ export const BrowserSession = Sentry.instrumentDurableObjectWithSentry(
 /** Map a request to its billable operation + credit cost (null = not billed). */
 function usageForRequest(method: string, path: string): { name: string; credits: number } | null {
   if (method !== 'POST') return null;
-  // Fuego-exclusive PREMIUM ops. Current billed values are the pre-GA defaults; the
+  // crawl.cheap-exclusive PREMIUM ops. Current billed values are the pre-GA defaults; the
   // margin-floored GA targets (priced against the worst-case lot) live in the pricing
-  // SSOT — see premiumCredits() in @fuegol/contracts and docs/RELEASE_CHECKLIST.md.
+  // SSOT — see premiumCredits() in @crawlcheap/contracts and docs/RELEASE_CHECKLIST.md.
   if (path === '/v2/browser') return { name: 'browser_session', credits: 2 };
   if (/^\/v2\/browser\/[^/]+\/act$/.test(path)) return { name: 'browser_act', credits: 1 };
   if (path === '/v2/ai-search/index') return { name: 'ai_search_index', credits: 5 };
@@ -87,7 +87,7 @@ app.use(
     origin: '*',
     allowHeaders: ['authorization', 'content-type'],
     allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-    exposeHeaders: ['x-fuegol-strategy'],
+    exposeHeaders: ['x-crawlcheap-strategy'],
     maxAge: 86400,
   }),
 );
@@ -129,13 +129,13 @@ app.use('/v2/*', async (c, next) => {
 
 app.get('/', (c) =>
   c.json({
-    service: 'fuegol.ink',
+    service: 'crawl.cheap',
     tagline:
       'The web data engine for AI. Firecrawl-compatible. Cloudflare-powered. Half the price.',
     version: '0.1.0',
-    documentation: 'https://docs.fuegol.ink',
-    dashboard: 'https://app.fuegol.ink',
-    source: 'https://github.com/heymegabyte/fuegol.ink',
+    documentation: 'https://docs.crawl.cheap',
+    dashboard: 'https://app.crawl.cheap',
+    source: 'https://github.com/heymegabyte/crawl.cheap',
     compatibility: { firecrawl: FIRECRAWL_COMPAT.apiVersion, pinnedAt: FIRECRAWL_COMPAT.pinnedAt },
     endpoints: {
       scrape: 'POST /v2/scrape',
@@ -178,8 +178,8 @@ app.post('/webhook-sink/:id', async (c) => {
   if (!c.env.ARTIFACTS) return c.json({ ok: false }, 503);
   const body = await c.req.text();
   const record = {
-    signature: c.req.header('x-fuegol-signature') ?? '',
-    event: c.req.header('x-fuegol-event') ?? '',
+    signature: c.req.header('x-crawlcheap-signature') ?? '',
+    event: c.req.header('x-crawlcheap-event') ?? '',
     body,
     receivedAt: new Date().toISOString(),
   };

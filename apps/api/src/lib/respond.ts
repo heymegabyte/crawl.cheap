@@ -1,7 +1,7 @@
 import type { Context } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { z } from 'zod';
-import type { ErrorCode } from '@fuegol/contracts';
+import type { ErrorCode } from '@crawlcheap/contracts';
 
 /** Emit a Firecrawl-compatible error envelope. */
 export function fail(

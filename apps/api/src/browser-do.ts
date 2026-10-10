@@ -1,8 +1,8 @@
 import { DurableObject } from 'cloudflare:workers';
 import puppeteer from '@cloudflare/puppeteer';
 import type { BrowserWorker, Browser, Page } from '@cloudflare/puppeteer';
-import type { Action, Document } from '@fuegol/contracts';
-import { applyActions, captureDocument, assertSafeUrl, ActionError } from '@fuegol/engine';
+import type { Action, Document } from '@crawlcheap/contracts';
+import { applyActions, captureDocument, assertSafeUrl, ActionError } from '@crawlcheap/engine';
 import { engineEnv, type Env } from './env';
 
 /**

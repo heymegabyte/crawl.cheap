@@ -38,16 +38,16 @@ and a live Hono API Worker with honest stubs.
   - MCP server pinned at `firecrawl-mcp-server@ec0f9de` (npm `firecrawl-mcp@3.28.2`), **30 tools**.
   - Pricing model captured.
   - Cloudflare primitives surveyed.
-- **Zod contracts SSOT** — `@fuegol/contracts`: the single source of truth for every request/response
+- **Zod contracts SSOT** — `@crawlcheap/contracts`: the single source of truth for every request/response
   shape, mirrored from the pinned upstream Zod.
-- **Cloudflare-native engine** — `@fuegol/engine`:
+- **Cloudflare-native engine** — `@crawlcheap/engine`:
   - SSRF guard
   - safe-fetch
   - readability extraction
   - HTML→Markdown conversion
   - sitemap/robots parsing
   - cheapest-tier planner
-- **Hono API Worker (live)** — `https://fuegol-api.manhattan.workers.dev`:
+- **Hono API Worker (live)** — `https://crawl-cheap-api.manhattan.workers.dev`:
   - `scrape` + `map` implemented
   - account endpoints
   - honest `501` stubs for not-yet-built contracted routes
@@ -76,9 +76,9 @@ The biggest release-blocking gaps after Pass 0. None of these are shipped yet.
 | 2   | **Search provider**                    | `/v2/search` needs a pluggable provider key                     |
 | 3   | **Extract (Workers AI)**               | `/v2/extract*` async jobs via Workers AI + AI Gateway           |
 | 4   | **MCP server**                         | 30-tool surface via Cloudflare `createMcpHandler`               |
-| 5   | **Dashboard / website**                | `app.fuegol.ink` + `fuegol.ink`                                 |
+| 5   | **Dashboard / website**                | `app.crawl.cheap` + `crawl.cheap`                               |
 | 6   | **Stripe billing + credit ledger**     | real balances replacing demo values                             |
-| 7   | **D1 key store**                       | real fuegol-key issuance + lookup                               |
+| 7   | **D1 key store**                       | real crawl-cheap-key issuance + lookup                          |
 | 8   | **Document parse**                     | `/v2/parse*` family                                             |
 | 9   | **Screenshot → R2**                    | `screenshot` format persisted to R2                             |
 | 10  | **Browser-tier verification**          | prove the browser tier end-to-end (unblocks `json` + more)      |

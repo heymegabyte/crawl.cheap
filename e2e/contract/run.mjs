@@ -5,7 +5,7 @@
  *
  *   1. COVERAGE — live-probe every documented operation (method-aware, with an
  *      intentionally-invalid body so nothing executes or bills) and classify each as
- *      SERVED (the route exists) vs NOT-SERVED (Fuego returns "No such endpoint").
+ *      SERVED (the route exists) vs NOT-SERVED (crawl.cheap returns "No such endpoint").
  *   2. CONFORMANCE — call a curated set of live endpoints and validate the response
  *      body against the documented 200 schema with a dependency-free OpenAPI-3.0
  *      validator ($ref / oneOf / anyOf / allOf / nullable / enum / required / types).
@@ -17,15 +17,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Prod API. workers.dev is disabled for this Worker; the canonical hostname is the custom domain.
-const API = process.env.API ?? 'https://api.crawl.cheap';
+const API = process.env.API ?? 'https://crawl-cheap-api.manhattan.workers.dev';
 const DIR = path.dirname(new URL(import.meta.url).pathname);
 const UP = path.resolve(DIR, '../../packages/contracts/upstream');
 const SPECS = {
   v2: JSON.parse(fs.readFileSync(path.join(UP, 'v2-openapi.json'), 'utf8')),
   v1: JSON.parse(fs.readFileSync(path.join(UP, 'v1-openapi.json'), 'utf8')),
 };
-const UA = { 'user-agent': 'fuegol-contract/1.0' };
+const UA = { 'user-agent': 'crawl-cheap-contract/1.0' };
 
 // ---------- dependency-free OpenAPI 3.0 conformance validator ----------
 function makeValidator(root) {
@@ -159,9 +158,9 @@ const ok = (n, c, x = '') => (
   console[c ? 'log' : 'error'](`  ${c ? '✓' : '✗'} ${n}${c ? '' : '  ' + x}`)
 );
 
-console.log(`\nfuegol × Firecrawl OpenAPI contract tests → ${API}\n`);
+console.log(`\ncrawl.cheap × Firecrawl OpenAPI contract tests → ${API}\n`);
 const key = await issueKey();
-ok('issued a fuegol key for authed probing', !!key);
+ok('issued a crawl.cheap key for authed probing', !!key);
 
 for (const v of ['v2', 'v1']) {
   const spec = SPECS[v];

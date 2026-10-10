@@ -1,8 +1,8 @@
 // Drop-in compatibility proof: the OFFICIAL Firecrawl v2 SDK (@mendable/firecrawl-js)
-// pointed at the fuegol.ink API with a fuegol key. No business-logic changes.
+// pointed at the crawl.cheap API with a crawl.cheap key. No business-logic changes.
 import { Firecrawl } from '@mendable/firecrawl-js';
 
-const API = process.env.FUEGOL_API || 'https://fuegol-api.manhattan.workers.dev';
+const API = process.env.CRAWLCHEAP_API || 'https://crawl-cheap-api.manhattan.workers.dev';
 let pass = 0,
   fail = 0;
 const ok = (n, cond, extra = '') => {
@@ -10,14 +10,14 @@ const ok = (n, cond, extra = '') => {
   cond ? pass++ : fail++;
 };
 
-// Issue a fuegol key (never a Firecrawl fc- key).
+// Issue a crawl.cheap key (never a Firecrawl fc- key).
 const keyRes = await fetch(`${API}/v2/keys`, {
   method: 'POST',
   headers: { 'content-type': 'application/json' },
   body: JSON.stringify({ name: 'sdk-compat' }),
 });
 const { apiKey } = await keyRes.json();
-console.log('issued fuegol key:', (apiKey || '').slice(0, 16) + '…\n');
+console.log('issued crawl.cheap key:', (apiKey || '').slice(0, 16) + '…\n');
 
 const app = new Firecrawl({ apiKey, apiUrl: API });
 

@@ -2,7 +2,7 @@
 // FABRICATED facts (so a correct answer can only come from retrieval, never model memory),
 // then queries it. Also proves per-key tenant isolation. Vectorize upserts are eventually
 // consistent, so the query is retried until the vectors are searchable. Zero deps.
-const API = process.env.FUEGOL_API || 'https://fuegol-api.manhattan.workers.dev';
+const API = process.env.CRAWLCHEAP_API || 'https://crawl-cheap-api.manhattan.workers.dev';
 let pass = 0;
 let fail = 0;
 const ok = (name, cond, detail = '') => {
@@ -32,7 +32,7 @@ const DOC = `Project Emberlight is the internal codename for a web-data engine. 
 console.log(`\nAI Search (RAG) E2E → ${API}\n`);
 const k1 = await newKey('e2e-aisearch-1');
 const k2 = await newKey('e2e-aisearch-2');
-ok('issued two authenticated keys', (k1 || '').startsWith('fgl_') && (k2 || '').startsWith('fgl_'));
+ok('issued two authenticated keys', (k1 || '').startsWith('cc_') && (k2 || '').startsWith('cc_'));
 
 // Index under tenant 1
 const idx = await post(k1, '/v2/ai-search/index', { text: DOC, title: 'Emberlight' });

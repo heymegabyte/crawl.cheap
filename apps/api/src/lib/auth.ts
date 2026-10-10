@@ -15,7 +15,7 @@ export interface Principal {
 export type Vars = { principal: Principal };
 
 /**
- * Resolve the caller. We NEVER honour a Firecrawl `fc-` key — only fuegol-issued keys:
+ * Resolve the caller. We NEVER honour a Firecrawl `fc-` key — only crawl-cheap-issued keys:
  * static admin keys in the API_KEYS secret, or D1-backed keys (with plan + ledger). Absent
  * a valid key we fall back to demo mode (rate-limited), per the public-demo goal.
  */
@@ -64,7 +64,7 @@ export function requireAuth(c: Context<{ Bindings: Env; Variables: Vars }>): Res
     {
       success: false as const,
       error:
-        'This endpoint requires a fuegol.ink API key. Create one at POST /v2/keys, then send it as `Authorization: Bearer fgl_...`. (Firecrawl fc- keys are not accepted.)',
+        'This endpoint requires a crawl.cheap API key. Create one at POST /v2/keys, then send it as `Authorization: Bearer cc_...`. (Firecrawl fc- keys are not accepted.)',
       code: 'BAD_REQUEST' as const,
     },
     401,

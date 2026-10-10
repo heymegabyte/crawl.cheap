@@ -21,10 +21,10 @@ async function sha256hex(input: string): Promise<string> {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-/** fuegol keys look like `fgl_live_<48 hex>`. Never a Firecrawl `fc-` key. */
+/** crawl.cheap keys look like `cc_live_<48 hex>`. Never a Firecrawl `fc-` key. */
 export function generateKey(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(24));
-  return `fgl_live_${[...bytes].map((b) => b.toString(16).padStart(2, '0')).join('')}`;
+  return `cc_live_${[...bytes].map((b) => b.toString(16).padStart(2, '0')).join('')}`;
 }
 
 export async function createKey(

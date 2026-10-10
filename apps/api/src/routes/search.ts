@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
-import { SearchRequestSchema } from '@fuegol/contracts';
-import { webSearch, searchAvailable, scrape, SsrfError } from '@fuegol/engine';
+import { SearchRequestSchema } from '@crawlcheap/contracts';
+import { webSearch, searchAvailable, scrape, SsrfError } from '@crawlcheap/engine';
 import { engineEnv, type Env } from '../env';
 import { fail, parseBody } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
@@ -31,7 +31,7 @@ function gate(c: Context<{ Bindings: Env; Variables: Vars }>): Response | null {
     return fail(
       c,
       429,
-      'Demo rate limit reached (≈20 requests/min). Add a fuegol.ink API key for higher limits.',
+      'Demo rate limit reached (≈20 requests/min). Add a crawl.cheap API key for higher limits.',
       'BAD_REQUEST',
     );
   }
@@ -111,7 +111,7 @@ route.post('/search', async (c) => {
     if (images) data.images = images;
 
     const total = (data.web?.length ?? 0) + (data.news?.length ?? 0) + (data.images?.length ?? 0);
-    c.header('x-fuegol-search-provider', provider);
+    c.header('x-crawlcheap-search-provider', provider);
     return c.json({
       success: true as const,
       data,

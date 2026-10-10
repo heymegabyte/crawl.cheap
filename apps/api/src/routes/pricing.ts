@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { computeQuote, pricingBook, QuoteRequestSchema } from '@fuegol/contracts';
+import { computeQuote, pricingBook, QuoteRequestSchema } from '@crawlcheap/contracts';
 import type { Env } from '../env';
 import type { Vars } from '../lib/auth';
 import { parseBody } from '../lib/respond';

@@ -1,18 +1,18 @@
 <p align="center">
-  <img src="assets/fuegol-mark.svg" alt="fuegol.ink — the web data engine for AI" width="560">
+  <img src="assets/crawl-cheap-mark.svg" alt="crawl.cheap — the web data engine for AI" width="560">
 </p>
 
-<h1 align="center">fuegol.ink</h1>
+<h1 align="center">crawl.cheap</h1>
 
 <p align="center">
   <strong>The web data engine for AI. Firecrawl-compatible. Cloudflare-powered. Half the price.</strong>
 </p>
 
 <p align="center">
-  <a href="https://fuegol-web.manhattan.workers.dev">Website</a> ·
-  <a href="https://fuegol-web.manhattan.workers.dev/app/">Console</a> ·
-  <a href="https://fuegol-api.manhattan.workers.dev">Live API</a> ·
-  <a href="https://fuegol-mcp.manhattan.workers.dev">MCP</a> ·
+  <a href="https://crawl-cheap-web.manhattan.workers.dev">Website</a> ·
+  <a href="https://crawl-cheap-web.manhattan.workers.dev/app/">Console</a> ·
+  <a href="https://crawl-cheap-api.manhattan.workers.dev">Live API</a> ·
+  <a href="https://crawl-cheap-mcp.manhattan.workers.dev">MCP</a> ·
   <a href="docs/firecrawl-compatibility.md">Compatibility</a> ·
   <a href="docs/implementation-roadmap.md">Roadmap</a> ·
   <a href="deploy/README.md">Self-host</a> ·
@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/heymegabyte/fuegol.ink/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/heymegabyte/fuegol.ink/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/heymegabyte/crawl.cheap/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/heymegabyte/crawl.cheap/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="status" src="https://img.shields.io/badge/status-alpha-00E5FF?style=flat-square">
   <img alt="api" src="https://img.shields.io/badge/API-live-2ecc71?style=flat-square">
   <img alt="firecrawl" src="https://img.shields.io/badge/Firecrawl_v2-compatible-FF8A3D?style=flat-square">
@@ -30,12 +30,12 @@
 
 ---
 
-fuegol.ink is an open-source, **Cloudflare-native** web-data platform that speaks the
-**Firecrawl v2 API**. Point an existing Firecrawl client at `api.fuegol.ink`, swap in a fuegol key,
+crawl.cheap is an open-source, **Cloudflare-native** web-data platform that speaks the
+**Firecrawl v2 API**. Point an existing Firecrawl client at `api.crawl.cheap`, swap in a crawl.cheap key,
 and keep your code. The managed edition targets **≈50% of Firecrawl's published plans**; the engine
 is MIT and self-hostable on your own Cloudflare account.
 
-> **Compatibility means:** change your base URL + use a **new fuegol key** (never your `fc-` key).
+> **Compatibility means:** change your base URL + use a **new crawl.cheap key** (never your `fc-` key).
 > Your request/response business logic stays the same.
 
 ## 30-second quickstart
@@ -43,7 +43,7 @@ is MIT and self-hostable on your own Cloudflare account.
 The public demo is live and keyless (rate-limited). Scrape any page to clean Markdown:
 
 ```sh
-curl -X POST https://fuegol-api.manhattan.workers.dev/v2/scrape \
+curl -X POST https://crawl-cheap-api.manhattan.workers.dev/v2/scrape \
   -H 'content-type: application/json' \
   -d '{"url":"https://example.com","formats":["markdown","links"]}'
 ```
@@ -74,7 +74,7 @@ Real response (trimmed):
 Map a site's URLs:
 
 ```sh
-curl -X POST https://fuegol-api.manhattan.workers.dev/v2/map \
+curl -X POST https://crawl-cheap-api.manhattan.workers.dev/v2/map \
   -H 'content-type: application/json' -d '{"url":"https://example.com","limit":50}'
 ```
 
@@ -156,19 +156,19 @@ deprecated shims). We pin to the source count. Details: [`docs/firecrawl-compati
 
 Plans are **exactly half of Firecrawl's month-to-month price**, like-for-like credits (re-verified
 2026-10-09). The "50% less" claim is measured against Firecrawl's **month-to-month** price; their
-annual-billed equivalents ($16/$83/$333/$599) are shown too, and fuego is cheaper even against those.
+annual-billed equivalents ($16/$83/$333/$599) are shown too, and crawl.cheap is cheaper even against those.
 Live price book: `GET /v2/pricing`. Preflight a job cost: `POST /v2/quote`.
 
-| Tier     | Monthly credits | Firecrawl (month-to-month) | **fuego (½)** |
-| -------- | --------------: | -------------------------: | ------------: |
-| Free     |           1,000 |                         $0 |        **$0** |
-| Hobby    |           5,000 |                        $19 |     **$9.50** |
-| Standard |         100,000 |                        $99 |    **$49.50** |
-| Growth   |         500,000 |                       $399 |   **$199.50** |
-| Scale    |       1,000,000 |                       $749 |   **$374.50** |
+| Tier     | Monthly credits | Firecrawl (month-to-month) | **crawl.cheap (½)** |
+| -------- | --------------: | -------------------------: | ------------------: |
+| Free     |           1,000 |                         $0 |              **$0** |
+| Hobby    |           5,000 |                        $19 |           **$9.50** |
+| Standard |         100,000 |                        $99 |          **$49.50** |
+| Growth   |         500,000 |                       $399 |         **$199.50** |
+| Scale    |       1,000,000 |                       $749 |         **$374.50** |
 
 **One-time credit packs** (no subscription): $5→2,000 · $10→4,500 · $25→12,000 · $50→26,000 ·
-$100→55,000 · $250→145,000 · $500→300,000. Core ops bill at Firecrawl parity; Fuego-exclusive premium
+$100→55,000 · $250→145,000 · $500→300,000. Core ops bill at Firecrawl parity; crawl.cheap-exclusive premium
 ops (browser/AI/agent) are priced to a proven **≥50% margin floor** against the worst-case lot — never a
 half-price loss leader. Cost model + margin proof: [`docs/unit-economics.md`](docs/unit-economics.md) ·
 status gates: [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md). Billing (subscriptions +
@@ -179,9 +179,9 @@ packs) is built behind the ledger and resumes the moment a Stripe `sk_test_` key
 **TypeScript**
 
 ```ts
-const res = await fetch('https://fuegol-api.manhattan.workers.dev/v2/scrape', {
+const res = await fetch('https://crawl-cheap-api.manhattan.workers.dev/v2/scrape', {
   method: 'POST',
-  headers: { 'content-type': 'application/json' /* , authorization: `Bearer ${fuegolKey}` */ },
+  headers: { 'content-type': 'application/json' /* , authorization: `Bearer ${crawlcheapKey}` */ },
   body: JSON.stringify({ url: 'https://example.com', formats: ['markdown', 'links'] }),
 });
 const { data } = await res.json();
@@ -192,20 +192,20 @@ console.log(data.markdown);
 
 ```python
 import requests
-r = requests.post("https://fuegol-api.manhattan.workers.dev/v2/scrape",
+r = requests.post("https://crawl-cheap-api.manhattan.workers.dev/v2/scrape",
                   json={"url": "https://example.com", "formats": ["markdown"]})
 print(r.json()["data"]["markdown"])
 ```
 
-**CLI** (`@fuegol/cli` — zero-dependency)
+**CLI** (`@crawlcheap/cli` — zero-dependency)
 
 ```sh
-fuegol scrape https://example.com
-fuegol search "durable objects" --category developer
-FUEGOL_API_KEY=fgl_live_… fuegol crawl https://docs.site --limit 20 --wait
+crawlcheap scrape https://example.com
+crawlcheap search "durable objects" --category developer
+CRAWLCHEAP_API_KEY=cc_live_… crawlcheap crawl https://docs.site --limit 20 --wait
 ```
 
-**MCP** — live at `https://fuegol-mcp.manhattan.workers.dev`. Real working tools: `firecrawl_scrape`,
+**MCP** — live at `https://crawl-cheap-mcp.manhattan.workers.dev`. Real working tools: `firecrawl_scrape`,
 `firecrawl_map`, `firecrawl_crawl`, `firecrawl_check_crawl_status`, `firecrawl_search` (web/news/images),
 `firecrawl_developer_search`, `firecrawl_gov_search`, `firecrawl_research_search_papers`,
 `firecrawl_research_inspect_paper` / `_related_papers` / `_read_paper` (Semantic Scholar),
@@ -214,12 +214,14 @@ Bearer key so authed tools hit your ledger). Only `firecrawl_find_tools` (propri
 Stateless Streamable-HTTP JSON-RPC.
 
 ```jsonc
-{ "mcpServers": { "fuegol": { "url": "https://fuegol-mcp.manhattan.workers.dev/v2/mcp" } } }
+{
+  "mcpServers": { "crawlcheap": { "url": "https://crawl-cheap-mcp.manhattan.workers.dev/v2/mcp" } },
+}
 ```
 
 ```sh
 # verify it live:
-curl -X POST https://fuegol-mcp.manhattan.workers.dev/v2/mcp -H 'content-type: application/json' \
+curl -X POST https://crawl-cheap-mcp.manhattan.workers.dev/v2/mcp -H 'content-type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"firecrawl_scrape","arguments":{"url":"https://example.com"}}}'
 ```
 
@@ -228,9 +230,9 @@ cookies, form input) survives across separate requests:
 
 ```sh
 # start a session, then click "next" + screenshot — the tab persists between calls
-ID=$(curl -s -X POST https://fuegol-api.manhattan.workers.dev/v2/browser \
+ID=$(curl -s -X POST https://crawl-cheap-api.manhattan.workers.dev/v2/browser \
   -H 'content-type: application/json' -d '{"url":"https://quotes.toscrape.com/"}' | jq -r .id)
-curl -X POST https://fuegol-api.manhattan.workers.dev/v2/browser/$ID/act \
+curl -X POST https://crawl-cheap-api.manhattan.workers.dev/v2/browser/$ID/act \
   -H 'content-type: application/json' \
   -d '{"actions":[{"type":"click","selector":"li.next a"},{"type":"screenshot"}]}'
 ```
@@ -253,39 +255,39 @@ sequenceDiagram
   DO-->>C: { url, actCount, screenshot→R2 }
 ```
 
-Or drive it visually in the [console playground](https://fuegol-web.manhattan.workers.dev/app/).
+Or drive it visually in the [console playground](https://crawl-cheap-web.manhattan.workers.dev/app/).
 
 ## Migrating from Firecrawl
 
 ```diff
 - const base = 'https://api.firecrawl.dev';
 - const key  = 'fc-...';
-+ const base = 'https://api.fuegol.ink';   // or your self-hosted Worker
-+ const key  = 'fgl-...';                  // a NEW fuegol key — fc- keys are not accepted
++ const base = 'https://api.crawl.cheap';   // or your self-hosted Worker
++ const key  = 'cc_live_...';                  // a NEW crawl.cheap key — fc- keys are not accepted
 ```
 
-Or use the **official Firecrawl SDK** unchanged — just point it at fuegol:
+Or use the **official Firecrawl SDK** unchanged — just point it at crawl.cheap:
 
 ```ts
 import { Firecrawl } from '@mendable/firecrawl-js';
-const app = new Firecrawl({ apiKey: 'fgl_live_...', apiUrl: 'https://api.fuegol.ink' });
+const app = new Firecrawl({ apiKey: 'cc_live_...', apiUrl: 'https://api.crawl.cheap' });
 const doc = await app.scrape('https://example.com', { formats: ['markdown'] });
 ```
 
 > **Verified against both official SDKs:** `@mendable/firecrawl-js@4.45.0` **8/8** and
-> `firecrawl-py@4.49.3` **4/4** run unchanged against fuegol.ink — scrape · map · search · crawl
+> `firecrawl-py@4.49.3` **4/4** run unchanged against crawl.cheap — scrape · map · search · crawl
 > (+ batch/extract/status in TS). Reproduce: `node e2e/sdk-compat/test.mjs` · `python e2e/sdk-compat/test.py`.
 
 Your scrape/map/crawl request bodies and response handling stay the same (within the supported
-surface above). A fuegol key is required — an existing Firecrawl key is never automatically valid.
+surface above). A crawl.cheap key is required — an existing Firecrawl key is never automatically valid.
 
 ## Self-hosting
 
-MIT-licensed; runs on **your** Cloudflare account with no Stripe and no dependency on fuegol.ink
+MIT-licensed; runs on **your** Cloudflare account with no Stripe and no dependency on crawl.cheap
 infrastructure. The free static tier needs zero extra provisioning. See [`deploy/README.md`](deploy/README.md).
 
 ```sh
-git clone https://github.com/heymegabyte/fuegol.ink.git && cd fuegol.ink
+git clone https://github.com/heymegabyte/crawl.cheap.git && cd crawl.cheap
 pnpm install && cd apps/api && pnpm exec wrangler deploy
 ```
 
@@ -300,7 +302,7 @@ pnpm install && cd apps/api && pnpm exec wrangler deploy
   schemes, and re-validates every redirect hop; optional DNS-over-HTTPS rebinding check.
 - Respects `robots.txt` and Cloudflare Content Signals. No CAPTCHA bypass, credential theft, private-
   network scanning, or paywall circumvention.
-- **Signed webhooks** (HMAC-SHA256, `x-fuegol-signature`) fire on crawl/batch completion **and on
+- **Signed webhooks** (HMAC-SHA256, `x-crawlcheap-signature`) fire on crawl/batch completion **and on
   monitor change detection** (`monitor.changed`), with retries. Webhook targets are SSRF-guarded.
 - Zero-data-retention mode, PII redaction, and per-tenant isolation are on the roadmap.
 - **Observability:** server-side **Sentry** (`@sentry/cloudflare`) on the API + MCP Workers —
@@ -318,7 +320,7 @@ deploy/             self-hosting guide + standalone-template plan
 
 ## Contributing
 
-Issues and PRs welcome. Run `pnpm install`, then `pnpm -r typecheck` and `pnpm --filter @fuegol/engine test`.
+Issues and PRs welcome. Run `pnpm install`, then `pnpm -r typecheck` and `pnpm --filter @crawlcheap/engine test`.
 Add a regression test with every bug fix; keep the Zod contracts authoritative.
 
 ## License
@@ -328,4 +330,4 @@ describe API compatibility. A clean-room implementation pinned to public upstrea
 
 ---
 
-<p align="center"><strong>Point your client at fuegol.ink. Keep your code. Pay half.</strong></p>
+<p align="center"><strong>Point your client at crawl.cheap. Keep your code. Pay half.</strong></p>

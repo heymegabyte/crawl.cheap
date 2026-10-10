@@ -1,8 +1,8 @@
 // Reproducible E2E for persistent interactive browser sessions (/v2/browser + /act).
 // Proves state persists across SEPARATE requests: two independent `act` calls each click
 // "next" and must advance page 1 → 2 → 3. Zero dependencies (node fetch sends a real UA).
-//   node e2e/browser-session/run.mjs   (FUEGOL_API overrides the base URL)
-const API = process.env.FUEGOL_API || 'https://fuegol-api.manhattan.workers.dev';
+//   node e2e/browser-session/run.mjs   (CRAWLCHEAP_API overrides the base URL)
+const API = process.env.CRAWLCHEAP_API || 'https://crawl-cheap-api.manhattan.workers.dev';
 let pass = 0;
 let fail = 0;
 const ok = (name, cond, detail = '') => {
@@ -37,7 +37,7 @@ console.log(`\ninteractive browser session E2E → ${API}\n`);
 // 0. issue a key (authed path avoids the demo per-IP rate limit)
 const keyRes = await post('/v2/keys', { name: 'e2e-sessions' });
 AUTH = keyRes.json?.apiKey || '';
-ok('issued an authenticated key', AUTH.startsWith('fgl_'), AUTH ? `${AUTH.slice(0, 12)}…` : 'none');
+ok('issued an authenticated key', AUTH.startsWith('cc_'), AUTH ? `${AUTH.slice(0, 12)}…` : 'none');
 
 // 1. create
 const created = await post('/v2/browser', { url: 'https://quotes.toscrape.com/' });

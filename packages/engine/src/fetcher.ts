@@ -14,7 +14,7 @@ export interface FetchResult {
   redirects: number;
 }
 
-export const DEFAULT_USER_AGENT = 'fuegolbot/0.1 (+https://fuegol.ink/bot)';
+export const DEFAULT_USER_AGENT = 'crawlcheapbot/0.1 (+https://crawl.cheap/bot)';
 
 /**
  * Fetch with SSRF protection on every hop. Redirects are followed manually so the

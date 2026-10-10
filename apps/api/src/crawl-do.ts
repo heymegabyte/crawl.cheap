@@ -1,6 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
-import type { Document, CrawlRequest, BatchScrapeRequest } from '@fuegol/contracts';
-import { scrape, mapSite, assertSafeUrl, fetchRobots, isAllowed } from '@fuegol/engine';
+import type { Document, CrawlRequest, BatchScrapeRequest } from '@crawlcheap/contracts';
+import { scrape, mapSite, assertSafeUrl, fetchRobots, isAllowed } from '@crawlcheap/engine';
 import { engineEnv, type Env } from './env';
 import { deliverWebhook } from './lib/webhook';
 
@@ -109,7 +109,7 @@ function pathAllowed(u: string, opts: CrawlRequest): boolean {
 
 function capField(s?: string): string | undefined {
   if (s === undefined) return undefined;
-  return s.length > FIELD_CAP ? `${s.slice(0, FIELD_CAP)}\n\n…[truncated by fuegol crawl]` : s;
+  return s.length > FIELD_CAP ? `${s.slice(0, FIELD_CAP)}\n\n…[truncated by crawl.cheap crawl]` : s;
 }
 function capDoc(d: Document): Document {
   return {

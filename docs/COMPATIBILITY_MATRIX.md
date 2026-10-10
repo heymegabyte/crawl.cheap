@@ -17,10 +17,10 @@ The official **v2 + v1 OpenAPI** are now pinned byte-exact in `packages/contract
 **23 operations** / 12 schemas. A dependency-free OpenAPI-3.0 validator (`e2e/contract/run.mjs`) does
 two things against the **live** API:
 
-- **Coverage** (routed vs not, method-aware live probe): **v2 28/56** · **v1 2/23** operations SERVED.
-  The unserved v2 ops are out-of-scope (`/support/*`, `/team/threat-protection`), Fuego-namespaced
-  under different paths (upstream `/interact/*` → Fuego `/v2/browser`; `/search/developer|gov|research`
-  → Fuego MCP tools + `/v2/search` categories), or low-priority (`/scrape/{jobId}` async, `/feedback`,
+- **Coverage** (routed vs not, method-aware live probe): **v2 28/57** · **v1 2/23** operations SERVED.
+  The unserved v2 ops are out-of-scope (`/support/*`, `/team/threat-protection`), crawl.cheap-namespaced
+  under different paths (upstream `/interact/*` → crawl.cheap `/v2/browser`; `/search/developer|gov|research`
+  → crawl.cheap MCP tools + `/v2/search` categories), or low-priority (`/scrape/{jobId}` async, `/feedback`,
   agent list/trace/snapshots, monitor PATCH). **v1 is intentionally thin** (only `/v1/scrape` +
   `/v1/map` adapters) — tracked as a NEXT item; the official SDKs use v2.
 - **Conformance** (live response ⊆ documented 200 schema): **4/4 VERIFIED** — `scrape`, `map`,
@@ -91,37 +91,37 @@ No breaking delta for any served operation was found; the one real conformance b
 
 ## SDKs (the operational definition of "drop-in")
 
-| Client                               | Version | How                                     | Status                                       |
-| ------------------------------------ | ------- | --------------------------------------- | -------------------------------------------- |
-| TypeScript `@mendable/firecrawl-js`  | 4.45.0  | `apiUrl` + fuegol key, code unchanged   | **VERIFIED** 8/8 (`e2e/sdk-compat/test.mjs`) |
-| Python `firecrawl-py`                | 4.49.3  | `api_url=` + fuegol key, code unchanged | **VERIFIED** 4/4 (`e2e/sdk-compat/test.py`)  |
-| Go / Java / Rust / Ruby / PHP / .NET | —       | REST contract is identical; untested    | NOT VERIFIED (no harness yet)                |
+| Client                               | Version | How                                          | Status                                       |
+| ------------------------------------ | ------- | -------------------------------------------- | -------------------------------------------- |
+| TypeScript `@mendable/firecrawl-js`  | 4.45.0  | `apiUrl` + crawl.cheap key, code unchanged   | **VERIFIED** 8/8 (`e2e/sdk-compat/test.mjs`) |
+| Python `firecrawl-py`                | 4.49.3  | `api_url=` + crawl.cheap key, code unchanged | **VERIFIED** 4/4 (`e2e/sdk-compat/test.py`)  |
+| Go / Java / Rust / Ruby / PHP / .NET | —       | REST contract is identical; untested         | NOT VERIFIED (no harness yet)                |
 
 ## REST endpoints (prefix `/v2`)
 
-| Family                                                                                  | Status          | Notes                                                                                     |
-| --------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------- |
-| `scrape` (markdown/html/links/json/screenshot/actions/changeTracking/attributes/cache)  | **VERIFIED**    | static + browser tier; `removeBase64Images`, `maxAge` live; `attributes` static-tier only |
-| `map`                                                                                   | **VERIFIED**    | sitemap + link discovery                                                                  |
-| `crawl` (+status/cancel/errors)                                                         | **VERIFIED**    | Durable-Object coordinator, race-safe cancel                                              |
-| `batch/scrape` (+status/cancel/errors)                                                  | **VERIFIED**    | reuses the crawl DO                                                                       |
-| `search` (web/news/images, `tbs`, categories)                                           | **VERIFIED**    | Exa primary / Tavily fallback                                                             |
-| `extract` (+status)                                                                     | **VERIFIED**    | Workers AI, ExtractCoordinator DO                                                         |
-| `parse` (PDF/HTML/text)                                                                 | **VERIFIED**    | unpdf; multipart or `{url}`                                                               |
-| `agent` (+status)                                                                       | **VERIFIED**    | web-search + scrape + AI synthesis                                                        |
-| `monitor` (+run/checks/webhook)                                                         | **VERIFIED**    | cron sweep + change diff + signed alerts                                                  |
-| `browser` + `/:id/act` (interact)                                                       | **VERIFIED**    | persistent Puppeteer session, DO-backed                                                   |
-| `ai-search/index` · `ai-search/query` (RAG)                                             | **VERIFIED**    | Vectorize + Workers AI (Fuego-exclusive, namespaced)                                      |
-| `team/credit-usage` (+historical), `keys`, spend-limit                                  | **VERIFIED**    | real D1 ledger; reserve-before-work → 402                                                 |
-| **`pricing` · `quote`** (price book + preflight)                                        | **VERIFIED**    | NEW — 25/25 prod E2E (`e2e/quote/run.mjs`)                                                |
-| `crawl/active` · `crawl/ongoing`                                                        | PARTIAL         | returns empty — no cross-DO registry yet                                                  |
-| `crawl/params-preview`, `scrape/:jobId`, token-usage, queue-status, keyless/eligibility | NOT IMPLEMENTED | honest 501/⛔; low-priority                                                               |
-| `/slack`, `/support`, threat-protection, SIEM                                           | N/A             | out-of-scope for this edition                                                             |
+| Family                                                                                  | Status          | Notes                                                      |
+| --------------------------------------------------------------------------------------- | --------------- | ---------------------------------------------------------- |
+| `scrape` (markdown/html/links/json/screenshot/actions/changeTracking/cache)             | **VERIFIED**    | static + browser tier; `removeBase64Images`, `maxAge` live |
+| `map`                                                                                   | **VERIFIED**    | sitemap + link discovery                                   |
+| `crawl` (+status/cancel/errors)                                                         | **VERIFIED**    | Durable-Object coordinator, race-safe cancel               |
+| `batch/scrape` (+status/cancel/errors)                                                  | **VERIFIED**    | reuses the crawl DO                                        |
+| `search` (web/news/images, `tbs`, categories)                                           | **VERIFIED**    | Exa primary / Tavily fallback                              |
+| `extract` (+status)                                                                     | **VERIFIED**    | Workers AI, ExtractCoordinator DO                          |
+| `parse` (PDF/HTML/text)                                                                 | **VERIFIED**    | unpdf; multipart or `{url}`                                |
+| `agent` (+status)                                                                       | **VERIFIED**    | web-search + scrape + AI synthesis                         |
+| `monitor` (+run/checks/webhook)                                                         | **VERIFIED**    | cron sweep + change diff + signed alerts                   |
+| `browser` + `/:id/act` (interact)                                                       | **VERIFIED**    | persistent Puppeteer session, DO-backed                    |
+| `ai-search/index` · `ai-search/query` (RAG)                                             | **VERIFIED**    | Vectorize + Workers AI (crawl.cheap-exclusive, namespaced) |
+| `team/credit-usage` (+historical), `keys`, spend-limit                                  | **VERIFIED**    | real D1 ledger; reserve-before-work → 402                  |
+| **`pricing` · `quote`** (price book + preflight)                                        | **VERIFIED**    | NEW — 25/25 prod E2E (`e2e/quote/run.mjs`)                 |
+| `crawl/active` · `crawl/ongoing`                                                        | PARTIAL         | returns empty — no cross-DO registry yet                   |
+| `crawl/params-preview`, `scrape/:jobId`, token-usage, queue-status, keyless/eligibility | NOT IMPLEMENTED | honest 501/⛔; low-priority                                |
+| `/slack`, `/support`, threat-protection, SIEM                                           | N/A             | out-of-scope for this edition                              |
 
 Error envelope `{success:false, error, code?, details?}` with the upstream `ErrorCode` enum verbatim;
 status codes 400/401/402/403/404/408/409/429/500/503. Legacy `/v1/*` served by adapters.
 
-## MCP (`fuegol-mcp.manhattan.workers.dev`, stateless Streamable-HTTP)
+## MCP (`crawl-cheap-mcp.manhattan.workers.dev`, stateless Streamable-HTTP)
 
 | Tool group                                                                                | Status                                           |
 | ----------------------------------------------------------------------------------------- | ------------------------------------------------ |

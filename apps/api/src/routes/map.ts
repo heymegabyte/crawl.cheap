@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import { MapRequestSchema } from '@fuegol/contracts';
-import { mapSite, SsrfError } from '@fuegol/engine';
+import { MapRequestSchema } from '@crawlcheap/contracts';
+import { mapSite, SsrfError } from '@crawlcheap/engine';
 import { engineEnv, type Env } from '../env';
 import { fail, parseBody } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
@@ -18,7 +18,7 @@ route.post('/map', async (c) => {
       return fail(
         c,
         429,
-        'Demo rate limit reached (≈20 requests/min). Add a fuegol.ink API key for higher limits.',
+        'Demo rate limit reached (≈20 requests/min). Add a crawl.cheap API key for higher limits.',
         'BAD_REQUEST',
       );
     }

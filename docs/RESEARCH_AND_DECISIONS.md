@@ -15,9 +15,9 @@
    like-for-like (monthly plan vs annual commitment) and it leaves margin on the table; the brief is
    explicit. Higher prices also widen the premium margin.
 
-2. **Core ops bill at Firecrawl parity; only Fuego-exclusive premium ops are margin-floored.**
+2. **Core ops bill at Firecrawl parity; only crawl.cheap-exclusive premium ops are margin-floored.**
    Compatibility is a hard contract, so scrape/crawl/map/search/extract/parse/batch keep identical
-   credit burn. Browser sessions, AI search, agent, OCR, stealth are Fuego-exclusive and priced to a
+   credit burn. Browser sessions, AI search, agent, OCR, stealth are crawl.cheap-exclusive and priced to a
    margin floor. This is the clean principled line that satisfies both compatibility and sustainability.
    _Counter:_ margin-floor everything for max safety. _Rejected:_ it would break Firecrawl credit-burn
    expectations on core ops — a compatibility violation.
@@ -31,10 +31,10 @@
 
 4. **The quote fails closed on unbounded jobs.**
    An unbounded crawl (no page limit) or agent (no `maxCredits`) returns `boundable:false` → HTTP 400
-   with an actionable message. Fuego never quotes — or runs — an unbounded-cost job.
+   with an actionable message. crawl.cheap never quotes — or runs — an unbounded-cost job.
 
 5. **Live metering keeps pre-GA flat premium defaults for now (quote is already margin-safe).**
-   Changing billed credits on the Fuego-exclusive ops is a _prospective_ pricing change; it's deferred
+   Changing billed credits on the crawl.cheap-exclusive ops is a _prospective_ pricing change; it's deferred
    to GA with notice, even though there are no live customers, to keep the discipline. The quote surfaces
    the margin-safe numbers today so the website + clients see honest pricing.
 
@@ -90,11 +90,11 @@ external input). The "top ~30%" that were highest impact × feasible × compatib
 27. Use-case SEO pages (Firecrawl alternative, RAG, price-monitoring) — **NEXT**
 28. PostHog funnel + A/B on the calculator/estimator CTAs — **NEXT**
 29. Status page + public uptime — **NEXT**
-30. Custom domains (api/app/mcp/docs.fuegol.ink) + Deploy-to-CF button — **GATED** (DNS zone)
+30. Custom domains (api/app/mcp/docs.crawl.cheap) + Deploy-to-CF button — **GATED** (DNS zone)
 
 ## Convergence state
 
 The buildable-without-external-input scope is converged for this pass: the two highest-leverage
 unblocked clusters (preflight pricing/quote + conversion surfaces + honesty fixes) shipped and are
 prod-verified. The remaining high-value work is concentrated behind two external inputs — a Stripe
-`sk_test_` key and the `fuegol.ink` DNS zone — plus a measurement corpus for invoice-grade margins.
+`sk_test_` key and the `crawl.cheap` DNS zone — plus a measurement corpus for invoice-grade margins.

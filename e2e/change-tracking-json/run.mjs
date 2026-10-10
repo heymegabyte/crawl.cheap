@@ -3,7 +3,7 @@
 // changeTracking modes [git-diff, json]; asserts baseline 'new', then on a real change
 // that an AI-structured `json` diff (summary + changes) is produced alongside git-diff.
 // Authenticated (avoids demo limiter). Zero dependencies.
-const API = process.env.FUEGOL_API || 'https://fuegol-api.manhattan.workers.dev';
+const API = process.env.CRAWLCHEAP_API || 'https://crawl-cheap-api.manhattan.workers.dev';
 let pass = 0;
 let fail = 0;
 const ok = (name, cond, detail = '') => {
@@ -34,7 +34,7 @@ const scrape = async () =>
   ).json();
 
 console.log(`\nchangeTracking json mode E2E → ${API}\n`);
-ok('issued an authenticated key', (keyRes.apiKey || '').startsWith('fgl_'));
+ok('issued an authenticated key', (keyRes.apiKey || '').startsWith('cc_'));
 
 // Baseline
 const first = await scrape();

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 180" role="img" aria-label="fuegol.ink — the web data engine for AI">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 180" role="img" aria-label="crawl.cheap — the web data engine for AI">
   <defs>
     <linearGradient id="flame" x1="0" y1="1" x2="0" y2="0">
       <stop offset="0" stop-color="#FF5722"/>
@@ -17,6 +17,6 @@
     <circle cx="44" cy="92" r="12" fill="#00E5FF" opacity="0.9"/>
   </g>
   <!-- wordmark -->
-  <text x="150" y="86" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="56" font-weight="800" fill="#F4F7FB">fuegol<tspan fill="url(#cyan)">.ink</tspan></text>
+  <text x="150" y="86" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="56" font-weight="800" fill="#F4F7FB">crawl.cheap<tspan fill="url(#cyan)">.ink</tspan></text>
   <text x="152" y="124" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="500" fill="#8A93A6">The web data engine for AI · Firecrawl-compatible · Cloudflare-powered</text>
 </svg>

@@ -12,7 +12,7 @@
   "triggers": { "crons": ["*/15 * * * *"] },
   "vars": {
     "DEMO_MODE": "true",
-    "SERVICE_ORIGIN": "https://api.crawl.cheap",
+    "SERVICE_ORIGIN": "https://crawl-cheap-api.manhattan.workers.dev",
     "USER_AGENT": "crawlcheapbot/0.1 (+https://crawl.cheap/bot)",
     "SEARCH_PROVIDER": "exa",
     "WEBHOOK_SECRET": "whsec_crawlcheap_demo_override_in_prod",
@@ -30,7 +30,7 @@
     {
       "binding": "DB",
       "database_name": "crawl-cheap",
-      "database_id": "d65e6d6f-712e-4a05-a37a-89e4e850e291",
+      "database_id": "928ae85c-221a-4c65-8bee-5ce4322b308b",
       "migrations_dir": "migrations",
     },
   ],

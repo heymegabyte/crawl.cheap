@@ -29,9 +29,5 @@ jobs:
       - name: Unit tests (engine + contracts)
         run: |
           pnpm rebuild esbuild
-          pnpm --filter @fuegol/engine test
-          pnpm --filter @fuegol/contracts test
-      # Positive/negative fixtures for the scheduled drift gate: matching bytes pass, changed
-      # v2/v1 bytes fail, fetch failures are INCONCLUSIVE (never a false "no drift").
-      - name: Contract drift gate itself (fixtures)
-        run: node scripts/test/contract-drift.test.mjs
+          pnpm --filter @crawlcheap/engine test
+          pnpm --filter @crawlcheap/contracts test

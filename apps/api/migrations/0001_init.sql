@@ -1,9 +1,9 @@
--- fuegol.ink — API keys + usage ledger (the internal commercialization authority).
+-- crawl.cheap — API keys + usage ledger (the internal commercialization authority).
 
 CREATE TABLE IF NOT EXISTS api_keys (
   id              TEXT PRIMARY KEY,
   key_hash        TEXT NOT NULL UNIQUE,   -- SHA-256 of the plaintext key (never stored plain)
-  key_prefix      TEXT NOT NULL,          -- first chars for display (fgl_live_xxxx…)
+  key_prefix      TEXT NOT NULL,          -- first chars for display (cc_live_xxxx…)
   name            TEXT,
   plan            TEXT NOT NULL DEFAULT 'free',
   monthly_credits INTEGER NOT NULL DEFAULT 1000,

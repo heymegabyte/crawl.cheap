@@ -1,6 +1,6 @@
-# fuegol.ink — Recursive Invention Ledger (Pass 1)
+# crawl.cheap — Recursive Invention Ledger (Pass 1)
 
-> **fuegol.ink** is a Cloudflare-native, Firecrawl-compatible web-data platform: open-source core + managed SaaS priced at ~50% of Firecrawl. It speaks the Firecrawl v2 API/MCP contract so existing SDKs, agents, and `firecrawl_*` MCP tools drop in unchanged, while running entirely on Workers, Browser Rendering, Queues, Workflows, Durable Objects, R2, D1, and Workers AI.
+> **crawl.cheap** is a Cloudflare-native, Firecrawl-compatible web-data platform: open-source core + managed SaaS priced at ~50% of Firecrawl. It speaks the Firecrawl v2 API/MCP contract so existing SDKs, agents, and `firecrawl_*` MCP tools drop in unchanged, while running entirely on Workers, Browser Rendering, Queues, Workflows, Durable Objects, R2, D1, and Workers AI.
 
 ## Methodology — recursive 30 → top-9 (30%)
 
@@ -40,7 +40,7 @@ Selected baseline already includes: exact Firecrawl v2 route/schema contracts; l
 17. **Response content-hash + ETag** — stable `scrape` content hash enabling client-side caching + conditional re-fetch. — value:M · feasibility:H · cost:L · differentiation:M
 18. **Credit-usage echo in responses** — include `creditsUsed` per job like Firecrawl, computed from our cost model. — value:M · feasibility:H · cost:L · differentiation:M
 19. **Batch-scrape endpoint** — `/v2/batch/scrape` fan-out over Queues with a single job id + aggregated results. — value:H · feasibility:M · cost:M · differentiation:M
-20. **Compatibility version header** — `x-fuegol-compat: firecrawl-v2.x` so clients can assert the contract generation they get. — value:M · feasibility:H · cost:L · differentiation:M
+20. **Compatibility version header** — `x-crawlcheap-compat: firecrawl-v2.x` so clients can assert the contract generation they get. — value:M · feasibility:H · cost:L · differentiation:M
 21. **Deterministic field ordering** — stable JSON key order to keep snapshot diffs + client caches clean. — value:L · feasibility:H · cost:L · differentiation:L
 22. **Partial-result streaming** — SSE on long crawls emitting pages as discovered (superset of Firecrawl polling). — value:M · feasibility:M · cost:M · differentiation:H
 23. **Typed error taxonomy** — enumerated `code` values (`SSRF_BLOCKED`, `ROBOTS_DISALLOWED`, `JS_TIMEOUT`) documented in OpenAPI. — value:M · feasibility:H · cost:L · differentiation:M
@@ -214,9 +214,9 @@ Selected baseline: version-pinned firecrawl_* MCP compat (30 tools / 28 listed @
 6. **Local stdio bridge** — a tiny npx bridge exposing the hosted MCP over stdio for Claude Code/Codex local config. — value:H · feasibility:H · cost:L · differentiation:H **[SELECTED]**
 7. **MCP contract tests** — assert tool names/schemas/results match the pinned Firecrawl MCP version in CI. — value:H · feasibility:M · cost:M · differentiation:H **[SELECTED]**
 8. **Tested-with-Claude-Code/Codex matrix** — automated smoke that both clients can list + call every tool against prod. — value:H · feasibility:M · cost:M · differentiation:H **[SELECTED]**
-9. **Drop-in SDK compatibility** — publish nothing new: document that `@mendable/firecrawl-js`/`firecrawl-py` work by pointing `apiUrl` at fuegol.ink. — value:H · feasibility:H · cost:L · differentiation:H **[SELECTED]**
-10. **Native `@fuegol/sdk` (thin)** — optional typed client generated from our OpenAPI for teams wanting first-party types. — value:M · feasibility:H · cost:L · differentiation:M
-11. **CLI (`fuegol`)** — scrape/crawl/search/monitor from the terminal with streaming output. — value:M · feasibility:H · cost:L · differentiation:H
+9. **Drop-in SDK compatibility** — publish nothing new: document that `@mendable/firecrawl-js`/`firecrawl-py` work by pointing `apiUrl` at crawl.cheap. — value:H · feasibility:H · cost:L · differentiation:H **[SELECTED]**
+10. **Native `@crawlcheap/sdk` (thin)** — optional typed client generated from our OpenAPI for teams wanting first-party types. — value:M · feasibility:H · cost:L · differentiation:M
+11. **CLI (`crawlcheap`)** — scrape/crawl/search/monitor from the terminal with streaming output. — value:M · feasibility:H · cost:L · differentiation:H
 12. **Code Mode (optional)** — expose tools as a typed JS API the model writes code against, per CF's Code Mode pattern. — value:M · feasibility:M · cost:M · differentiation:H
 13. **MCP resource endpoints** — expose crawl results/datasets as MCP resources, not just tools. — value:M · feasibility:M · cost:M · differentiation:H
 14. **Per-tool rate limiting** — independent limits per MCP tool to protect expensive ops. — value:M · feasibility:H · cost:L · differentiation:M
@@ -230,7 +230,7 @@ Selected baseline: version-pinned firecrawl_* MCP compat (30 tools / 28 listed @
 22. **Streaming tool results** — stream long scrape/crawl output over Streamable-HTTP. — value:M · feasibility:M · cost:M · differentiation:H
 23. **Playground "copy as MCP call"** — dashboard button turns a UI action into an MCP tool invocation. — value:M · feasibility:M · cost:L · differentiation:H
 24. **SDK compat shim notes** — document any param our v2 adds so SDK users opt in safely. — value:L · feasibility:H · cost:L · differentiation:L
-25. **GitHub Action** — `fuegol-scrape` reusable Action for CI data pulls. — value:M · feasibility:H · cost:L · differentiation:H
+25. **GitHub Action** — `crawl-cheap-scrape` reusable Action for CI data pulls. — value:M · feasibility:H · cost:L · differentiation:H
 26. **MCP server versioning header** — advertise the Firecrawl MCP version we track. — value:M · feasibility:H · cost:L · differentiation:M
 27. **Zod-validated tool I/O** — every MCP tool validates input+output against shared contracts. — value:M · feasibility:H · cost:L · differentiation:M
 28. **Interactive MCP debugger** — a web console to call tools + inspect raw JSON-RPC. — value:M · feasibility:M · cost:M · differentiation:H
@@ -251,7 +251,7 @@ Selected baseline: cinematic homepage; rate-limited public demo (no signup); vis
 6. **Searchable job history** — filter/sort past scrapes/crawls/searches by URL, status, cost, date. — value:H · feasibility:H · cost:L · differentiation:M **[SELECTED]**
 7. **Real-time credit balance** — live-updating credit/spend meter in the header via WebSocket. — value:H · feasibility:M · cost:L · differentiation:H **[SELECTED]**
 8. **Interactive onboarding** — guided first-scrape + first-key + copy-your-MCP-config walkthrough. — value:H · feasibility:M · cost:L · differentiation:H **[SELECTED]**
-9. **Firecrawl migration wizard** — paste your Firecrawl key/config, get a ready-to-run fuegol config + a cost comparison. — value:H · feasibility:M · cost:M · differentiation:H **[SELECTED]**
+9. **Firecrawl migration wizard** — paste your Firecrawl key/config, get a ready-to-run crawl.cheap config + a cost comparison. — value:H · feasibility:M · cost:M · differentiation:H **[SELECTED]**
 10. **Orgs/workspaces/teams** — multi-member orgs with role-based access to keys + jobs. — value:M · feasibility:M · cost:M · differentiation:M
 11. **Result viewer** — rendered Markdown/HTML/JSON tabs + screenshot preview per job. — value:M · feasibility:H · cost:L · differentiation:M
 12. **Usage analytics dashboard** — calls, credits, latency, error-rate charts over time. — value:M · feasibility:H · cost:L · differentiation:M
@@ -289,7 +289,7 @@ Selected baseline: ~half-price tiers ($0/$8/$42/$167/$300); cost modeling + marg
 7. **Per-job price estimate** — return an estimated credit cost before running (and in the dashboard preview). — value:H · feasibility:H · cost:L · differentiation:H **[SELECTED]**
 8. **Spend ceilings + hard stop** — per-key + per-org hard caps that reject new jobs at 402 when exceeded. — value:H · feasibility:H · cost:L · differentiation:H **[SELECTED]**
 9. **User-controlled overages / auto-recharge** — opt-in to buy more credits automatically at a threshold, with a cap. — value:H · feasibility:M · cost:M · differentiation:H **[SELECTED]**
-10. **Transparent pricing page with comparison** — side-by-side fuegol vs Firecrawl cost per 1k scrapes. — value:M · feasibility:H · cost:L · differentiation:H
+10. **Transparent pricing page with comparison** — side-by-side crawl.cheap vs Firecrawl cost per 1k scrapes. — value:M · feasibility:H · cost:L · differentiation:H
 11. **Annual billing discount** — ~2 months free on annual plans. — value:M · feasibility:H · cost:L · differentiation:L
 12. **Metered pay-as-you-go** — no plan, pure per-credit billing via Stripe metered price. — value:M · feasibility:M · cost:M · differentiation:M
 13. **Free-tier anti-abuse** — Turnstile + per-IP + per-account free limits to protect margin. — value:M · feasibility:H · cost:L · differentiation:M
@@ -332,7 +332,7 @@ Selected baseline: Workers+Hono; native browser-rendering /crawl; Browser Run Qu
 13. **Workers AI for extraction/synthesis** — Llama/other models on Workers AI for first-pass extraction + research. — value:M · feasibility:H · cost:L · differentiation:H
 14. **Cron Triggers for monitors** — scheduled monitors + reconciliation jobs via Cron Triggers. — value:M · feasibility:H · cost:L · differentiation:M
 15. **Smart Placement** — enable Smart Placement so the API Worker runs near its bindings. — value:M · feasibility:H · cost:L · differentiation:M
-16. **Prod domain routing** — `fuegol.ink` apex + `api.fuegol.ink` routes mapped to the Worker. — value:M · feasibility:H · cost:L · differentiation:L
+16. **Prod domain routing** — `crawl.cheap` apex + `api.crawl.cheap` routes mapped to the Worker. — value:M · feasibility:H · cost:L · differentiation:L
 17. **Hyperdrive/Neon fallback (optional)** — only if a relational workload outgrows D1. — value:L · feasibility:M · cost:M · differentiation:L
 18. **R2 lifecycle rules** — auto-expire temp assets + enforce retention TTLs. — value:M · feasibility:H · cost:L · differentiation:M
 19. **Service bindings between Workers** — split public API / worker-queue-consumer / MCP into bound services. — value:M · feasibility:M · cost:L · differentiation:M
@@ -430,7 +430,7 @@ Selected baseline: 4 original generated product illustrations; verified Deploy b
 
 1. **4 original generated product illustrations** — brand-locked (black+cyan) hero/architecture/flow/compat illustrations generated via Workers AI / Replicate, not stock. — value:H · feasibility:M · cost:M · differentiation:H **[SELECTED]**
 2. **Verified Deploy-to-Cloudflare button** — a button proven to work from the isolated subdir repo, with a post-deploy checklist. — value:H · feasibility:M · cost:M · differentiation:H **[SELECTED]**
-3. **Evidence-based compatibility matrix** — a table mapping every Firecrawl endpoint/MCP tool → fuegol status (full/partial/n/a) with links to the passing contract test. — value:H · feasibility:M · cost:L · differentiation:H **[SELECTED]**
+3. **Evidence-based compatibility matrix** — a table mapping every Firecrawl endpoint/MCP tool → crawl.cheap status (full/partial/n/a) with links to the passing contract test. — value:H · feasibility:M · cost:L · differentiation:H **[SELECTED]**
 4. **Firecrawl migration guide** — step-by-step: swap `apiUrl`, keep SDK/MCP as-is, cost comparison, gotchas. — value:H · feasibility:H · cost:L · differentiation:H **[SELECTED]**
 5. **Hosted + self-host quickstarts** — two parallel "60-second start" paths, each copy-pasteable. — value:H · feasibility:H · cost:L · differentiation:M **[SELECTED]**
 6. **Architecture diagram + data-flow charts** — Mermaid diagrams of the Workers/Queues/Workflows/DO/R2/D1 topology. — value:H · feasibility:H · cost:L · differentiation:H **[SELECTED]**
@@ -440,7 +440,7 @@ Selected baseline: 4 original generated product illustrations; verified Deploy b
 10. **Pricing table in README** — the 5 tiers + a cost-vs-Firecrawl column, kept in sync with the pricing page. — value:M · feasibility:H · cost:L · differentiation:M
 11. **"Why Cloudflare-native" section** — scale-to-zero, global edge, one-vendor-simplicity narrative. — value:M · feasibility:H · cost:L · differentiation:H
 12. **Benchmark results published** — reproducible latency/accuracy/cost numbers vs Firecrawl with the script linked. — value:M · feasibility:M · cost:M · differentiation:H
-13. **Feature comparison chart** — fuegol vs Firecrawl vs alternatives on a feature grid. — value:M · feasibility:H · cost:L · differentiation:H
+13. **Feature comparison chart** — crawl.cheap vs Firecrawl vs alternatives on a feature grid. — value:M · feasibility:H · cost:L · differentiation:H
 14. **Interactive README via GitHub** — collapsible sections, badges (CI, coverage, license, deploy). — value:M · feasibility:H · cost:L · differentiation:M
 15. **Launch assets (HN/PH/Reddit)** — tailored launch posts + a demo video for distribution channels. — value:M · feasibility:M · cost:L · differentiation:H
 16. **llms.txt + llms-full.txt** — machine-readable site/docs manifest for AI crawlers (dogfood). — value:M · feasibility:H · cost:L · differentiation:H
@@ -452,7 +452,7 @@ Selected baseline: 4 original generated product illustrations; verified Deploy b
 22. **"Powered by Cloudflare" credibility strip** — logos of primitives used, linking to CF docs. — value:L · feasibility:H · cost:L · differentiation:M
 23. **Community: Discord/Discussions** — a support + feedback channel linked everywhere. — value:M · feasibility:H · cost:L · differentiation:M
 24. **Good-first-issue labeling + roadmap** — public roadmap + curated starter issues. — value:M · feasibility:H · cost:L · differentiation:M
-25. **Template repo for integrations** — starter repos (Next.js, worker, agent) using fuegol. — value:M · feasibility:M · cost:L · differentiation:H
+25. **Template repo for integrations** — starter repos (Next.js, worker, agent) using crawl.cheap. — value:M · feasibility:M · cost:L · differentiation:H
 26. **SEO: per-use-case landing pages** — "scrape for RAG", "crawl for LLM training" targeted pages. — value:M · feasibility:M · cost:L · differentiation:H
 27. **Social preview cards** — OG 1200×630 brand images per key page. — value:L · feasibility:H · cost:L · differentiation:M
 28. **Star-history + adoption badges** — social proof surfaced in README. — value:L · feasibility:H · cost:L · differentiation:L
@@ -463,4 +463,4 @@ Selected baseline: 4 original generated product illustrations; verified Deploy b
 
 ## Pass 1 convergence note
 
-Pass 1 produced 360 ideas (30 × 12) and converged on the **108 selected** (9 × 12) that together form the mandatory first implementation wave. The selection was driven by _value × differentiation, gated by feasibility, penalized by cost_ — which pulled the wave decisively toward **contract fidelity and migration frictionlessness** (exact v2 schemas, SDK/MCP drop-in, migration wizard, evidence-based compat matrix) as the acquisition engine, and toward **Cloudflare-native correctness** (Workers+Hono, Browser Rendering, Queues, Workflows, DOs only where justified, R2/D1, reproducible provisioning, a genuinely-working Deploy button) as the moat Firecrawl clones can't cheaply copy. Economics selections lock a defensible ~half-price position behind a real cost model, an idempotent credit ledger, per-job estimates, and hard spend ceilings so the price cut never eats margin; security selections (SSRF depth, zero-retention, tenant isolation, signed webhooks, honest locality) make the platform safe to adopt for business data. The deferred 252 ideas are not rejected — they are the pre-scored Pass-2+ reservoir (deeper research connectors, session pooling, GraphQL/Code-Mode surfaces, advanced evals, growth content) to be re-ranked deterministically from these same axes once the first wave ships and real usage data sharpens the value estimates. First wave done-definition: every selected item ships behind a feature flag, with a failing-test-first E2E against the live `fuegol.ink` deploy, before it counts as complete.
+Pass 1 produced 360 ideas (30 × 12) and converged on the **108 selected** (9 × 12) that together form the mandatory first implementation wave. The selection was driven by _value × differentiation, gated by feasibility, penalized by cost_ — which pulled the wave decisively toward **contract fidelity and migration frictionlessness** (exact v2 schemas, SDK/MCP drop-in, migration wizard, evidence-based compat matrix) as the acquisition engine, and toward **Cloudflare-native correctness** (Workers+Hono, Browser Rendering, Queues, Workflows, DOs only where justified, R2/D1, reproducible provisioning, a genuinely-working Deploy button) as the moat Firecrawl clones can't cheaply copy. Economics selections lock a defensible ~half-price position behind a real cost model, an idempotent credit ledger, per-job estimates, and hard spend ceilings so the price cut never eats margin; security selections (SSRF depth, zero-retention, tenant isolation, signed webhooks, honest locality) make the platform safe to adopt for business data. The deferred 252 ideas are not rejected — they are the pre-scored Pass-2+ reservoir (deeper research connectors, session pooling, GraphQL/Code-Mode surfaces, advanced evals, growth content) to be re-ranked deterministically from these same axes once the first wave ships and real usage data sharpens the value estimates. First wave done-definition: every selected item ships behind a feature flag, with a failing-test-first E2E against the live `crawl.cheap` deploy, before it counts as complete.

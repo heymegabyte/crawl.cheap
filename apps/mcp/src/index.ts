@@ -7,7 +7,7 @@ import { listTools, TOOLS, toolError, type McpContent, type ToolProfile } from '
 const sentryOptions = (env: Env) => ({ dsn: env.SENTRY_DSN, tracesSampleRate: 1.0 });
 
 /**
- * fuegol.ink remote MCP — stateless Streamable-HTTP (JSON-RPC 2.0 over POST).
+ * crawl.cheap remote MCP — stateless Streamable-HTTP (JSON-RPC 2.0 over POST).
  * Firecrawl-tool-compatible. Profiles: /v2/mcp (full), /v2/mcp-search (search-only),
  * /mcp (alias → full). Clean-room stateless handler (request/response tool flow); a
  * migration to Cloudflare's createMcpHandler is tracked once its wiring is verified.
@@ -15,8 +15,8 @@ const sentryOptions = (env: Env) => ({ dsn: env.SENTRY_DSN, tracesSampleRate: 1.
 
 const PROTOCOL_VERSION = '2025-06-18';
 const SERVER_INFO = {
-  name: 'fuegol.ink',
-  title: 'fuegol.ink — web data engine for AI',
+  name: 'crawl.cheap',
+  title: 'crawl.cheap — web data engine for AI',
   version: '0.1.0',
 };
 
@@ -113,7 +113,7 @@ app.use(
 );
 
 const INFO = {
-  service: 'fuegol.ink MCP',
+  service: 'crawl.cheap MCP',
   transport: 'Streamable HTTP (stateless JSON-RPC 2.0)',
   endpoints: {
     full: 'POST /v2/mcp',

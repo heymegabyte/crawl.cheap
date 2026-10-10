@@ -47,7 +47,11 @@ function parseGroups(robotsTxt: string): Group[] {
   return groups;
 }
 
-export function isAllowed(robotsTxt: string | null, pathname: string, ua = 'fuegolbot'): boolean {
+export function isAllowed(
+  robotsTxt: string | null,
+  pathname: string,
+  ua = 'crawlcheapbot',
+): boolean {
   if (!robotsTxt) return true;
   const groups = parseGroups(robotsTxt);
   if (groups.length === 0) return true;

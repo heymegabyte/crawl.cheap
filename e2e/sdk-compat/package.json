@@ -1,9 +1,9 @@
 {
-  "name": "fuegol-sdk-compat",
+  "name": "crawl-cheap-sdk-compat",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Runs the official Firecrawl TypeScript SDK against the fuegol.ink API to prove drop-in compatibility.",
+  "description": "Runs the official Firecrawl TypeScript SDK against the crawl.cheap API to prove drop-in compatibility.",
   "dependencies": {
     "@mendable/firecrawl-js": "latest"
   }

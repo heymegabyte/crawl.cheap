@@ -29,7 +29,7 @@ export const ConcurrencyResponseSchema = z.object({
 });
 export type ConcurrencyResponse = z.infer<typeof ConcurrencyResponseSchema>;
 
-/** A row in the credit ledger (fuegol-native, surfaced via /v2/team/credit-usage/historical). */
+/** A row in the credit ledger (crawl-cheap-native, surfaced via /v2/team/credit-usage/historical). */
 export const UsageEventSchema = z.object({
   id: z.string(),
   createdAt: z.string(),

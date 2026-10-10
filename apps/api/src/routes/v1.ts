@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
-import { ScrapeRequestSchema, MapRequestSchema } from '@fuegol/contracts';
-import { scrape, mapSite, SsrfError } from '@fuegol/engine';
+import { ScrapeRequestSchema, MapRequestSchema } from '@crawlcheap/contracts';
+import { scrape, mapSite, SsrfError } from '@crawlcheap/engine';
 import { engineEnv, type Env } from '../env';
 import { fail, parseBody } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';

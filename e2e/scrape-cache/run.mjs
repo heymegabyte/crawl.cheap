@@ -3,7 +3,7 @@
 //   • maxAge expiry → stale entry is a miss, while a longer maxAge hits the same entry
 //   • storeInCache:false → nothing is cached
 // Unique URLs per run (query param) so prior runs don't interfere. Authenticated. Zero deps.
-const API = process.env.FUEGOL_API || 'https://fuegol-api.manhattan.workers.dev';
+const API = process.env.CRAWLCHEAP_API || 'https://crawl-cheap-api.manhattan.workers.dev';
 let pass = 0;
 let fail = 0;
 const ok = (name, cond, detail = '') => {
@@ -29,7 +29,7 @@ const scrape = async (body) => {
   const json = await res.json();
   return {
     ms: Math.round(performance.now() - t0),
-    strategy: res.headers.get('x-fuegol-strategy'),
+    strategy: res.headers.get('x-crawlcheap-strategy'),
     state: json.data?.metadata?.cacheState,
     json,
   };
@@ -37,7 +37,7 @@ const scrape = async (body) => {
 const uniq = (n) => `https://example.com/?cb=${Date.now()}-${n}`;
 
 console.log(`\nscrape cache E2E → ${API}\n`);
-ok('issued an authenticated key', (keyRes.apiKey || '').startsWith('fgl_'));
+ok('issued an authenticated key', (keyRes.apiKey || '').startsWith('cc_'));
 
 // 1. hit within maxAge
 const u1 = uniq('hit');

@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { z } from 'zod';
-import { scrape, assertSafeUrl, SsrfError } from '@fuegol/engine';
+import { scrape, assertSafeUrl, SsrfError } from '@crawlcheap/engine';
 import { engineEnv, type Env } from '../env';
 import { fail, parseBody } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
@@ -32,7 +32,7 @@ function gate(c: Ctx): { denied?: Response; tenant?: string } {
       denied: fail(
         c,
         501,
-        'AI Search requires a D1-backed fuegol.ink key (your index is per key).',
+        'AI Search requires a D1-backed crawl.cheap key (your index is per key).',
         'UNKNOWN_ERROR',
       ),
     };

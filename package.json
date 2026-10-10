@@ -1,14 +1,14 @@
 {
-  "name": "fuegol.ink",
+  "name": "crawl.cheap",
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
   "type": "module",
-  "description": "fuegol.ink — the web data engine for AI. Firecrawl-compatible. Cloudflare-powered. Half the price.",
-  "homepage": "https://fuegol.ink",
+  "description": "crawl.cheap — the web data engine for AI. Firecrawl-compatible. Cloudflare-powered. Half the price.",
+  "homepage": "https://crawl.cheap",
   "repository": {
     "type": "git",
-    "url": "https://github.com/heymegabyte/fuegol.ink.git"
+    "url": "https://github.com/heymegabyte/crawl.cheap.git"
   },
   "packageManager": "pnpm@11.28.2",
   "engines": {
@@ -18,8 +18,8 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
-    "dev": "pnpm --filter @fuegol/api dev",
-    "deploy:api": "pnpm --filter @fuegol/api deploy",
+    "dev": "pnpm --filter @crawlcheap/api dev",
+    "deploy:api": "pnpm --filter @crawlcheap/api deploy",
     "lint": "prettier --check .",
     "format": "prettier --write ."
   },

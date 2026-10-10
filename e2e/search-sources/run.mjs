@@ -1,7 +1,7 @@
 // Reproducible E2E for multi-source search (web / news / images). Asserts each requested
 // source returns real, well-formed results from the live providers (Exa + Tavily).
 // Authenticated to avoid the demo per-IP limiter. Zero dependencies.
-const API = process.env.FUEGOL_API || 'https://fuegol-api.manhattan.workers.dev';
+const API = process.env.CRAWLCHEAP_API || 'https://crawl-cheap-api.manhattan.workers.dev';
 let pass = 0;
 let fail = 0;
 const ok = (name, cond, detail = '') => {
@@ -24,7 +24,7 @@ const search = async (body) =>
 const isUrl = (u) => typeof u === 'string' && /^https?:\/\//.test(u);
 
 console.log(`\nmulti-source search E2E → ${API}\n`);
-ok('issued an authenticated key', (keyRes.apiKey || '').startsWith('fgl_'));
+ok('issued an authenticated key', (keyRes.apiKey || '').startsWith('cc_'));
 
 // web (baseline / regression)
 const w = await search({ query: 'cloudflare workers', sources: ['web'], limit: 5 });

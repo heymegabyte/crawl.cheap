@@ -1,5 +1,5 @@
-import { scrape } from '@fuegol/engine';
-import type { WebhookEvent } from '@fuegol/contracts';
+import { scrape } from '@crawlcheap/engine';
+import type { WebhookEvent } from '@crawlcheap/contracts';
 import { engineEnv, type Env } from '../env';
 import { trackChange } from './change';
 import { deliverWebhook } from './webhook';
@@ -164,7 +164,7 @@ export async function runMonitor(
     webhookDelivered = await deliverWebhook(
       { url: monitor.webhook_url, headers },
       event,
-      env.WEBHOOK_SECRET ?? 'whsec_fuegol_demo',
+      env.WEBHOOK_SECRET ?? 'whsec_crawlcheap_demo',
     );
   }
   return { changeStatus: ct.changeStatus, checkId, webhookDelivered };

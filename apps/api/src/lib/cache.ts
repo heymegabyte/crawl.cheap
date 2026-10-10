@@ -1,7 +1,7 @@
 /** Scrape result cache (Firecrawl `maxAge` / `storeInCache`). Content-addressed in R2:
  *  key = sha256(url + output-affecting options). Global (content is the same per URL+opts,
  *  so a hit is shareable + honest). changeTracking/actions requests are never cached. */
-import type { Document } from '@fuegol/contracts';
+import type { Document } from '@crawlcheap/contracts';
 import type { Env } from '../env';
 
 async function sha256hex(input: string): Promise<string> {

@@ -1,7 +1,7 @@
 # Benchmarks
 
 > **Honesty contract.** Every number here comes from a real request to the live production API
-> (`https://fuegol-api.manhattan.workers.dev`). Nothing is fabricated, extrapolated, or borrowed from
+> (`https://crawl-cheap-api.manhattan.workers.dev`). Nothing is fabricated, extrapolated, or borrowed from
 > marketing. The harness is committed at [`e2e/benchmark/run.mjs`](../e2e/benchmark/run.mjs) — re-run
 > it and you will get numbers in the same shape (live-internet variance applies; see Caveats).
 >
@@ -13,7 +13,7 @@
 
 ```bash
 node e2e/benchmark/run.mjs
-# knobs: FUEGOL_API=<base-url>  RUNS=<n per URL, default 3>
+# knobs: CRAWLCHEAP_API=<base-url>  RUNS=<n per URL, default 3>
 ```
 
 The harness warms the Worker once, then times each corpus URL `RUNS` times (default 3), reports the
@@ -38,14 +38,14 @@ The P95 is dominated by occasional **browser-tier escalation cold starts**, not 
 pure-static pages land in the **30–240 ms** band, scaling with page size (Wikipedia's 123 KB of
 markdown is the slow end, example.com the fast end).
 
-¹ Hacker News intermittently serves thin HTML to datacenter egress, which trips fuegol's
+¹ Hacker News intermittently serves thin HTML to datacenter egress, which trips crawl.cheap's
 automatic escalation (static markdown under the threshold → re-fetch via Browser Rendering). The
 result is still correct (12.5 KB of real markdown); the tier header just reflects the escalation.
 
 ² **Honest coverage caveat.** MDN's `/en-US/` landing page is a JavaScript app shell — the static
 tier extracts ~311 characters of genuinely-present content. For JS-driven SPAs, force the browser
 tier (`waitFor` / `actions`) or target a content page rather than the shell. This is a property of
-the page, not a scrape failure — fuegol returns what is actually in the static HTML, never invented filler.
+the page, not a scrape failure — crawl.cheap returns what is actually in the static HTML, never invented filler.
 
 ## By tier / adjacent operation
 
@@ -81,5 +81,5 @@ the page, not a scrape failure — fuegol returns what is actually in the static
 
 No head-to-head "X× faster than Firecrawl" number. That would require running both products under
 identical conditions and is not something we will assert without that apparatus. What these figures
-establish is concrete and verifiable: **fuegol's static scrape path is sub-150 ms at the median, the
+establish is concrete and verifiable: **crawl.cheap's static scrape path is sub-150 ms at the median, the
 browser tier is ~1.5 s, and every request either returns real extracted content or an honest error.**

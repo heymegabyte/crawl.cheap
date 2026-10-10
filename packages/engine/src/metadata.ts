@@ -1,5 +1,5 @@
 import type { HTMLElement } from 'node-html-parser';
-import type { DocumentMetadata } from '@fuegol/contracts';
+import type { DocumentMetadata } from '@crawlcheap/contracts';
 
 function decode(s: string): string {
   return s

@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
-import { CrawlRequestSchema } from '@fuegol/contracts';
-import { SsrfError } from '@fuegol/engine';
+import { CrawlRequestSchema } from '@crawlcheap/contracts';
+import { SsrfError } from '@crawlcheap/engine';
 import type { Env } from '../env';
 import type { CrawlStatusResult } from '../crawl-do';
 import { fail, parseBody } from '../lib/respond';
@@ -20,7 +20,7 @@ function gate(c: Context<{ Bindings: Env; Variables: Vars }>): Response | null {
     return fail(
       c,
       429,
-      'Demo rate limit reached (≈20 requests/min). Add a fuegol.ink API key for higher limits.',
+      'Demo rate limit reached (≈20 requests/min). Add a crawl.cheap API key for higher limits.',
       'BAD_REQUEST',
     );
   }
@@ -31,7 +31,7 @@ function origin(c: Context<{ Bindings: Env; Variables: Vars }>): string {
   try {
     return c.env.SERVICE_ORIGIN || new URL(c.req.url).origin;
   } catch {
-    return 'https://api.fuegol.ink';
+    return 'https://api.crawl.cheap';
   }
 }
 

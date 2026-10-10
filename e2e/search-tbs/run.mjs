@@ -1,7 +1,7 @@
 // Reproducible E2E for `tbs` time-based search. Proves the filter actually narrows results
 // by publish date (not just that the param is forwarded): news results carry dates, and a
 // `qdr:w` / `qdr:d` search returns only results within that window. Authenticated. Zero deps.
-const API = process.env.FUEGOL_API || 'https://fuegol-api.manhattan.workers.dev';
+const API = process.env.CRAWLCHEAP_API || 'https://crawl-cheap-api.manhattan.workers.dev';
 let pass = 0;
 let fail = 0;
 const ok = (name, cond, detail = '') => {
@@ -25,7 +25,7 @@ const NOW = Date.now();
 const ageDays = (d) => (NOW - Date.parse(d)) / 86_400_000;
 
 console.log(`\ntbs time-filter E2E → ${API}\n`);
-ok('issued an authenticated key', (keyRes.apiKey || '').startsWith('fgl_'));
+ok('issued an authenticated key', (keyRes.apiKey || '').startsWith('cc_'));
 
 // News carries dates (needed for any time assertion to be meaningful)
 const base = await search({ query: 'technology', sources: ['news'], limit: 10 });

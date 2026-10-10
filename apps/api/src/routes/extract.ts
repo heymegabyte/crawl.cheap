@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
-import { ExtractRequestSchema } from '@fuegol/contracts';
+import { ExtractRequestSchema } from '@crawlcheap/contracts';
 import type { Env } from '../env';
 import type { ExtractStatusResult } from '../extract-do';
 import { fail, parseBody } from '../lib/respond';
@@ -19,7 +19,7 @@ function gate(c: Context<{ Bindings: Env; Variables: Vars }>): Response | null {
     return fail(
       c,
       429,
-      'Demo rate limit reached (≈20 requests/min). Add a fuegol.ink API key for higher limits.',
+      'Demo rate limit reached (≈20 requests/min). Add a crawl.cheap API key for higher limits.',
       'BAD_REQUEST',
     );
   }
