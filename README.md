@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/crawl-cheap-mark.svg" alt="crawl.cheap — the web data engine for AI" width="560">
+  <img src="assets/crawl-cheap-logo.png" alt="crawl.cheap — the web data engine for AI" width="560">
 </p>
 
 <h1 align="center">crawl.cheap</h1>
