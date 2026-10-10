@@ -1,4 +1,4 @@
-import type { WebhookConfig, WebhookEvent } from '@fuegol/contracts';
+import type { WebhookConfig, WebhookEvent } from '@crawlcheap/contracts';
 
 /** HMAC-SHA256 hex of a body under a secret (for webhook signatures). */
 export async function hmacHex(secret: string, body: string): Promise<string> {
@@ -14,8 +14,8 @@ export async function hmacHex(secret: string, body: string): Promise<string> {
 }
 
 /**
- * Deliver a signed webhook with retries. Signature in `x-fuegol-signature:
- * sha256=<hmac>`; event type in `x-fuegol-event`. Returns true on a 2xx.
+ * Deliver a signed webhook with retries. Signature in `x-crawlcheap-signature:
+ * sha256=<hmac>`; event type in `x-crawlcheap-event`. Returns true on a 2xx.
  */
 export async function deliverWebhook(
   cfg: WebhookConfig,
@@ -26,8 +26,8 @@ export async function deliverWebhook(
   const signature = `sha256=${await hmacHex(secret, body)}`;
   const headers: Record<string, string> = {
     'content-type': 'application/json',
-    'x-fuegol-signature': signature,
-    'x-fuegol-event': event.type,
+    'x-crawlcheap-signature': signature,
+    'x-crawlcheap-event': event.type,
     ...(cfg.headers ?? {}),
   };
   for (let attempt = 0; attempt < 3; attempt += 1) {

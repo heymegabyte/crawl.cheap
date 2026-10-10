@@ -1,5 +1,5 @@
 {
-  "name": "@fuegol/api",
+  "name": "@crawlcheap/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@cloudflare/puppeteer": "^1.4.0",
-    "@fuegol/contracts": "workspace:*",
-    "@fuegol/engine": "workspace:*",
+    "@crawlcheap/contracts": "workspace:*",
+    "@crawlcheap/engine": "workspace:*",
     "@sentry/cloudflare": "^11.5.0",
     "hono": "^4.6.14",
     "node-html-parser": "^6.1.13",

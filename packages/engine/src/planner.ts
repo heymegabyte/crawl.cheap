@@ -1,4 +1,4 @@
-import type { ScrapeOptions } from '@fuegol/contracts';
+import type { ScrapeOptions } from '@crawlcheap/contracts';
 import { browserAvailable } from './browser';
 import type { EngineEnv } from './types';
 

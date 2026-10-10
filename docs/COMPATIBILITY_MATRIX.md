@@ -18,9 +18,9 @@ schemas; **v1** = 21 paths / **23 operations**. A dependency-free OpenAPI-3.0 va
 (`e2e/contract/run.mjs`) does two things against the **live** API:
 
 - **Coverage** (routed vs not, method-aware live probe): **v2 28/57** · **v1 2/23** operations SERVED.
-  The unserved v2 ops are out-of-scope (`/support/*`, `/team/threat-protection`), Fuego-namespaced
-  under different paths (upstream `/interact/*` → Fuego `/v2/browser`; `/search/developer|gov|research`
-  → Fuego MCP tools + `/v2/search` categories), or low-priority (`/scrape/{jobId}` async, `/feedback`,
+  The unserved v2 ops are out-of-scope (`/support/*`, `/team/threat-protection`), crawl.cheap-namespaced
+  under different paths (upstream `/interact/*` → crawl.cheap `/v2/browser`; `/search/developer|gov|research`
+  → crawl.cheap MCP tools + `/v2/search` categories), or low-priority (`/scrape/{jobId}` async, `/feedback`,
   agent list/trace/snapshots, monitor PATCH). **v1 is intentionally thin** (only `/v1/scrape` +
   `/v1/map` adapters) — tracked as a NEXT item; the official SDKs use v2.
 - **Conformance** (live response ⊆ documented 200 schema): **4/4 VERIFIED** — `scrape`, `map`,
@@ -31,11 +31,11 @@ A scheduled CI job (`.github/workflows/contract-drift.yml`) re-fetches upstream 
 
 ## SDKs (the operational definition of "drop-in")
 
-| Client                               | Version | How                                     | Status                                       |
-| ------------------------------------ | ------- | --------------------------------------- | -------------------------------------------- |
-| TypeScript `@mendable/firecrawl-js`  | 4.45.0  | `apiUrl` + fuegol key, code unchanged   | **VERIFIED** 8/8 (`e2e/sdk-compat/test.mjs`) |
-| Python `firecrawl-py`                | 4.49.3  | `api_url=` + fuegol key, code unchanged | **VERIFIED** 4/4 (`e2e/sdk-compat/test.py`)  |
-| Go / Java / Rust / Ruby / PHP / .NET | —       | REST contract is identical; untested    | NOT VERIFIED (no harness yet)                |
+| Client                               | Version | How                                          | Status                                       |
+| ------------------------------------ | ------- | -------------------------------------------- | -------------------------------------------- |
+| TypeScript `@mendable/firecrawl-js`  | 4.45.0  | `apiUrl` + crawl.cheap key, code unchanged   | **VERIFIED** 8/8 (`e2e/sdk-compat/test.mjs`) |
+| Python `firecrawl-py`                | 4.49.3  | `api_url=` + crawl.cheap key, code unchanged | **VERIFIED** 4/4 (`e2e/sdk-compat/test.py`)  |
+| Go / Java / Rust / Ruby / PHP / .NET | —       | REST contract is identical; untested         | NOT VERIFIED (no harness yet)                |
 
 ## REST endpoints (prefix `/v2`)
 
@@ -51,7 +51,7 @@ A scheduled CI job (`.github/workflows/contract-drift.yml`) re-fetches upstream 
 | `agent` (+status)                                                                       | **VERIFIED**    | web-search + scrape + AI synthesis                         |
 | `monitor` (+run/checks/webhook)                                                         | **VERIFIED**    | cron sweep + change diff + signed alerts                   |
 | `browser` + `/:id/act` (interact)                                                       | **VERIFIED**    | persistent Puppeteer session, DO-backed                    |
-| `ai-search/index` · `ai-search/query` (RAG)                                             | **VERIFIED**    | Vectorize + Workers AI (Fuego-exclusive, namespaced)       |
+| `ai-search/index` · `ai-search/query` (RAG)                                             | **VERIFIED**    | Vectorize + Workers AI (crawl.cheap-exclusive, namespaced) |
 | `team/credit-usage` (+historical), `keys`, spend-limit                                  | **VERIFIED**    | real D1 ledger; reserve-before-work → 402                  |
 | **`pricing` · `quote`** (price book + preflight)                                        | **VERIFIED**    | NEW — 25/25 prod E2E (`e2e/quote/run.mjs`)                 |
 | `crawl/active` · `crawl/ongoing`                                                        | PARTIAL         | returns empty — no cross-DO registry yet                   |
@@ -61,7 +61,7 @@ A scheduled CI job (`.github/workflows/contract-drift.yml`) re-fetches upstream 
 Error envelope `{success:false, error, code?, details?}` with the upstream `ErrorCode` enum verbatim;
 status codes 400/401/402/403/404/408/409/429/500/503. Legacy `/v1/*` served by adapters.
 
-## MCP (`fuegol-mcp.manhattan.workers.dev`, stateless Streamable-HTTP)
+## MCP (`crawl-cheap-mcp.manhattan.workers.dev`, stateless Streamable-HTTP)
 
 | Tool group                                                                                | Status                                           |
 | ----------------------------------------------------------------------------------------- | ------------------------------------------------ |

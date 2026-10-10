@@ -8,7 +8,7 @@
  *   node e2e/quote/run.mjs            # against prod
  *   API=https://… node e2e/quote/run.mjs
  */
-const API = process.env.API ?? 'https://fuegol-api.manhattan.workers.dev';
+const API = process.env.API ?? 'https://crawl-cheap-api.manhattan.workers.dev';
 
 let pass = 0;
 let fail = 0;
@@ -23,19 +23,19 @@ const ok = (name, cond, extra = '') => {
 };
 
 async function get(path) {
-  const r = await fetch(API + path, { headers: { 'user-agent': 'fuegol-e2e/1.0' } });
+  const r = await fetch(API + path, { headers: { 'user-agent': 'crawl-cheap-e2e/1.0' } });
   return { status: r.status, body: await r.json() };
 }
 async function quote(payload) {
   const r = await fetch(API + '/v2/quote', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'user-agent': 'fuegol-e2e/1.0' },
+    headers: { 'content-type': 'application/json', 'user-agent': 'crawl-cheap-e2e/1.0' },
     body: JSON.stringify(payload),
   });
   return { status: r.status, body: await r.json() };
 }
 
-console.log(`\nfuegol quote/pricing E2E → ${API}\n`);
+console.log(`\ncrawl.cheap quote/pricing E2E → ${API}\n`);
 
 // 1. Price book
 {
@@ -57,7 +57,7 @@ console.log(`\nfuegol quote/pricing E2E → ${API}\n`);
   ok('price book stamps a verified date', typeof body?.data?.verifiedAt === 'string');
   ok(
     'subscriber $5 top-ups ≥ 2× Firecrawl',
-    body?.data?.topupPer5Usd?.fuego?.scale >= body?.data?.topupPer5Usd?.firecrawl?.scale * 2,
+    body?.data?.topupPer5Usd?.crawlcheap?.scale >= body?.data?.topupPer5Usd?.firecrawl?.scale * 2,
   );
   ok(
     'worst-case net $/credit is published + tiny',

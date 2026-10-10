@@ -1,5 +1,5 @@
 /**
- * @fuegol/contracts — the single source of truth for every API, MCP, SDK, and
+ * @crawlcheap/contracts — the single source of truth for every API, MCP, SDK, and
  * dashboard boundary. Firecrawl-v2 compatible request/response shapes expressed
  * as Zod schemas; infer TypeScript types from these, never hand-duplicate them.
  */

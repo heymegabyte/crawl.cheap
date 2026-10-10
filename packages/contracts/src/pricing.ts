@@ -12,7 +12,7 @@ import { z } from 'zod';
  *     is an externally testable contract, not a marketing line — so credit burn on the
  *     common operations matches upstream exactly.
  *
- *  2. PREMIUM, Fuego-exclusive ops (interactive browser sessions, AI search / RAG,
+ *  2. PREMIUM, crawl.cheap-exclusive ops (interactive browser sessions, AI search / RAG,
  *     the autonomous agent, deep research, OCR, stealth proxy) are priced to clear a
  *     contribution-MARGIN FLOOR even for the deepest-discount credit lot (Scale /
  *     bulk). They are NEVER half-price loss leaders, and never fund themselves off a
@@ -55,7 +55,7 @@ export const FIRECRAWL_TOPUP_PER_5USD: Record<string, number> = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// Fuego plans — exactly HALF of Firecrawl's month-to-month price, like-for-like
+// crawl.cheap plans — exactly HALF of Firecrawl's month-to-month price, like-for-like
 // included credits. The headline "50% less on comparable core API plans".
 // ---------------------------------------------------------------------------
 export type PlanKey = 'free' | 'hobby' | 'standard' | 'growth' | 'scale' | 'enterprise';
@@ -72,7 +72,7 @@ export interface FuegoPlan {
   highlight?: boolean;
 }
 
-export const FUEGO_PLANS: Record<PlanKey, FuegoPlan> = {
+export const CRAWLCHEAP_PLANS: Record<PlanKey, FuegoPlan> = {
   free: {
     key: 'free',
     label: 'Free',
@@ -128,7 +128,7 @@ export interface CreditPack {
   usd: number;
   credits: number;
 }
-export const FUEGO_STANDALONE_PACKS: CreditPack[] = [
+export const CRAWLCHEAP_STANDALONE_PACKS: CreditPack[] = [
   { usd: 5, credits: 2_000 },
   { usd: 10, credits: 4_500 },
   { usd: 25, credits: 12_000 },
@@ -142,7 +142,7 @@ export const FUEGO_STANDALONE_PACKS: CreditPack[] = [
  * Subscriber $5 top-up by entitlement tier — double the competitor's top-up credits
  * at the same price (≥50% cheaper per credit on comparable top-ups).
  */
-export const FUEGO_TOPUP_PER_5USD: Record<string, number> = {
+export const CRAWLCHEAP_TOPUP_PER_5USD: Record<string, number> = {
   hobby: 2_000,
   standard: 4_000,
   growth: 5_000,
@@ -175,7 +175,7 @@ export const ADVANCED_FORMATS = new Set([
 ]);
 
 // ---------------------------------------------------------------------------
-// PREMIUM unit cost model (Fuego-exclusive). Modeled, conservative, P95. These are
+// PREMIUM unit cost model (crawl.cheap-exclusive). Modeled, conservative, P95. These are
 // NOT yet reconciled against live provider invoices — docs/unit-economics.md tracks
 // the measured values and this table is updated from measurements each pass.
 //
@@ -227,12 +227,12 @@ export function netRevenuePerCredit(priceUsd: number, credits: number): number {
  */
 export function lowestNetRevenuePerCredit(): number {
   const rates: number[] = [];
-  for (const p of Object.values(FUEGO_PLANS)) {
+  for (const p of Object.values(CRAWLCHEAP_PLANS)) {
     if (p.priceMonthly && p.credits && p.priceMonthly > 0 && p.credits > 0) {
       rates.push(netRevenuePerCredit(p.priceMonthly, p.credits));
     }
   }
-  for (const pack of FUEGO_STANDALONE_PACKS) {
+  for (const pack of CRAWLCHEAP_STANDALONE_PACKS) {
     rates.push(netRevenuePerCredit(pack.usd, pack.credits));
   }
   return Math.min(...rates);
@@ -368,19 +368,19 @@ export function lotPricePerCredit(lot?: QuoteRequest['lot']): {
 } {
   switch (lot) {
     case 'hobby':
-      return { perCredit: planPricePerCredit(FUEGO_PLANS.hobby), label: 'Hobby' };
+      return { perCredit: planPricePerCredit(CRAWLCHEAP_PLANS.hobby), label: 'Hobby' };
     case 'standard':
-      return { perCredit: planPricePerCredit(FUEGO_PLANS.standard), label: 'Standard' };
+      return { perCredit: planPricePerCredit(CRAWLCHEAP_PLANS.standard), label: 'Standard' };
     case 'growth':
-      return { perCredit: planPricePerCredit(FUEGO_PLANS.growth), label: 'Growth' };
+      return { perCredit: planPricePerCredit(CRAWLCHEAP_PLANS.growth), label: 'Growth' };
     case 'scale':
-      return { perCredit: planPricePerCredit(FUEGO_PLANS.scale), label: 'Scale' };
+      return { perCredit: planPricePerCredit(CRAWLCHEAP_PLANS.scale), label: 'Scale' };
     case 'bulk': {
-      const pack = FUEGO_STANDALONE_PACKS[0]!;
+      const pack = CRAWLCHEAP_STANDALONE_PACKS[0]!;
       return { perCredit: pack.usd / pack.credits, label: 'Bulk $5 pack' };
     }
     default:
-      return { perCredit: planPricePerCredit(FUEGO_PLANS.standard), label: 'Standard' };
+      return { perCredit: planPricePerCredit(CRAWLCHEAP_PLANS.standard), label: 'Standard' };
   }
 }
 
@@ -565,11 +565,11 @@ export function computeQuote(req: QuoteRequest): QuoteResponse['data'] {
       note:
         firecrawlCredits > 0
           ? 'Same credit burn as Firecrawl on core operations; your plan costs half as much per credit.'
-          : 'A Fuego-exclusive premium operation — priced to a contribution-margin floor, not a Firecrawl parity SKU.',
+          : 'A crawl.cheap-exclusive premium operation — priced to a contribution-margin floor, not a Firecrawl parity SKU.',
     },
     disclaimer: boundable
       ? 'Deterministic estimate. Failed requests that return no document bill 0 credits; cached hits bill 0.'
-      : 'Unbounded as specified — set a page limit (crawl) or maxCredits (agent) before running. Fuego never runs an unbounded-cost job.',
+      : 'Unbounded as specified — set a page limit (crawl) or maxCredits (agent) before running. crawl.cheap never runs an unbounded-cost job.',
     verifiedAt: PRICING_VERIFIED_AT,
   };
 }
@@ -580,7 +580,7 @@ export function pricingBook() {
     verifiedAt: PRICING_VERIFIED_AT,
     currency: 'usd',
     claim: '50% less than Firecrawl on comparable core API plans (vs. their month-to-month price).',
-    plans: Object.values(FUEGO_PLANS).map((p) => {
+    plans: Object.values(CRAWLCHEAP_PLANS).map((p) => {
       const comp = FIRECRAWL_PLANS[p.key];
       return {
         key: p.key,
@@ -592,8 +592,8 @@ export function pricingBook() {
         competitor: comp ? { monthly: comp.monthly, annualMonthly: comp.annualMonthly } : null,
       };
     }),
-    packs: FUEGO_STANDALONE_PACKS,
-    topupPer5Usd: { fuego: FUEGO_TOPUP_PER_5USD, firecrawl: FIRECRAWL_TOPUP_PER_5USD },
+    packs: CRAWLCHEAP_STANDALONE_PACKS,
+    topupPer5Usd: { crawlcheap: CRAWLCHEAP_TOPUP_PER_5USD, firecrawl: FIRECRAWL_TOPUP_PER_5USD },
     coreCreditCosts: CORE_CREDIT_COSTS,
     premiumUnitCostUsd: PREMIUM_UNIT_COST_USD,
     premiumMarginFloor: MARGIN_FLOOR,

@@ -8,14 +8,14 @@
  *   • price estimator      → POST /v2/quote, render a bounded quote
  *   • migration tabs       → switch TS ↔ Python panes
  *
- *   URL=https://fuegol-web.manhattan.workers.dev node e2e/web/cdp-check.mjs
+ *   URL=https://crawl-cheap-web.manhattan.workers.dev node e2e/web/cdp-check.mjs
  *
  * Local-only (needs a Chromium binary) — not a CI gate, like the rest of e2e/.
  */
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 
-const URL_ = process.env.URL ?? 'https://fuegol-web.manhattan.workers.dev';
+const URL_ = process.env.URL ?? 'https://crawl-cheap-web.manhattan.workers.dev';
 const PORT = Number(process.env.CDP_PORT ?? 9333);
 const BINS = [
   process.env.CHROME,
@@ -40,7 +40,7 @@ const child = spawn(
   BIN,
   [
     `--remote-debugging-port=${PORT}`,
-    '--user-data-dir=/tmp/fuegol-cdp-profile',
+    '--user-data-dir=/tmp/crawl-cheap-cdp-profile',
     '--no-sandbox',
     '--disable-gpu',
     '--disable-dev-shm-usage',
@@ -156,7 +156,7 @@ async function main() {
   const calc = await ev15("document.getElementById('calcOut')?.innerText||''");
   ok(
     'savings calculator rendered a result',
-    /\/mo on fuegol/.test(calc) && /% less/.test(calc),
+    /\/mo on crawl.cheap/.test(calc) && /% less/.test(calc),
     calc.slice(0, 120),
   );
   ok('calculator shows the Standard default ($49.50)', /\$49\.50/.test(calc), calc.slice(0, 120));

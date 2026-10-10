@@ -1,7 +1,7 @@
 # Firecrawl Compatibility
 
 > **Compatibility thesis:** an existing supported Firecrawl client should be able to change its
-> base URL to `https://api.fuegol.ink` and swap in a **newly-issued fuegol.ink key** (never its
+> base URL to `https://api.crawl.cheap` and swap in a **newly-issued crawl.cheap key** (never its
 > old `fc-` key) without rewriting business logic. This file is the living evidence for that claim.
 
 ## Pinned upstream sources
@@ -19,11 +19,11 @@ source wins**. Our Zod mirror lives in `packages/contracts` and is the single so
 ## SDK compatibility — verified ✅
 
 The official **Firecrawl v2 TypeScript SDK** (`@mendable/firecrawl-js@4.45.0`) runs **unchanged**
-against fuegol.ink — only `apiUrl` + a fuegol key change. Reproducible harness: `e2e/sdk-compat/`.
+against crawl.cheap — only `apiUrl` + a crawl.cheap key change. Reproducible harness: `e2e/sdk-compat/`.
 
 ```ts
 import { Firecrawl } from '@mendable/firecrawl-js';
-const app = new Firecrawl({ apiKey: 'fgl_live_…', apiUrl: 'https://api.fuegol.ink' });
+const app = new Firecrawl({ apiKey: 'cc_live_…', apiUrl: 'https://api.crawl.cheap' });
 await app.scrape('https://example.com', { formats: ['markdown'] });
 ```
 
@@ -35,9 +35,9 @@ await app.scrape('https://example.com', { formats: ['markdown'] });
 
 **TypeScript: 8/8** (`node e2e/sdk-compat/test.mjs`). **Python** (`firecrawl-py@4.49.3`): **4/4**
 (`e2e/sdk-compat/test.py` — scrape/map/search/crawl). Both official SDKs run unchanged. This is the
-operational definition of drop-in compatibility: change the base URL, use a fuegol key, keep your code.
+operational definition of drop-in compatibility: change the base URL, use a crawl.cheap key, keep your code.
 
-> Note: Cloudflare's edge 403s the bare `Python-urllib` User-Agent (bot protection) — not a fuegol
+> Note: Cloudflare's edge 403s the bare `Python-urllib` User-Agent (bot protection) — not a crawl.cheap
 > behaviour; the real SDKs set proper User-Agents and are unaffected.
 
 ## REST API coverage
@@ -65,7 +65,7 @@ Legend: ✅ implemented · 🟡 partial/stub · ⛔ planned · `n/a` not applica
 | POST         | `/ai-search/index`                       | Index url(s)/text into your namespace (Vectorize + Workers AI embeddings)                                                         | ✅ live                                                                                                                                                                                                                                                                                                                                                   |
 | POST         | `/ai-search/query`                       | Semantic search + grounded RAG answer over your indexed content                                                                   | ✅ live                                                                                                                                                                                                                                                                                                                                                   |
 | GET          | `/team/credit-usage` (+ historical)      | Credit balance (D1 ledger, live for keyed)                                                                                        | ✅ live                                                                                                                                                                                                                                                                                                                                                   |
-| POST         | `/keys` (fuegol-native)                  | Self-serve API-key issuance (free tier)                                                                                           | ✅ live                                                                                                                                                                                                                                                                                                                                                   |
+| POST         | `/keys` (crawl-cheap-native)             | Self-serve API-key issuance (free tier)                                                                                           | ✅ live                                                                                                                                                                                                                                                                                                                                                   |
 | GET          | `/team/token-usage` (+ historical)       | Token balance                                                                                                                     | ⛔                                                                                                                                                                                                                                                                                                                                                        |
 | GET          | `/team/queue-status` · `/team/activity`  | Queue + activity                                                                                                                  | ⛔                                                                                                                                                                                                                                                                                                                                                        |
 | GET          | `/concurrency-check`                     | Concurrency                                                                                                                       | 🟡                                                                                                                                                                                                                                                                                                                                                        |
@@ -96,10 +96,10 @@ Upstream registers **30 `firecrawl_*` tools / 28 listable** (2 hidden deprecated
 Built on **FastMCP** + `@modelcontextprotocol/sdk@^1.29`; we use Cloudflare's stateless
 `createMcpHandler` (from `agents/mcp/server`) instead — `McpAgent` is legacy.
 
-Endpoints we will expose: `mcp.fuegol.ink/v2/mcp` (full), `/v2/mcp-search` (the frozen 9-tool
+Endpoints we will expose: `mcp.crawl.cheap/v2/mcp` (full), `/v2/mcp-search` (the frozen 9-tool
 search profile), `/mcp` (documented alias). Keyless profile = 3 tools (`scrape`, `search`, `parse`).
 
-**Live: https://fuegol-mcp.manhattan.workers.dev** (stateless Streamable-HTTP JSON-RPC). `firecrawl_scrape`
+**Live: https://crawl-cheap-mcp.manhattan.workers.dev** (stateless Streamable-HTTP JSON-RPC). `firecrawl_scrape`
 
 - `firecrawl_map` are real working tools; the rest are advertised for compatibility and return an
   explicit not-yet error (never fabricated data).

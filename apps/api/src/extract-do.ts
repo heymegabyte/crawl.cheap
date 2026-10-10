@@ -1,5 +1,5 @@
 import { DurableObject } from 'cloudflare:workers';
-import type { ExtractRequest } from '@fuegol/contracts';
+import type { ExtractRequest } from '@crawlcheap/contracts';
 import {
   scrape,
   assertSafeUrl,
@@ -7,7 +7,7 @@ import {
   extractAvailable,
   webSearch,
   searchAvailable,
-} from '@fuegol/engine';
+} from '@crawlcheap/engine';
 import { engineEnv, type Env } from './env';
 
 interface ExtractMeta {

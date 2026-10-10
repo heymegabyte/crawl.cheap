@@ -1,5 +1,5 @@
-import type { MapLink, MapRequest } from '@fuegol/contracts';
-import { MapRequestSchema } from '@fuegol/contracts';
+import type { MapLink, MapRequest } from '@crawlcheap/contracts';
+import { MapRequestSchema } from '@crawlcheap/contracts';
 import { assertSafeUrl } from './ssrf';
 import { safeFetch } from './fetcher';
 import { parseHtml } from './extract-content';

@@ -1,7 +1,7 @@
-// Reproducible benchmark: scrape a representative corpus via the live fuegol API,
+// Reproducible benchmark: scrape a representative corpus via the live crawl.cheap API,
 // measuring end-to-end latency (client → edge → target → markdown), success, and tier.
 // Honest: numbers include network RTT from the runner; corpus is public + authorized.
-const API = process.env.FUEGOL_API || 'https://fuegol-api.manhattan.workers.dev';
+const API = process.env.CRAWLCHEAP_API || 'https://crawl-cheap-api.manhattan.workers.dev';
 const RUNS = Number(process.env.RUNS || 3);
 
 const corpus = [
@@ -51,7 +51,7 @@ for (const [name, url] of corpus) {
       ok += 1;
       mdLen = (j.data.markdown || '').length;
     }
-    tier = (res.headers.get && res.headers.get('x-fuegol-strategy')) || tier;
+    tier = (res.headers.get && res.headers.get('x-crawlcheap-strategy')) || tier;
     lat.push(ms);
     await new Promise((r) => setTimeout(r, 400));
   }
@@ -99,7 +99,7 @@ async function timePost(path, body, bustCache = false) {
           body: JSON.stringify(runBody),
         });
         j = await res.json();
-        tier = (res.headers.get && res.headers.get('x-fuegol-strategy')) || tier;
+        tier = (res.headers.get && res.headers.get('x-crawlcheap-strategy')) || tier;
         if (j.success) break; // transient target failure → one retry
       } catch {
         j = {};

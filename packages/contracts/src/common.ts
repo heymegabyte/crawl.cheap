@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /**
- * Shared primitives for the fuegol.ink / Firecrawl-v2-compatible contract.
+ * Shared primitives for the crawl.cheap / Firecrawl-v2-compatible contract.
  * Pinned to firecrawl/firecrawl@f9f2e3d (2026-10-08); the authoritative upstream
  * source is the Zod in apps/api/src/controllers/v2/types.ts (no v2 OpenAPI exists
  * in-repo). This file has no internal imports — it is the base of the dep graph.

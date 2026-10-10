@@ -72,7 +72,9 @@ export function selectContent(root: HTMLElement, opts: SelectOptions): HTMLEleme
   }
 
   if (opts.includeTags?.length) {
-    const container = parse('<div id="fuegol-root"></div>').querySelector('#fuegol-root')!;
+    const container = parse('<div id="crawl-cheap-root"></div>').querySelector(
+      '#crawl-cheap-root',
+    )!;
     for (const sel of opts.includeTags) {
       try {
         for (const el of body.querySelectorAll(sel)) container.appendChild(el);

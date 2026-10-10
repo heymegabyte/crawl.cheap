@@ -1,8 +1,8 @@
 // Reproducible regression for Firecrawl-compatible browser `actions` on /v2/scrape.
 // Drives real interactions against the live API + public fixture sites and asserts
 // state changes (navigation, typed input, JS returns, artifacts). Zero dependencies.
-//   node e2e/actions/run.mjs   (FUEGOL_API overrides the base URL)
-const API = process.env.FUEGOL_API || 'https://fuegol-api.manhattan.workers.dev';
+//   node e2e/actions/run.mjs   (CRAWLCHEAP_API overrides the base URL)
+const API = process.env.CRAWLCHEAP_API || 'https://crawl-cheap-api.manhattan.workers.dev';
 let pass = 0;
 let fail = 0;
 const ok = (name, cond, detail = '') => {
@@ -23,7 +23,7 @@ async function scrape(body) {
   });
   return {
     status: res.status,
-    strategy: res.headers.get('x-fuegol-strategy'),
+    strategy: res.headers.get('x-crawlcheap-strategy'),
     json: await res.json(),
   };
 }
@@ -66,7 +66,7 @@ console.log(`\nbrowser actions E2E → ${API}\n`);
     url: 'https://quotes.toscrape.com/login',
     formats: ['markdown'],
     actions: [
-      { type: 'write', selector: '#username', text: 'fuegoltest' },
+      { type: 'write', selector: '#username', text: 'crawlcheaptest' },
       { type: 'write', selector: '#password', text: 'secret123' },
       {
         type: 'executeJavascript',
@@ -76,7 +76,7 @@ console.log(`\nbrowser actions E2E → ${API}\n`);
     ],
   });
   const v = r.json?.data?.actions?.javascriptReturns?.[0]?.value;
-  ok('write typed into both fields', v === 'fuegoltest:secret123', String(v));
+  ok('write typed into both fields', v === 'crawlcheaptest:secret123', String(v));
 }
 
 // 3. screenshot + scrape actions → artifacts

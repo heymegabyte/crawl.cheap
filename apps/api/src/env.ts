@@ -1,4 +1,4 @@
-import type { BrowserQuickAction, WorkersAiBinding, EngineEnv } from '@fuegol/engine';
+import type { BrowserQuickAction, WorkersAiBinding, EngineEnv } from '@crawlcheap/engine';
 import type { CrawlCoordinator } from './crawl-do';
 import type { ExtractCoordinator } from './extract-do';
 import type { BrowserSession } from './browser-do';

@@ -1,4 +1,4 @@
-import { scrape, mapSite, SsrfError } from '@fuegol/engine';
+import { scrape, mapSite, SsrfError } from '@crawlcheap/engine';
 import { engineEnv, DEFAULT_API_BASE, type Env } from './env';
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
@@ -18,7 +18,7 @@ async function apiFetch(
   };
   if (auth) headers.authorization = auth;
   const url = env.API
-    ? `https://fuegol-api.internal${path}`
+    ? `https://crawl-cheap-api.internal${path}`
     : `${env.API_BASE || DEFAULT_API_BASE}${path}`;
   const req = new Request(url, { ...init, headers });
   return env.API ? env.API.fetch(req) : fetch(req);
@@ -33,7 +33,7 @@ async function s2Fetch(url: string): Promise<Record<string, unknown>> {
     const res = await fetch(url, {
       headers: {
         accept: 'application/json',
-        'user-agent': 'fuegolbot/0.1 (+https://fuegol.ink/bot)',
+        'user-agent': 'crawlcheapbot/0.1 (+https://crawl.cheap/bot)',
       },
       signal: AbortSignal.timeout(15000),
     });
@@ -103,7 +103,7 @@ async function proxyMonitor(
     return [
       {
         type: 'text',
-        text: 'Monitors require a fuegol.ink API key. Send it as Authorization: Bearer fgl_live_… to this MCP server.',
+        text: 'Monitors require a crawl.cheap API key. Send it as Authorization: Bearer cc_live_… to this MCP server.',
       },
     ];
   return [{ type: 'text', text: JSON.stringify(json, null, 2) }];
@@ -191,7 +191,7 @@ export const TOOLS: McpTool[] = [
         document.markdown ??
         (document.json !== undefined ? JSON.stringify(document.json, null, 2) : '') ??
         '';
-      const header = `[fuegol scrape · ${strategy} · ${document.metadata.statusCode}] ${document.url ?? ''}`;
+      const header = `[crawl.cheap scrape · ${strategy} · ${document.metadata.statusCode}] ${document.url ?? ''}`;
       return [{ type: 'text', text: `${header}\n\n${text || JSON.stringify(document, null, 2)}` }];
     },
   },
@@ -275,7 +275,7 @@ export const TOOLS: McpTool[] = [
   {
     name: 'firecrawl_crawl',
     description:
-      'Start a multi-page crawl of a website, poll it to a terminal state, and return the collected pages as markdown. Backed by the fuegol crawl Durable Object.',
+      'Start a multi-page crawl of a website, poll it to a terminal state, and return the collected pages as markdown. Backed by the crawl.cheap crawl Durable Object.',
     profiles: ['full'],
     inputSchema: {
       type: 'object',

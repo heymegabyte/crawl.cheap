@@ -1,5 +1,5 @@
-import type { Document, ScrapeRequest } from '@fuegol/contracts';
-import { ScrapeRequestSchema } from '@fuegol/contracts';
+import type { Document, ScrapeRequest } from '@crawlcheap/contracts';
+import { ScrapeRequestSchema } from '@crawlcheap/contracts';
 import { safeFetch } from './fetcher';
 import { assertSafeUrl } from './ssrf';
 import { parseHtml, selectContent, extractLinks } from './extract-content';

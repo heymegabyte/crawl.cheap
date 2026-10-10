@@ -17,7 +17,7 @@ let drift = false;
 for (const [v, meta] of Object.entries(M.specs)) {
   let buf;
   try {
-    const r = await fetch(meta.sourceUrl, { headers: { 'user-agent': 'fuegol-drift/1.0' } });
+    const r = await fetch(meta.sourceUrl, { headers: { 'user-agent': 'crawl-cheap-drift/1.0' } });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     buf = Buffer.from(await r.arrayBuffer());
   } catch (e) {

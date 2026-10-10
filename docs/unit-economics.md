@@ -7,20 +7,20 @@
 
 Firecrawl's pricing cards default to **annual-billed** monthly-equivalent prices, but they also sell
 **month-to-month**. The headline **"50% less on comparable core API plans"** is measured against the
-**month-to-month** price — the apples-to-apples basis for a monthly fuego plan. The annual figures are
-shown alongside so the comparison is never misleading. fuego seeds each monthly plan at **exactly half
+**month-to-month** price — the apples-to-apples basis for a monthly crawl.cheap plan. The annual figures are
+shown alongside so the comparison is never misleading. crawl.cheap seeds each monthly plan at **exactly half
 of Firecrawl's month-to-month price**, like-for-like credits (SSOT: `packages/contracts/src/pricing.ts`).
 
-| Firecrawl plan | Monthly credits | Month-to-month | Annual (mo-equiv) | **fuego (½ of m2m)** |
-| -------------- | --------------: | -------------: | ----------------: | -------------------: |
-| Free           |           1,000 |             $0 |                $0 |    **$0** (1,000 cr) |
-| Hobby          |           5,000 |            $19 |               $16 |            **$9.50** |
-| Standard       |         100,000 |            $99 |               $83 |           **$49.50** |
-| Growth         |         500,000 |           $399 |              $333 |          **$199.50** |
-| Scale          |       1,000,000 |           $749 |              $599 |          **$374.50** |
-| Enterprise     |          custom |         custom |            custom |               custom |
+| Firecrawl plan | Monthly credits | Month-to-month | Annual (mo-equiv) | **crawl.cheap (½ of m2m)** |
+| -------------- | --------------: | -------------: | ----------------: | -------------------------: |
+| Free           |           1,000 |             $0 |                $0 |          **$0** (1,000 cr) |
+| Hobby          |           5,000 |            $19 |               $16 |                  **$9.50** |
+| Standard       |         100,000 |            $99 |               $83 |                 **$49.50** |
+| Growth         |         500,000 |           $399 |              $333 |                **$199.50** |
+| Scale          |       1,000,000 |           $749 |              $599 |                **$374.50** |
+| Enterprise     |          custom |         custom |            custom |                     custom |
 
-Even against Firecrawl's **annual** headline, fuego is cheaper (e.g. $9.50 vs $16 = 41% less).
+Even against Firecrawl's **annual** headline, crawl.cheap is cheaper (e.g. $9.50 vs $16 = 41% less).
 **One-time credit packs** (no subscription): $5→2,000 · $10→4,500 · $25→12,000 · $50→26,000 ·
 $100→55,000 · $250→145,000 · $500→300,000. Subscriber $5 top-ups give 2× the competitor's credits.
 
@@ -28,7 +28,7 @@ Credit model (Firecrawl, mirrored for compatibility): scrape **1/page**, crawl *
 search **2 / 10 results**, JSON/LLM-extraction **+4/page** (=5), PDF parse **+1/page**, browser interact
 **2–7 / browser-minute**. Failed requests that return no document = **0 credits**.
 
-## fuegol cost drivers (Cloudflare)
+## crawl.cheap cost drivers (Cloudflare)
 
 | Driver                  | Cost basis                                        | Notes                                                                              |
 | ----------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------- |
@@ -68,7 +68,7 @@ search **2 / 10 results**, JSON/LLM-extraction **+4/page** (=5), PDF parse **+1/
 
 ## Premium margin model (verified 2026-10-09)
 
-Fuego-exclusive premium ops (interactive browser, AI search/RAG, agent, OCR, stealth) are **not**
+crawl.cheap-exclusive premium ops (interactive browser, AI search/RAG, agent, OCR, stealth) are **not**
 half-price loss leaders. They are priced to clear a **≥50% contribution-margin floor** against the
 **worst-case (deepest-discount) credit lot** — never the Hobby retail rate — so a Scale or bulk-pack
 buyer cannot arbitrage premium work at a loss.
@@ -93,7 +93,7 @@ buyer cannot arbitrage premium work at a loss.
 | OCR / page               |             $0.004 |                 ~33 | scanned-doc layout            |
 | Stealth proxy / page     |             $0.005 |                 ~42 | premium/stealth egress        |
 
-> Pre-GA, live metering of the Fuego-exclusive ops still bills the earlier flat defaults (browser
+> Pre-GA, live metering of the crawl.cheap-exclusive ops still bills the earlier flat defaults (browser
 > act 1, ai-search query 2, etc.); these are **below** the margin-safe floor for deep-discount lots.
 > `/v2/quote` already returns the margin-safe numbers, and moving live metering to them is a tracked,
 > prospective change (see `docs/RELEASE_CHECKLIST.md`) — never a silent rate hike on a live customer.

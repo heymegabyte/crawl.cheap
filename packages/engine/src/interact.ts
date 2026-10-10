@@ -1,6 +1,6 @@
 import puppeteer from '@cloudflare/puppeteer';
 import type { BrowserWorker, Browser, Page, PaperFormat } from '@cloudflare/puppeteer';
-import type { Action, Document, ScrapeRequest } from '@fuegol/contracts';
+import type { Action, Document, ScrapeRequest } from '@crawlcheap/contracts';
 import { parseHtml, selectContent, extractLinks } from './extract-content';
 import { extractMetadata } from './metadata';
 import { htmlToMarkdown } from './html-to-markdown';

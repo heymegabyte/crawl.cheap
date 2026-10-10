@@ -29,5 +29,5 @@ jobs:
       - name: Unit tests (engine + contracts)
         run: |
           pnpm rebuild esbuild
-          pnpm --filter @fuegol/engine test
-          pnpm --filter @fuegol/contracts test
+          pnpm --filter @crawlcheap/engine test
+          pnpm --filter @crawlcheap/contracts test

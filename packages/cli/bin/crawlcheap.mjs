@@ -1,31 +1,31 @@
 #!/usr/bin/env node
-// fuegol — CLI for the fuegol.ink web-data API (Firecrawl-compatible). Zero dependencies.
+// crawlcheap — CLI for the crawl.cheap web-data API (Firecrawl-compatible). Zero dependencies.
 import { parseArgs } from 'node:util';
 
-const API = process.env.FUEGOL_API_URL || 'https://fuegol-api.manhattan.workers.dev';
-const KEY = process.env.FUEGOL_API_KEY || '';
+const API = process.env.CRAWLCHEAP_API_URL || 'https://crawl-cheap-api.manhattan.workers.dev';
+const KEY = process.env.CRAWLCHEAP_API_KEY || '';
 const VERSION = '0.1.0';
 
-const HELP = `fuegol ${VERSION} — the web data engine for AI (CLI)
+const HELP = `crawlcheap ${VERSION} — the web data engine for AI (CLI)
 
 Usage:
-  fuegol scrape <url> [--format markdown|html|links] [--json]
-  fuegol map <url> [--limit N] [--json]
-  fuegol search <query...> [--limit N] [--category developer|research|gov] [--json]
-  fuegol crawl <url> [--limit N] [--wait] [--json]
-  fuegol status <crawlId> [--json]
-  fuegol extract <url> --prompt "<what to extract>" [--json]
-  fuegol key [--name <name>]
-  fuegol help
+  crawlcheap scrape <url> [--format markdown|html|links] [--json]
+  crawlcheap map <url> [--limit N] [--json]
+  crawlcheap search <query...> [--limit N] [--category developer|research|gov] [--json]
+  crawlcheap crawl <url> [--limit N] [--wait] [--json]
+  crawlcheap status <crawlId> [--json]
+  crawlcheap extract <url> --prompt "<what to extract>" [--json]
+  crawlcheap key [--name <name>]
+  crawlcheap help
 
 Environment:
-  FUEGOL_API_URL   API base (default ${API})
-  FUEGOL_API_KEY   your fgl_live_… key (optional; keyless demo is rate-limited)
+  CRAWLCHEAP_API_URL   API base (default ${API})
+  CRAWLCHEAP_API_KEY   your cc_live_… key (optional; keyless demo is rate-limited)
 
 Examples:
-  fuegol scrape https://example.com
-  FUEGOL_API_KEY=fgl_live_… fuegol crawl https://docs.site --limit 20 --wait
-  fuegol search "durable objects" --category developer`;
+  crawlcheap scrape https://example.com
+  CRAWLCHEAP_API_KEY=cc_live_… crawlcheap crawl https://docs.site --limit 20 --wait
+  crawlcheap search "durable objects" --category developer`;
 
 const { values: flags, positionals } = parseArgs({
   args: process.argv.slice(2),
@@ -104,7 +104,7 @@ async function main() {
       if (status >= 400 || !json?.id) return fail(json?.error || `HTTP ${status}`);
       if (!flags.wait)
         return print(
-          flags.json ? json : `Crawl started: ${json.id}\nStatus: fuegol status ${json.id}`,
+          flags.json ? json : `Crawl started: ${json.id}\nStatus: crawlcheap status ${json.id}`,
         );
       process.stderr.write('crawling');
       for (let i = 0; i < 40; i++) {
@@ -121,7 +121,7 @@ async function main() {
         process.stderr.write('.');
       }
       process.stderr.write('\n');
-      return fail('crawl did not finish in time; check: fuegol status ' + json.id);
+      return fail('crawl did not finish in time; check: crawlcheap status ' + json.id);
     }
     case 'status': {
       const id = need(arg[0], 'status needs a <crawlId>');
@@ -153,14 +153,14 @@ async function main() {
       return print(
         flags.json
           ? json
-          : `API key (save it — shown once):\n${json.apiKey}\n\nUse it:  export FUEGOL_API_KEY=${json.apiKey}`,
+          : `API key (save it — shown once):\n${json.apiKey}\n\nUse it:  export CRAWLCHEAP_API_KEY=${json.apiKey}`,
       );
     }
     case 'help':
     case undefined:
       return print(HELP);
     default:
-      return fail(`unknown command "${cmd}". Try: fuegol help`);
+      return fail(`unknown command "${cmd}". Try: crawlcheap help`);
   }
 }
 

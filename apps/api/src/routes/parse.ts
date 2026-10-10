@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { z } from 'zod';
-import { parseDocument, safeFetch, SsrfError } from '@fuegol/engine';
+import { parseDocument, safeFetch, SsrfError } from '@crawlcheap/engine';
 import { type Env } from '../env';
 import { fail, parseBody } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
@@ -20,7 +20,7 @@ function gate(c: Context<{ Bindings: Env; Variables: Vars }>): Response | null {
     return fail(
       c,
       429,
-      'Demo rate limit reached (≈20 requests/min). Add a fuegol.ink API key for higher limits.',
+      'Demo rate limit reached (≈20 requests/min). Add a crawl.cheap API key for higher limits.',
       'BAD_REQUEST',
     );
   }

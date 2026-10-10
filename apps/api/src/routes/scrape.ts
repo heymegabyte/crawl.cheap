@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import { ScrapeRequestSchema } from '@fuegol/contracts';
-import { scrape, SsrfError, ActionError } from '@fuegol/engine';
+import { ScrapeRequestSchema } from '@crawlcheap/contracts';
+import { scrape, SsrfError, ActionError } from '@crawlcheap/engine';
 import { engineEnv, type Env } from '../env';
 import { trackChange } from '../lib/change';
 import { cacheKey, readCache, writeCache } from '../lib/cache';
@@ -20,7 +20,7 @@ route.post('/scrape', async (c) => {
       return fail(
         c,
         429,
-        'Demo rate limit reached (≈20 requests/min). Add a fuegol.ink API key for higher limits.',
+        'Demo rate limit reached (≈20 requests/min). Add a crawl.cheap API key for higher limits.',
         'BAD_REQUEST',
       );
     }
@@ -46,13 +46,13 @@ route.post('/scrape', async (c) => {
     if (key && maxAge > 0) {
       const cached = await readCache(c.env, key, maxAge);
       if (cached) {
-        c.header('x-fuegol-strategy', 'cache');
+        c.header('x-crawlcheap-strategy', 'cache');
         return c.json({ success: true as const, data: cached });
       }
     }
 
     const { document, strategy } = await scrape(parsed.data, engineEnv(c.env));
-    c.header('x-fuegol-strategy', strategy);
+    c.header('x-crawlcheap-strategy', strategy);
     if (key && maxAge > 0) document.metadata = { ...document.metadata, cacheState: 'miss' };
 
     // Populate the cache for future maxAge reads (storeInCache defaults true). Awaited so the

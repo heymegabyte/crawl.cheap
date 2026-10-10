@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { z } from 'zod';
-import { assertSafeUrl, SsrfError } from '@fuegol/engine';
+import { assertSafeUrl, SsrfError } from '@crawlcheap/engine';
 import type { Env } from '../env';
 import { fail, parseBody } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
@@ -25,7 +25,7 @@ function authScope(c: Context<{ Bindings: Env; Variables: Vars }>): {
   if (!p.authed) return { denied: requireAuth(c)! };
   if (!p.keyId || !c.env.DB)
     return {
-      denied: fail(c, 501, 'Monitors require a D1-backed fuegol.ink key.', 'UNKNOWN_ERROR'),
+      denied: fail(c, 501, 'Monitors require a D1-backed crawl.cheap key.', 'UNKNOWN_ERROR'),
     };
   return { scope: p.keyId };
 }

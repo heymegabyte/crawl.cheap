@@ -1,10 +1,10 @@
 {
-  "name": "@fuegol/cli",
+  "name": "@crawlcheap/cli",
   "version": "0.1.0",
-  "description": "Command-line interface for the fuegol.ink web-data API (Firecrawl-compatible).",
+  "description": "Command-line interface for the crawl.cheap web-data API (Firecrawl-compatible).",
   "type": "module",
   "bin": {
-    "fuegol": "bin/fuegol.mjs"
+    "crawlcheap": "bin/crawlcheap.mjs"
   },
   "files": [
     "bin"

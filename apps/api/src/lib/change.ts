@@ -1,7 +1,7 @@
 /** changeTracking: compare a fresh scrape against the last-seen content for a
  *  (scope, url, tag) and report new / same / changed (+ an optional line diff
  *  and/or an AI-structured semantic `json` diff). */
-import { extractWithAI, extractAvailable, type EngineEnv } from '@fuegol/engine';
+import { extractWithAI, extractAvailable, type EngineEnv } from '@crawlcheap/engine';
 
 const CONTENT_CAP = 100_000;
 /** Per-side cap when feeding both versions to the AI json-diff (keeps within the model budget). */

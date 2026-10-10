@@ -1,18 +1,18 @@
 # Drop-in compatibility proof: the OFFICIAL Firecrawl Python SDK (firecrawl-py)
-# pointed at the fuegol.ink API with a fuegol key. No business-logic changes.
+# pointed at the crawl.cheap API with a crawl.cheap key. No business-logic changes.
 import os, sys, json, urllib.request
 from firecrawl import Firecrawl
 
-API = os.environ.get("FUEGOL_API", "https://fuegol-api.manhattan.workers.dev")
+API = os.environ.get("CRAWLCHEAP_API", "https://crawl-cheap-api.manhattan.workers.dev")
 
-# Issue a fuegol key (never a Firecrawl fc- key).
+# Issue a crawl.cheap key (never a Firecrawl fc- key).
 req = urllib.request.Request(
     API + "/v2/keys",
     data=json.dumps({"name": "py-sdk-compat"}).encode(),
-    headers={"content-type": "application/json", "user-agent": "Mozilla/5.0 fuegol-sdk-compat"},
+    headers={"content-type": "application/json", "user-agent": "Mozilla/5.0 crawl-cheap-sdk-compat"},
 )
 key = json.loads(urllib.request.urlopen(req).read())["apiKey"]
-print("issued fuegol key:", key[:16] + "…\n")
+print("issued crawl.cheap key:", key[:16] + "…\n")
 
 app = Firecrawl(api_key=key, api_url=API)
 

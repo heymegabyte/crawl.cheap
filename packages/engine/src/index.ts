@@ -1,5 +1,5 @@
 /**
- * @fuegol/engine — the Cloudflare-native web-data engine. Cheapest-adequate-tier
+ * @crawlcheap/engine — the Cloudflare-native web-data engine. Cheapest-adequate-tier
  * execution planner over a free static-HTTP path (SSRF-guarded fetch → readability
  * extraction → HTML→Markdown) with escalation to the Browser Rendering tier.
  */

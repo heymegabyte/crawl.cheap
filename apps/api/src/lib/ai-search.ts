@@ -3,7 +3,7 @@
  *  namespaces. Index → query → optional RAG answer. Needs the AI + VECTORIZE bindings. */
 import type { Env } from '../env';
 
-const EMBED_MODEL = '@cf/baai/bge-base-en-v1.5'; // 768-dim — matches the fuegol-rag index
+const EMBED_MODEL = '@cf/baai/bge-base-en-v1.5'; // 768-dim — matches the crawl-cheap-rag index
 const ANSWER_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const CHUNK_CHARS = 900;
 const MAX_CHUNKS_PER_DOC = 50;

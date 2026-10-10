@@ -12,7 +12,7 @@ free R2 egress, free-while-beta `/crawl`). A portability layer would forfeit exa
 
 ## ADR-002 — Zod contracts as the single source of truth
 
-**Decision:** `@fuegol/contracts` holds Firecrawl-v2-compatible Zod schemas; every surface (API, MCP,
+**Decision:** `@crawlcheap/contracts` holds Firecrawl-v2-compatible Zod schemas; every surface (API, MCP,
 SDK, dashboard) imports them; TS types are `z.infer`, never hand-duplicated.
 **Why:** One boundary definition → no drift between API, MCP, and clients. Runtime validation + static
 types from the same artifact. Upstream has no committed v2 OpenAPI, so our Zod _is_ the spec mirror.
@@ -36,7 +36,7 @@ actions/screenshot/stealth, and AI only when deterministic extraction is insuffi
 
 ## ADR-005 — MIT license
 
-**Decision:** MIT for all original fuegol code.
+**Decision:** MIT for all original crawl.cheap code.
 **Why:** Maximize self-host adoption; matches the house convention. **Trade-off considered:** Firecrawl
 uses AGPL to protect its hosted edition. We accept permissive licensing and compete on hosted
 convenience + price, not license restriction. Revisit if a competitor rehosts the managed edition.
@@ -44,7 +44,7 @@ convenience + price, not license restriction. Revisit if a competitor rehosts th
 
 ## ADR-006 — Stateless MCP via `createMcpHandler`, not `McpAgent`
 
-**Decision:** Build `mcp.fuegol.ink` on Cloudflare's stateless `createMcpHandler` (Streamable HTTP).
+**Decision:** Build `mcp.crawl.cheap` on Cloudflare's stateless `createMcpHandler` (Streamable HTTP).
 **Why:** CF docs mark `McpAgent` (Durable-Object-based) legacy and recommend the stateless handler;
 it is cheaper (no DO per session) and matches the modern MCP transport. **Status:** Planned (ADR records direction).
 
@@ -58,7 +58,7 @@ rejected for lacking per-job coordination/cancel.
 
 ## ADR-008 — Demo-mode auth now, D1-backed keys + ledger next
 
-**Decision:** Keyless rate-limited demo for scrape/map today; issue `fgl_` keys backed by D1 with a
+**Decision:** Keyless rate-limited demo for scrape/map today; issue `cc_` keys backed by D1 with a
 transactional credit ledger next. **Never** accept a Firecrawl `fc-` key.
 **Why:** Ship a usable public demo immediately (prompt G.2) without blocking on billing infra.
 **Status:** Demo live. **Trade-off:** in-memory per-isolate rate limit is best-effort until the DO/KV limiter lands.

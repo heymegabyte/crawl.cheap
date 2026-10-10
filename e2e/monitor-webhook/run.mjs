@@ -9,8 +9,8 @@
 // work but the built-in self-sink does not for monitor alerts — hence webhook.site here.
 import { createHmac } from 'node:crypto';
 
-const API = process.env.FUEGOL_API || 'https://fuegol-api.manhattan.workers.dev';
-const SECRET = process.env.WEBHOOK_SECRET || 'whsec_fuegol_demo_override_in_prod';
+const API = process.env.CRAWLCHEAP_API || 'https://crawl-cheap-api.manhattan.workers.dev';
+const SECRET = process.env.WEBHOOK_SECRET || 'whsec_crawlcheap_demo_override_in_prod';
 let pass = 0;
 let fail = 0;
 const ok = (name, cond, detail = '') => {
@@ -50,7 +50,7 @@ const keyRes = await (
   })
 ).json();
 const AUTH = keyRes.apiKey || '';
-ok('issued an authenticated key', AUTH.startsWith('fgl_'));
+ok('issued an authenticated key', AUTH.startsWith('cc_'));
 const H = { 'content-type': 'application/json', authorization: `Bearer ${AUTH}` };
 
 const created = await (
@@ -106,12 +106,12 @@ if (sinkUuid && changed) {
     ).json();
     req =
       (list.data || []).find(
-        (r) => (r.headers?.['x-fuegol-event'] || [])[0] === 'monitor.changed',
+        (r) => (r.headers?.['x-crawlcheap-event'] || [])[0] === 'monitor.changed',
       ) || null;
   }
   ok('external sink received monitor.changed', Boolean(req), req ? 'yes' : 'not seen');
   if (req) {
-    const sig = (req.headers['x-fuegol-signature'] || [])[0] || '';
+    const sig = (req.headers['x-crawlcheap-signature'] || [])[0] || '';
     const expected = `sha256=${createHmac('sha256', SECRET).update(req.content).digest('hex')}`;
     ok('HMAC-SHA256 signature valid', sig === expected, sig.slice(0, 22) + '…');
     const payload = JSON.parse(req.content);

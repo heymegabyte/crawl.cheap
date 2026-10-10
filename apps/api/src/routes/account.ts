@@ -90,7 +90,12 @@ route.get('/team/spend-limit', (c) => {
 route.post('/team/spend-limit', async (c) => {
   const p = c.get('principal');
   if (!p.authed || !p.keyId || !c.env.DB) {
-    return fail(c, 401, 'Setting a hard spend limit requires a fuegol.ink API key.', 'BAD_REQUEST');
+    return fail(
+      c,
+      401,
+      'Setting a hard spend limit requires a crawl.cheap API key.',
+      'BAD_REQUEST',
+    );
   }
   const parsed = await parseBody(c, z.object({ limit: z.number().int().nonnegative().nullable() }));
   if (!parsed.ok) return parsed.response;
