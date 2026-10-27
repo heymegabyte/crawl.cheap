@@ -271,6 +271,42 @@ console.log('\nFOCUSED (v2 2026-10-27 delta):');
 
 fs.writeFileSync(path.join(DIR, 'report.json'), JSON.stringify(report, null, 2));
 console.log(`\n${pass} passed, ${fail} failed · report → e2e/contract/report.json\n`);
+
+// Status gate (MEG-99 AC2): it is a real regression for a SERVED write operation (POST/PUT/
+// DELETE) to answer 5xx, and for it to answer 2xx while the probe sent an intentionally empty
+// body. Read-only GETs legitimately answer 200 with an empty list/summary and are recorded, not
+// failed. Jobs are excluded because the probe substitutes `x` for ids and their 404 is expected.
+const statusBreaks = [];
+const statusNotes = [];
+for (const [v, cov] of Object.entries(report.coverage))
+  for (const r of cov.rows) {
+    if (!r.served) continue;
+    const method = r.op.split(' ')[0];
+    if (r.status >= 500) statusBreaks.push(`${v} ${r.op} → ${r.status}`);
+    else if (method !== 'GET' && r.status >= 200 && r.status < 300)
+      statusBreaks.push(`${v} ${r.op} → ${r.status} on an empty body`);
+    else if (method === 'GET' && r.status >= 200 && r.status < 300)
+      statusNotes.push(`${v} ${r.op} → ${r.status}`);
+  }
+report.statusGate = {
+  ok: statusBreaks.length === 0,
+  breaks: statusBreaks,
+  emptyList200: statusNotes,
+};
+fs.writeFileSync(path.join(DIR, 'report.json'), JSON.stringify(report, null, 2));
+console.log(
+  `\nGATE (status, MEG-99 AC2): served operations ${statusNotes.length} empty 200 (read-only, ok) · ` +
+    `${statusBreaks.length} breaks`,
+);
+ok(
+  'every SERVED operation answered without 5xx or an unrequested 2xx write',
+  statusBreaks.length === 0,
+  statusBreaks.slice(0, 6).join(' | '),
+);
+console.log(`\n${pass} passed, ${fail} failed · report → e2e/contract/report.json\n`);
+// Report once, with the gate included.
+fs.writeFileSync(path.join(DIR, 'report.json'), JSON.stringify(report, null, 2));
+
 // Gate on conformance of the core sync endpoints only; NOT-SERVED is a documented
 // coverage fact, not a test failure (the matrix tracks it honestly).
 const coreConformFails = report.conformance.filter(
@@ -278,4 +314,4 @@ const coreConformFails = report.conformance.filter(
 ).length;
 // Focused deltas gate too: a regression here is a real conformance break, not a coverage fact.
 const focusedFails = (report.focused ?? []).filter((f) => !f.ok).length;
-process.exit(coreConformFails === 0 && focusedFails === 0 ? 0 : 1);
+process.exit(coreConformFails === 0 && focusedFails === 0 && statusBreaks.length === 0 ? 0 : 1);

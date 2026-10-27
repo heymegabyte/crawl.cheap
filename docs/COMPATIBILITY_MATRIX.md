@@ -30,7 +30,9 @@ A scheduled CI job (`.github/workflows/contract-drift.yml`) re-fetches upstream 
 **reviewable issue** on any sha256 drift — upstream contract changes never silently reach production.
 A fetch failure is reported as **INCONCLUSIVE** (fails, opens the issue too), never as "no drift".
 `scripts/test/contract-drift.test.mjs` proves the gate in CI with fixtures (match / v2 drift / v1
-drift / fetch failure / tampered pin).
+drift / fetch failure / tampered pin). A second CI step, `scripts/check-delta-disposition.mjs`
+(proven by `scripts/test/delta-disposition.test.mjs`), fails when upstream carries a v2 delta larger
+than the reviewed disposition below, so a changed spec cannot be re-pinned or merged unclassified.
 
 ### Pin identity (re-pin log)
 
@@ -40,14 +42,23 @@ drift / fetch failure / tampered pin).
 | v2      | 2026-10-10 (superseded) | `0541be01504053f8e978b60c6a12dc100cd6a76020f2a2723ecf9411f5778a3b` | 473629 | baseline                                                           |
 | v1      | 2026-10-10              | `d30b8816c05054b596b02d7dc8f39cb186ac79108b03113f3f4c9eee86300781` | 132167 | **unchanged** at the 2026-10-27 re-fetch (same bytes + hash)       |
 
-Contract run for the 2026-10-27 pin (`API=https://api.crawl.cheap node e2e/contract/run.mjs`,
-2026-10-27T07:16:50Z): **exit 0**, 5/5 probes pass, coverage **v2 28/57 · v1 2/23** (identical to
-the 2026-10-10 run — the re-pin added no routed-operation expectations).
+Contract run for the 2026-10-27 pin (`API=https://api.crawl.cheap node e2e/contract/run.mjs`): **exit 0**,
+7/7 gates pass — 4/4 conformance probes, the `attributes` focused probe, and the AC2 status gate
+(0 breaks; 9 read-only GETs answer an empty 200, every write probe answers 4xx — no 5xx, no
+unrequested 2xx write). Coverage **v2 28/57 · v1 2/23** (identical to the 2026-10-10 run — the re-pin
+added no routed-operation expectations). The status gate and its counts are in
+`e2e/contract/report.json#statusGate`.
 
 ### v2 2026-10-27 delta — what changed and how it is served
 
-Full classification (16 locations / 105 leaf changes) is in
-[`FIRECRAWL_DRIFT_2026-10-27.md`](./FIRECRAWL_DRIFT_2026-10-27.md). Summary:
+Full classification is in [`FIRECRAWL_DRIFT_2026-10-27.md`](./FIRECRAWL_DRIFT_2026-10-27.md).
+The machine-checked disposition is the next line; `scripts/check-delta-disposition.mjs` (CI:
+`contract-drift.yml`) compares the pinned v2 to upstream and fails when a delta is larger than
+what was reviewed here, so no upstream change can reach production unclassified.
+
+Locations: **16** changed · **36** review-class leaf changes · 44 additive · 25 documentation
+
+Summary:
 
 | Area                                                                                                       | Change                                                                              | Status here                                                                                                                                           |
 | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
