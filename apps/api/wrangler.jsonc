@@ -5,6 +5,9 @@
   "compatibility_date": "2026-09-23",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
+  // Serve only the custom domain; the *.workers.dev route stays disabled in prod.
+  "workers_dev": false,
+  "preview_urls": false,
 
   "triggers": { "crons": ["*/15 * * * *"] },
   "vars": {
