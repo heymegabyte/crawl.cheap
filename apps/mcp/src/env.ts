@@ -14,7 +14,7 @@ export interface Env {
   SENTRY_DSN?: string;
 }
 
-export const DEFAULT_API_BASE = 'https://fuegol-api.manhattan.workers.dev';
+export const DEFAULT_API_BASE = 'https://api.crawl.cheap';
 
 export function engineEnv(env: Env): EngineEnv {
   return {

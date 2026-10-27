@@ -22,6 +22,7 @@ jobs:
       - name: Compare upstream OpenAPI to pinned sha256
         id: drift
         run: node scripts/check-contract-drift.mjs
+      # Drift AND inconclusive results both fail the check and open the review issue below.
       - name: Open / update a review issue on drift
         if: failure()
         uses: actions/github-script@v7

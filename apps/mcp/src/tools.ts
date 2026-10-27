@@ -18,7 +18,7 @@ async function apiFetch(
   };
   if (auth) headers.authorization = auth;
   const url = env.API
-    ? `https://fuegol-api.internal${path}`
+    ? `https://crawl-cheap-api.internal${path}`
     : `${env.API_BASE || DEFAULT_API_BASE}${path}`;
   const req = new Request(url, { ...init, headers });
   return env.API ? env.API.fetch(req) : fetch(req);

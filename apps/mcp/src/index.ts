@@ -125,7 +125,7 @@ const INFO = {
 };
 
 app.get('/', (c) => c.json(INFO));
-app.get('/health', (c) => c.json({ status: 'ok', service: 'fuegol-mcp' }));
+app.get('/health', (c) => c.json({ status: 'ok', service: 'crawl-cheap-mcp' }));
 
 app.onError((err, c) => {
   Sentry.captureException(err);

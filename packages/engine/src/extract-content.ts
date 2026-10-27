@@ -30,6 +30,33 @@ export function extractLinks(root: HTMLElement, baseUrl: string): string[] {
   return [...out];
 }
 
+/**
+ * Extract attribute values for each `{selector, attribute}` pair against the whole
+ * document (before boilerplate stripping), matching the upstream `attributes` format.
+ * `values` are attribute values (or `textContent` for the pseudo-attribute `text`),
+ * empty when no element matches.
+ */
+export function extractAttributes(
+  root: HTMLElement,
+  selectors: ReadonlyArray<{ selector: string; attribute: string }>,
+): Array<{ selector: string; attribute: string; values: string[] }> {
+  return selectors.map(({ selector, attribute }) => {
+    const values: string[] = [];
+    try {
+      for (const el of root.querySelectorAll(selector)) {
+        const v =
+          attribute === 'text' || attribute === 'textContent'
+            ? (el.textContent ?? '').trim()
+            : (el.getAttribute(attribute) ?? '');
+        if (v) values.push(v);
+      }
+    } catch {
+      /* invalid CSS selector — return the pair with no values */
+    }
+    return { selector, attribute, values };
+  });
+}
+
 function textLength(el: HTMLElement): number {
   return (el.text ?? '').replace(/\s+/g, ' ').trim().length;
 }

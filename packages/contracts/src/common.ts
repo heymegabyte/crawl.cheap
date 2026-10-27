@@ -27,7 +27,7 @@ export const DocumentMetadataSchema = z
   .object({
     title: z.string().optional(),
     description: z.string().optional(),
-    language: z.string().optional(),
+    language: z.union([z.string(), z.array(z.string()), z.null()]).optional(),
     keywords: z.string().optional(),
     robots: z.string().optional(),
     ogTitle: z.string().optional(),
