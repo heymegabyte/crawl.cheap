@@ -38,12 +38,12 @@ strictly smaller one — fails closed, so a changed spec cannot be re-pinned or 
 
 ### Pin identity (re-pin log)
 
-| Version | Retrieved                                   | SHA-256                                                            |  Bytes | Delta review                                                       |
-| ------- | ------------------------------------------- | ------------------------------------------------------------------ | -----: | ------------------------------------------------------------------ |
-| v2      | **2026-11-16** (proposed, approval pending) | `ca3d83a0ff8001f0b2e722e0fc7722e1e4e3b9e0e920a5a6d5ebec33001f2c38` | 490961 | [`FIRECRAWL_DRIFT_2026-11-16.md`](./FIRECRAWL_DRIFT_2026-11-16.md) |
-| v2      | 2026-10-27 (superseded by proposal above)   | `49afc368bf971b2321857409d18ac32915f07abf73596905e97be52b2f397cfb` | 485788 | [`FIRECRAWL_DRIFT_2026-10-27.md`](./FIRECRAWL_DRIFT_2026-10-27.md) |
-| v2      | 2026-10-10 (superseded)                     | `0541be01504053f8e978b60c6a12dc100cd6a76020f2a2723ecf9411f5778a3b` | 473629 | baseline                                                           |
-| v1      | 2026-10-10                                  | `d30b8816c05054b596b02d7dc8f39cb186ac79108b03113f3f4c9eee86300781` | 132167 | **unchanged** at the 2026-10-27 re-fetch (same bytes + hash)       |
+| Version | Retrieved                              | SHA-256                                                            |  Bytes | Delta review                                                       |
+| ------- | -------------------------------------- | ------------------------------------------------------------------ | -----: | ------------------------------------------------------------------ |
+| v2      | **2026-11-16** (confirmed pin, merged) | `ca3d83a0ff8001f0b2e722e0fc7722e1e4e3b9e0e920a5a6d5ebec33001f2c38` | 490961 | [`FIRECRAWL_DRIFT_2026-11-16.md`](./FIRECRAWL_DRIFT_2026-11-16.md) |
+| v2      | 2026-10-27 (superseded)                | `49afc368bf971b2321857409d18ac32915f07abf73596905e97be52b2f397cfb` | 485788 | [`FIRECRAWL_DRIFT_2026-10-27.md`](./FIRECRAWL_DRIFT_2026-10-27.md) |
+| v2      | 2026-10-10 (superseded)                | `0541be01504053f8e978b60c6a12dc100cd6a76020f2a2723ecf9411f5778a3b` | 473629 | baseline                                                           |
+| v1      | 2026-10-10                             | `d30b8816c05054b596b02d7dc8f39cb186ac79108b03113f3f4c9eee86300781` | 132167 | **unchanged** at the 2026-10-27 re-fetch (same bytes + hash)       |
 
 Contract run for the 2026-10-27 pin (`API=https://api.crawl.cheap node e2e/contract/run.mjs`): **exit 0**,
 7/7 gates pass — 4/4 conformance probes, the `attributes` focused probe, and the AC2 status gate
@@ -52,13 +52,17 @@ unrequested 2xx write). Coverage **v2 28/57 · v1 2/23** (identical to the 2026-
 added no routed-operation expectations). The status gate and its counts are in
 `e2e/contract/report.json#statusGate`.
 
-### v2 2026-11-16 pin proposal — approval pending
+### v2 2026-11-16 pin — approved and merged
 
 Locations: **20** changed · **18** review-class leaf changes · 30 additive · 11 documentation
 
-Proposed pin: `ca3d83a0ff8001f0b2e722e0fc7722e1e4e3b9e0e920a5a6d5ebec33001f2c38` (490961 B), replacing `49afc368` (485788 B). v1 is unchanged. See [the complete drift review](./FIRECRAWL_DRIFT_2026-11-16.md) and [saved field classification](./evidence/meg-1120/classification.json). This exact transition has 20 locations and 59 leaves; its identity-bound disposition preserves the prior transition.
+Confirmed pin: `ca3d83a0ff8001f0b2e722e0fc7722e1e4e3b9e0e920a5a6d5ebec33001f2c38` (490961 B), replacing `49afc368` (485788 B). v1 is unchanged. See [the complete drift review](./FIRECRAWL_DRIFT_2026-11-16.md) and [saved field classification](./evidence/meg-1120/classification.json). This exact transition has 20 locations and 59 leaves; its identity-bound disposition preserves the prior transition.
 
-Specialized support/developer/government/research operations, object search categories, and agent safe filtering are **UNSUPPORTED**. The skipTlsVerification default delta is **KNOWN-UNSUPPORTED**; effective certificate verification remains **UNVERIFIED**. Approval from AppSec and Architect is required before this proposed pin can merge. Historical pin records below remain provenance.
+Specialized support/developer/government/research operations, object search categories, and agent safe filtering are **UNSUPPORTED**. The skipTlsVerification default delta is **KNOWN-UNSUPPORTED**; effective certificate verification remains **UNVERIFIED**. AppSec and Architect approved this pin on 2026-11-16; it merged in PR #3 (merge commit `ddc9517`), and no runtime code changed. Historical pin records below remain provenance.
+
+Contract run on the confirmed pin (`API=https://api.crawl.cheap node e2e/contract/run.mjs`): **exit 0**,
+7/7 gates pass — 4/4 conformance probes, the `attributes` focused probe, and the AC2 status gate
+(0 status breaks). Coverage **v2 28/56 · v1 2/23**.
 
 ### v2 2026-10-27 delta — what changed and how it is served
 

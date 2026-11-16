@@ -14,14 +14,14 @@
       "retrievedAt": "2026-10-27T07:08:00Z",
       "sha256": "49afc368bf971b2321857409d18ac32915f07abf73596905e97be52b2f397cfb",
       "bytes": 485788,
-      "note": "Superseded by the proposed 2026-11-16 pin; approval required before merge (MEG-1126)."
+      "note": "Superseded by the 2026-11-16 pin (approved; merged 2026-11-16 in PR #3, MEG-1126)."
     }
   ],
   "specs": {
     "v2": {
       "file": "v2-openapi.json",
       "sourceUrl": "https://docs.firecrawl.dev/api-reference/v2-openapi.json",
-      "retrievedAt": "2026-11-16",
+      "retrievedAt": "2026-11-16T07:29:04Z",
       "openapi": "3.0.0",
       "title": "Firecrawl API",
       "apiVersion": "v2",
@@ -31,7 +31,7 @@
       "operations": 56,
       "components": 65,
       "reviewedIn": "MEG-1126",
-      "reviewNote": "Review: docs/FIRECRAWL_DRIFT_2026-11-16.md. Known unsupported deltas retained; AppSec and Architect approval required before merge."
+      "reviewNote": "Review: docs/FIRECRAWL_DRIFT_2026-11-16.md. Known unsupported deltas retained; AppSec and Architect approved 2026-11-16, merged in PR #3 (ddc9517)."
     },
     "v1": {
       "file": "v1-openapi.json",
