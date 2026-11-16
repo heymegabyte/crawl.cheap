@@ -1,22 +1,35 @@
 {
   "note": "Pinned upstream Firecrawl OpenAPI. Byte-exact; sha256 gates drift detection (see .github/workflows/contract-drift.yml). Do NOT reformat.",
-  "retrievedAt": "2026-10-10",
+  "retrievedAt": "2026-10-27",
+  "history": [
+    {
+      "version": "v2",
+      "retrievedAt": "2026-10-10",
+      "bytes": 473629,
+      "sha256": "0541be01504053f8e978b60c6a12dc100cd6a76020f2a2723ecf9411f5778a3b",
+      "note": "Superseded by the 2026-10-27 pin (MEG-99 review). Kept for provenance."
+    }
+  ],
   "specs": {
     "v2": {
       "file": "v2-openapi.json",
       "sourceUrl": "https://docs.firecrawl.dev/api-reference/v2-openapi.json",
+      "retrievedAt": "2026-10-27T07:08:00Z",
       "openapi": "3.0.0",
       "title": "Firecrawl API",
       "apiVersion": "v2",
-      "bytes": 473629,
-      "sha256": "0541be01504053f8e978b60c6a12dc100cd6a76020f2a2723ecf9411f5778a3b",
+      "bytes": 485788,
+      "sha256": "49afc368bf971b2321857409d18ac32915f07abf73596905e97be52b2f397cfb",
       "paths": 45,
       "operations": 57,
-      "components": 67
+      "components": 67,
+      "reviewedIn": "MEG-99",
+      "reviewNote": "Triage/spec expected 5f889b6c8be4… (477957B); upstream had moved again by review time. Reviewed bytes are 49afc368… (485788B), re-fetched twice byte-identical. Delta review: docs/FIRECRAWL_DRIFT_2026-10-27.md"
     },
     "v1": {
       "file": "v1-openapi.json",
       "sourceUrl": "https://docs.firecrawl.dev/api-reference/v1-openapi.json",
+      "retrievedAt": "2026-10-10",
       "openapi": "3.0.0",
       "title": "Firecrawl API",
       "apiVersion": "v1",
@@ -24,7 +37,8 @@
       "sha256": "d30b8816c05054b596b02d7dc8f39cb186ac79108b03113f3f4c9eee86300781",
       "paths": 21,
       "operations": 23,
-      "components": 12
+      "components": 12,
+      "reviewNote": "Unchanged at the 2026-10-27 re-fetch (same sha256, same bytes). Not re-pinned."
     }
   }
 }

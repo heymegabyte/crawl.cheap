@@ -13,9 +13,9 @@ pricing `firecrawl.dev/pricing` — all re-verified **2026-10-09**.
 ## Machine contract tests (pinned OpenAPI)
 
 The official **v2 + v1 OpenAPI** are now pinned byte-exact in `packages/contracts/upstream/`
-(sha256 in `MANIFEST.json`, retrieved 2026-10-10): **v2** = 45 paths / **57 operations** / 67
-schemas; **v1** = 21 paths / **23 operations**. A dependency-free OpenAPI-3.0 validator
-(`e2e/contract/run.mjs`) does two things against the **live** API:
+(sha256 in `MANIFEST.json`): **v2** = 45 paths / **57 operations** / 67 schemas; **v1** = 21 paths /
+**23 operations** / 12 schemas. A dependency-free OpenAPI-3.0 validator (`e2e/contract/run.mjs`) does
+two things against the **live** API:
 
 - **Coverage** (routed vs not, method-aware live probe): **v2 28/57** · **v1 2/23** operations SERVED.
   The unserved v2 ops are out-of-scope (`/support/*`, `/team/threat-protection`), Fuego-namespaced
@@ -28,6 +28,53 @@ schemas; **v1** = 21 paths / **23 operations**. A dependency-free OpenAPI-3.0 va
 
 A scheduled CI job (`.github/workflows/contract-drift.yml`) re-fetches upstream weekly and opens a
 **reviewable issue** on any sha256 drift — upstream contract changes never silently reach production.
+A fetch failure is reported as **INCONCLUSIVE** (fails, opens the issue too), never as "no drift".
+`scripts/test/contract-drift.test.mjs` proves the gate in CI with fixtures (match / v2 drift / v1
+drift / fetch failure / tampered pin). A second CI step, `scripts/check-delta-disposition.mjs`
+(proven by `scripts/test/delta-disposition.test.mjs`), binds every disposition to the full SHA-256
+**and** byte length of both documents plus a fingerprint over every classified change
+(`packages/contracts/upstream/DELTA_DISPOSITION.json`). Any other baseline/candidate pair — even a
+strictly smaller one — fails closed, so a changed spec cannot be re-pinned or merged unclassified.
+
+### Pin identity (re-pin log)
+
+| Version | Retrieved               | SHA-256                                                            |  Bytes | Delta review                                                       |
+| ------- | ----------------------- | ------------------------------------------------------------------ | -----: | ------------------------------------------------------------------ |
+| v2      | **2026-10-27**          | `49afc368bf971b2321857409d18ac32915f07abf73596905e97be52b2f397cfb` | 485788 | [`FIRECRAWL_DRIFT_2026-10-27.md`](./FIRECRAWL_DRIFT_2026-10-27.md) |
+| v2      | 2026-10-10 (superseded) | `0541be01504053f8e978b60c6a12dc100cd6a76020f2a2723ecf9411f5778a3b` | 473629 | baseline                                                           |
+| v1      | 2026-10-10              | `d30b8816c05054b596b02d7dc8f39cb186ac79108b03113f3f4c9eee86300781` | 132167 | **unchanged** at the 2026-10-27 re-fetch (same bytes + hash)       |
+
+Contract run for the 2026-10-27 pin (`API=https://api.crawl.cheap node e2e/contract/run.mjs`): **exit 0**,
+7/7 gates pass — 4/4 conformance probes, the `attributes` focused probe, and the AC2 status gate
+(0 breaks; 9 read-only GETs answer an empty 200, every write probe answers 4xx — no 5xx, no
+unrequested 2xx write). Coverage **v2 28/57 · v1 2/23** (identical to the 2026-10-10 run — the re-pin
+added no routed-operation expectations). The status gate and its counts are in
+`e2e/contract/report.json#statusGate`.
+
+### v2 2026-10-27 delta — what changed and how it is served
+
+Full classification is in [`FIRECRAWL_DRIFT_2026-10-27.md`](./FIRECRAWL_DRIFT_2026-10-27.md).
+The machine-checked disposition is the next line; `scripts/check-delta-disposition.mjs` (CI:
+`contract-drift.yml`) only accepts this exact reviewed baseline→candidate bytes pair and its
+classified-change fingerprint, so no upstream change can reach production unclassified.
+
+Locations: **16** changed · **36** review-class leaf changes · 44 additive · 25 documentation
+
+Summary:
+
+| Area                                                                                                       | Change                                                                              | Status here                                                                                                                                           |
+| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `attributes` format (`{type:'attributes', selectors[]}` → `data.attributes`)                               | NEW format                                                                          | **VERIFIED (static tier)** — `extractAttributes` in the engine; unit + contract tests. Browser-only renders warn instead of returning an empty array. |
+| `parsers` (`"pdf"`/`"image"` names, PDF option object `pages`/`blocks`/`pageMarkers`, default `pdf,image`) | widened schema                                                                      | Contract accepts the exact upstream shape. `pages`/`blocks`/`pageMarkers` are accepted but **not applied** by the document-parse tier (see gaps).     |
+| `metadata.language`                                                                                        | `string \| string[] \| null`                                                        | Contract widened + tested (previously rejected arrays/null).                                                                                          |
+| `POST /agent` `zeroDataRetention`, `location`                                                              | NEW request fields                                                                  | **NOT IMPLEMENTED** — accepted-then-dropped.                                                                                                          |
+| `GET                                                                                                       | POST /search/gov` filters (`jurisdiction`, `court`, `courtType`, `cites`, `domain`) | NEW filters                                                                                                                                           | **NOT IMPLEMENTED** (REST path not routed; MCP `gov_search` unfiltered). |
+| `POST /scrape` `toolDetail` · schema `FindToolsData.next` · `AgentTraceEvent.error`                        | additive/type-only                                                                  | No behavior change (proprietary tool contracts not served).                                                                                           |
+| `search` `sources` default + `ParseOptions.parsers` default                                                | documentation/representation                                                        | No behavior change.                                                                                                                                   |
+| `SearchFeedbackRequest.valuableResults`                                                                    | NEW field                                                                           | **NOT IMPLEMENTED** (`/feedback` is a 501).                                                                                                           |
+
+No breaking delta for any served operation was found; the one real conformance bug the delta exposed
+(`metadata.language` rejecting an array or `null`) is fixed.
 
 ## SDKs (the operational definition of "drop-in")
 
@@ -39,24 +86,24 @@ A scheduled CI job (`.github/workflows/contract-drift.yml`) re-fetches upstream 
 
 ## REST endpoints (prefix `/v2`)
 
-| Family                                                                                  | Status          | Notes                                                      |
-| --------------------------------------------------------------------------------------- | --------------- | ---------------------------------------------------------- |
-| `scrape` (markdown/html/links/json/screenshot/actions/changeTracking/cache)             | **VERIFIED**    | static + browser tier; `removeBase64Images`, `maxAge` live |
-| `map`                                                                                   | **VERIFIED**    | sitemap + link discovery                                   |
-| `crawl` (+status/cancel/errors)                                                         | **VERIFIED**    | Durable-Object coordinator, race-safe cancel               |
-| `batch/scrape` (+status/cancel/errors)                                                  | **VERIFIED**    | reuses the crawl DO                                        |
-| `search` (web/news/images, `tbs`, categories)                                           | **VERIFIED**    | Exa primary / Tavily fallback                              |
-| `extract` (+status)                                                                     | **VERIFIED**    | Workers AI, ExtractCoordinator DO                          |
-| `parse` (PDF/HTML/text)                                                                 | **VERIFIED**    | unpdf; multipart or `{url}`                                |
-| `agent` (+status)                                                                       | **VERIFIED**    | web-search + scrape + AI synthesis                         |
-| `monitor` (+run/checks/webhook)                                                         | **VERIFIED**    | cron sweep + change diff + signed alerts                   |
-| `browser` + `/:id/act` (interact)                                                       | **VERIFIED**    | persistent Puppeteer session, DO-backed                    |
-| `ai-search/index` · `ai-search/query` (RAG)                                             | **VERIFIED**    | Vectorize + Workers AI (Fuego-exclusive, namespaced)       |
-| `team/credit-usage` (+historical), `keys`, spend-limit                                  | **VERIFIED**    | real D1 ledger; reserve-before-work → 402                  |
-| **`pricing` · `quote`** (price book + preflight)                                        | **VERIFIED**    | NEW — 25/25 prod E2E (`e2e/quote/run.mjs`)                 |
-| `crawl/active` · `crawl/ongoing`                                                        | PARTIAL         | returns empty — no cross-DO registry yet                   |
-| `crawl/params-preview`, `scrape/:jobId`, token-usage, queue-status, keyless/eligibility | NOT IMPLEMENTED | honest 501/⛔; low-priority                                |
-| `/slack`, `/support`, threat-protection, SIEM                                           | N/A             | out-of-scope for this edition                              |
+| Family                                                                                  | Status          | Notes                                                                                     |
+| --------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------- |
+| `scrape` (markdown/html/links/json/screenshot/actions/changeTracking/attributes/cache)  | **VERIFIED**    | static + browser tier; `removeBase64Images`, `maxAge` live; `attributes` static-tier only |
+| `map`                                                                                   | **VERIFIED**    | sitemap + link discovery                                                                  |
+| `crawl` (+status/cancel/errors)                                                         | **VERIFIED**    | Durable-Object coordinator, race-safe cancel                                              |
+| `batch/scrape` (+status/cancel/errors)                                                  | **VERIFIED**    | reuses the crawl DO                                                                       |
+| `search` (web/news/images, `tbs`, categories)                                           | **VERIFIED**    | Exa primary / Tavily fallback                                                             |
+| `extract` (+status)                                                                     | **VERIFIED**    | Workers AI, ExtractCoordinator DO                                                         |
+| `parse` (PDF/HTML/text)                                                                 | **VERIFIED**    | unpdf; multipart or `{url}`                                                               |
+| `agent` (+status)                                                                       | **VERIFIED**    | web-search + scrape + AI synthesis                                                        |
+| `monitor` (+run/checks/webhook)                                                         | **VERIFIED**    | cron sweep + change diff + signed alerts                                                  |
+| `browser` + `/:id/act` (interact)                                                       | **VERIFIED**    | persistent Puppeteer session, DO-backed                                                   |
+| `ai-search/index` · `ai-search/query` (RAG)                                             | **VERIFIED**    | Vectorize + Workers AI (Fuego-exclusive, namespaced)                                      |
+| `team/credit-usage` (+historical), `keys`, spend-limit                                  | **VERIFIED**    | real D1 ledger; reserve-before-work → 402                                                 |
+| **`pricing` · `quote`** (price book + preflight)                                        | **VERIFIED**    | NEW — 25/25 prod E2E (`e2e/quote/run.mjs`)                                                |
+| `crawl/active` · `crawl/ongoing`                                                        | PARTIAL         | returns empty — no cross-DO registry yet                                                  |
+| `crawl/params-preview`, `scrape/:jobId`, token-usage, queue-status, keyless/eligibility | NOT IMPLEMENTED | honest 501/⛔; low-priority                                                               |
+| `/slack`, `/support`, threat-protection, SIEM                                           | N/A             | out-of-scope for this edition                                                             |
 
 Error envelope `{success:false, error, code?, details?}` with the upstream `ErrorCode` enum verbatim;
 status codes 400/401/402/403/404/408/409/429/500/503. Legacy `/v1/*` served by adapters.
@@ -84,3 +131,15 @@ The release is **not** labeled "fully Firecrawl compatible" until the pinned v1+
 contracts and the major official-SDK paths pass. Today: core + premium families + TS/Python SDKs +
 MCP core tools are VERIFIED; the honest remaining gaps are the low-priority diagnostics endpoints and
 the externally-blocked Stripe commerce layer.
+
+### Candidate ca3d83a0: unpinned and unapproved
+
+The saved 490961-byte candidate is compared to the 485788-byte `49afc368` pin in
+[evidence/meg-1120/REVIEW.md](./evidence/meg-1120/REVIEW.md). Its fresh comparison produces
+20 locations / 59 leaves (18 review, 30 additive, 11 documentary), independently of the
+historical disposition above. [classification.json](./evidence/meg-1120/classification.json)
+records each field and unsupported user impact; specialized support/developer/government/research
+operations, object search categories, and agent safe filtering are not claimed as supported.
+TLS transport-option characterization is partial evidence only: effective certificate verification
+across runtime fetch, browser, and parser paths is **UNVERIFIED**, pending runtime certificate tests.
+The candidate remains **UNPINNED / UNAPPROVED**. No transition authorizes this pair; the guard must exit 1.

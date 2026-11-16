@@ -94,17 +94,28 @@ export const FormatSchema = z.union([
 ]);
 export type Format = z.infer<typeof FormatSchema>;
 
+/**
+ * Document parsers (upstream 2026-10-27): each item is a parser NAME string (`"pdf"` or
+ * `"image"`, shorthand for the default options) or a parser object. `pdf` accepts
+ * mode/maxPages/pages/blocks/pageMarkers; `image` takes no options. `pdf` and `image`
+ * are both on by default upstream.
+ */
 const PdfParserSchema = z.object({
   type: z.literal('pdf'),
   mode: z.enum(['fast', 'auto', 'ocr']).optional(),
   maxPages: z.number().int().positive().max(10000).optional(),
+  pages: z.boolean().optional(),
+  blocks: z.boolean().optional(),
+  pageMarkers: z.boolean().optional(),
 });
+const ImageParserSchema = z.object({ type: z.literal('image') });
 const ParserSchema = z.union([
   z.literal('pdf'),
   z.literal('image'),
   PdfParserSchema,
-  z.object({ type: z.literal('image') }),
+  ImageParserSchema,
 ]);
+export const ParserListSchema = z.array(ParserSchema);
 
 const RedactPiiSchema = z.union([
   z.boolean(),

@@ -151,7 +151,7 @@ app.get('/', (c) =>
   }),
 );
 
-app.get('/health', (c) => c.json({ status: 'ok', service: 'fuegol-api', version: '0.1.0' }));
+app.get('/health', (c) => c.json({ status: 'ok', service: 'crawl-cheap-api', version: '0.1.0' }));
 
 // Serve R2 artifacts (screenshots, result bundles) — public, cacheable, read-only.
 app.get('/assets/*', async (c) => {

@@ -17,7 +17,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const API = process.env.API ?? 'https://fuegol-api.manhattan.workers.dev';
+// Prod API. workers.dev is disabled for this Worker; the canonical hostname is the custom domain.
+const API = process.env.API ?? 'https://api.crawl.cheap';
 const DIR = path.dirname(new URL(import.meta.url).pathname);
 const UP = path.resolve(DIR, '../../packages/contracts/upstream');
 const SPECS = {
@@ -222,11 +223,95 @@ await conform('map', '/map', 'post', { url: 'https://example.com' });
 await conform('search', '/search', 'post', { query: 'cloudflare workers', limit: 3 });
 await conform('credit-usage', '/team/credit-usage', 'get', null);
 
+// Focused check for the 2026-10-27 delta: the `attributes` format must return `data.attributes`
+// rows ({selector, attribute, values[]}) and nothing else must regress in the static result.
+console.log('\nFOCUSED (v2 2026-10-27 delta):');
+{
+  const r = await fetch(`${API}/v2/scrape`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json', ...UA },
+    // MDN has anchors and an <h1> with text (example.com has no anchors).
+    body: JSON.stringify({
+      url: 'https://developer.mozilla.org/en-US/',
+      formats: [
+        {
+          type: 'attributes',
+          selectors: [
+            { selector: 'a', attribute: 'href' },
+            { selector: 'h1', attribute: 'text' },
+          ],
+        },
+      ],
+      maxAge: 0,
+    }),
+  });
+  const body = await r.json().catch(() => null);
+  const rows = body?.data?.attributes;
+  const [hrefRow, textRow] = rows ?? [];
+  const okAttrs =
+    r.status === 200 &&
+    Array.isArray(rows) &&
+    rows.length === 2 &&
+    hrefRow.selector === 'a' &&
+    hrefRow.attribute === 'href' &&
+    Array.isArray(hrefRow.values) &&
+    hrefRow.values.length > 0 &&
+    textRow.selector === 'h1' &&
+    textRow.attribute === 'text' &&
+    textRow.values.length > 0;
+  report.focused = [
+    { label: 'attributes format returns data.attributes rows', ok: okAttrs, status: r.status },
+  ];
+  ok(
+    'scrape {type:"attributes"} returns a selector/attribute/values row',
+    okAttrs,
+    JSON.stringify(body?.data?.attributes),
+  );
+}
+
 fs.writeFileSync(path.join(DIR, 'report.json'), JSON.stringify(report, null, 2));
 console.log(`\n${pass} passed, ${fail} failed · report → e2e/contract/report.json\n`);
+
+// Status gate (MEG-99 AC2): it is a real regression for a SERVED write operation (POST/PUT/
+// DELETE) to answer 5xx, and for it to answer 2xx while the probe sent an intentionally empty
+// body. Read-only GETs legitimately answer 200 with an empty list/summary and are recorded, not
+// failed. Jobs are excluded because the probe substitutes `x` for ids and their 404 is expected.
+const statusBreaks = [];
+const statusNotes = [];
+for (const [v, cov] of Object.entries(report.coverage))
+  for (const r of cov.rows) {
+    if (!r.served) continue;
+    const method = r.op.split(' ')[0];
+    if (r.status >= 500) statusBreaks.push(`${v} ${r.op} → ${r.status}`);
+    else if (method !== 'GET' && r.status >= 200 && r.status < 300)
+      statusBreaks.push(`${v} ${r.op} → ${r.status} on an empty body`);
+    else if (method === 'GET' && r.status >= 200 && r.status < 300)
+      statusNotes.push(`${v} ${r.op} → ${r.status}`);
+  }
+report.statusGate = {
+  ok: statusBreaks.length === 0,
+  breaks: statusBreaks,
+  emptyList200: statusNotes,
+};
+fs.writeFileSync(path.join(DIR, 'report.json'), JSON.stringify(report, null, 2));
+console.log(
+  `\nGATE (status, MEG-99 AC2): served operations ${statusNotes.length} empty 200 (read-only, ok) · ` +
+    `${statusBreaks.length} breaks`,
+);
+ok(
+  'every SERVED operation answered without 5xx or an unrequested 2xx write',
+  statusBreaks.length === 0,
+  statusBreaks.slice(0, 6).join(' | '),
+);
+console.log(`\n${pass} passed, ${fail} failed · report → e2e/contract/report.json\n`);
+// Report once, with the gate included.
+fs.writeFileSync(path.join(DIR, 'report.json'), JSON.stringify(report, null, 2));
+
 // Gate on conformance of the core sync endpoints only; NOT-SERVED is a documented
 // coverage fact, not a test failure (the matrix tracks it honestly).
 const coreConformFails = report.conformance.filter(
   (c) => ['scrape', 'map'].includes(c.label) && !c.conforms,
 ).length;
-process.exit(coreConformFails === 0 ? 0 : 1);
+// Focused deltas gate too: a regression here is a real conformance break, not a coverage fact.
+const focusedFails = (report.focused ?? []).filter((f) => !f.ok).length;
+process.exit(coreConformFails === 0 && focusedFails === 0 && statusBreaks.length === 0 ? 0 : 1);

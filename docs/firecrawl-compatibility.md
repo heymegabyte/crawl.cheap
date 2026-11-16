@@ -76,12 +76,15 @@ flat `formats`, `v0` unprefixed where trivial). `/agent`, `/monitor*`, and the `
 interactive family are now **live** (see rows above + the Agent/Monitors increments). Remaining
 out-of-scope upstream families, tracked: `/slack`, `/support`, threat-protection, SIEM.
 
-### `formats` (full enumeration, from pinned Zod)
+### `formats` (full enumeration, from the pinned v2 OpenAPI, 2026-10-27)
 
 String: `markdown summary html rawHtml rawBase64 links images screenshot audio video product menu json changeTracking`.
 Object: `{type:json}` `{type:deterministicJson}` `{type:screenshot}` `{type:changeTracking}` `{type:attributes}`
 `{type:question}` `{type:highlights}` `{type:query}` `{type:branding}`. Rules: max one `screenshot`;
 `changeTracking` requires `markdown`; `json`⊕`deterministicJson`; `rawBase64` cannot combine.
+`attributes` (`selectors: [{selector, attribute}]`, both required) returns `data.attributes`
+(`[{selector, attribute, values[]}]`) on the static-HTTP tier; a browser-only render returns a
+warning instead of an empty array.
 
 ### Error contract
 

@@ -22,6 +22,11 @@ jobs:
       - name: Compare upstream OpenAPI to pinned sha256
         id: drift
         run: node scripts/check-contract-drift.mjs
+      # AC1 guard: a v2 delta larger than the reviewed disposition fails, so nobody can re-pin
+      # or merge an unclassified upstream change. Runs after the pin check so a drift summary exists.
+      - name: Fail on an unclassified upstream delta
+        run: node scripts/check-delta-disposition.mjs
+      # Drift AND inconclusive results both fail the check and open the review issue below.
       - name: Open / update a review issue on drift
         if: failure()
         uses: actions/github-script@v7

@@ -2,7 +2,7 @@ import type { Document, ScrapeRequest } from '@fuegol/contracts';
 import { ScrapeRequestSchema } from '@fuegol/contracts';
 import { safeFetch } from './fetcher';
 import { assertSafeUrl } from './ssrf';
-import { parseHtml, selectContent, extractLinks } from './extract-content';
+import { parseHtml, selectContent, extractLinks, extractAttributes } from './extract-content';
 import { extractMetadata } from './metadata';
 import { htmlToMarkdown, stripBase64Images } from './html-to-markdown';
 import { browserAvailable, browserQuickAction, browserScreenshot } from './browser';
@@ -76,6 +76,13 @@ async function scrapeInner(request: ScrapeRequest, env: EngineEnv): Promise<Scra
   const html = await response.text();
   const root = parseHtml(html);
   const links = extractLinks(root, finalUrl);
+  // `attributes` selects from the full document, so extract before content selection strips nodes.
+  const attributeSelectors = (options.formats ?? []).flatMap((f) =>
+    typeof f === 'object' && f.type === 'attributes' ? f.selectors : [],
+  );
+  const attributeValues = attributeSelectors.length
+    ? extractAttributes(root, attributeSelectors)
+    : undefined;
   const metadata = extractMetadata(root, { url: finalUrl, statusCode, contentType });
   const content = selectContent(root, {
     onlyMainContent: options.onlyMainContent,
@@ -95,6 +102,7 @@ async function scrapeInner(request: ScrapeRequest, env: EngineEnv): Promise<Scra
   if (formats.has('html')) doc.html = content.toString();
   if (formats.has('rawHtml')) doc.rawHtml = html;
   if (formats.has('links')) doc.links = links;
+  if (attributeValues) doc.attributes = attributeValues;
 
   // Structured JSON extraction. Prefer Workers AI (available account-wide) over the
   // Browser Rendering /json tier; fall back to a warning when neither is configured.
@@ -186,6 +194,17 @@ async function browserScrape(
   if (formats.has('links')) {
     const r = await browserQuickAction<string[]>(env, 'links', { url });
     if (Array.isArray(r.result)) doc.links = r.result;
+  }
+  const attributeSelectors = (options.formats ?? []).flatMap((f) =>
+    typeof f === 'object' && f.type === 'attributes' ? f.selectors : [],
+  );
+  if (attributeSelectors.length) {
+    // Browser-only renders have no server-side DOM; the quick-action markdown is not a
+    // reliable attribute source, so report the gap honestly instead of returning [].
+    doc.warning = appendWarning(
+      doc.warning,
+      'attributes format needs the static (HTTP) tier; not extracted on a browser-only render.',
+    );
   }
   if (formats.has('screenshot')) {
     if (env.ARTIFACTS) {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseHtml, selectContent, extractLinks } from '../src/extract-content';
+import { parseHtml, selectContent, extractLinks, extractAttributes } from '../src/extract-content';
 import { htmlToMarkdown, stripBase64Images } from '../src/html-to-markdown';
 
 describe('htmlToMarkdown', () => {
@@ -61,5 +61,53 @@ describe('htmlToMarkdown', () => {
     expect(links).toContain('https://other.com/b');
     expect(links.filter((l) => l === 'https://e.com/a')).toHaveLength(1);
     expect(links.some((l) => l.includes('#frag'))).toBe(false);
+  });
+});
+
+describe('extractAttributes (v2 `attributes` format, upstream 2026-10-27)', () => {
+  const html = `<html><body>
+    <aside><a class="nav" href="/nav">nav</a></aside>
+    <main>
+      <a class="cta" href="/pricing">Pricing</a>
+      <a class="cta" href="/docs">Docs</a>
+      <img class="hero" src="/hero.png" alt="Hero shot">
+      <h1 data-id="42">Title</h1>
+    </main>
+  </body></html>`;
+
+  it('returns one row per selector pair with every matching value, in order', () => {
+    const out = extractAttributes(parseHtml(html), [
+      { selector: 'a.cta', attribute: 'href' },
+      { selector: 'img.hero', attribute: 'alt' },
+    ]);
+    expect(out).toEqual([
+      { selector: 'a.cta', attribute: 'href', values: ['/pricing', '/docs'] },
+      { selector: 'img.hero', attribute: 'alt', values: ['Hero shot'] },
+    ]);
+  });
+
+  it('selects from the whole document (boilerplate included) and keeps empty rows', () => {
+    const out = extractAttributes(parseHtml(html), [
+      { selector: 'aside a.nav', attribute: 'href' },
+      { selector: 'h1', attribute: 'data-id' },
+      { selector: '.missing', attribute: 'href' },
+    ]);
+    expect(out[0].values).toEqual(['/nav']);
+    expect(out[1].values).toEqual(['42']);
+    expect(out[2]).toEqual({ selector: '.missing', attribute: 'href', values: [] });
+  });
+
+  it('supports the `text` pseudo-attribute and tolerates an invalid selector', () => {
+    const out = extractAttributes(parseHtml(html), [
+      { selector: 'h1', attribute: 'text' },
+      { selector: 'a[', attribute: 'href' },
+    ]);
+    expect(out[0].values).toEqual(['Title']);
+    expect(out[1].values).toEqual([]);
+  });
+
+  it('omits values for elements where the attribute is absent', () => {
+    const out = extractAttributes(parseHtml(html), [{ selector: 'a', attribute: 'target' }]);
+    expect(out[0].values).toEqual([]);
   });
 });
