@@ -4,7 +4,7 @@
  *
  * Proves that no unreviewed v2 delta can be merged, and that a disposition is bound to the
  * exact reviewed bytes rather than to a historical count budget (AppSec AC1 finding):
- *   1. the real reviewed pair (2026-10-10 baseline → pinned) passes
+ *   1. the real reviewed pair (2026-10-27 baseline → pinned) passes
  *   2. an unclassified additive delta fails and says so
  *   3. a missing disposition line is refused (exit 2), never treated as covered
  *   4. an identical pair passes with no delta
@@ -23,7 +23,7 @@ const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 const SCRIPT = path.join(REPO, 'scripts/check-delta-disposition.mjs');
 const BASELINE =
   process.env.DELTA_BASELINE ??
-  path.join(REPO, 'packages/contracts/upstream/v2-baseline-2026-10-10.json');
+  path.join(REPO, 'packages/contracts/upstream/v2-baseline-2026-10-27.json');
 const PINNED = path.join(REPO, 'packages/contracts/upstream/v2-openapi.json');
 
 let failures = 0;
@@ -82,7 +82,7 @@ console.log('\ndelta disposition guard (scripts/check-delta-disposition.mjs)\n')
 if (!fs.existsSync(BASELINE)) {
   console.log(`  ! baseline ${BASELINE} not found — restore it with:\n`);
   console.log(
-    '    git show b0974fe:packages/contracts/upstream/v2-openapi.json > packages/contracts/upstream/v2-baseline-2026-10-10.json\n',
+    '    git show 0c17c25:packages/contracts/upstream/v2-openapi.json > packages/contracts/upstream/v2-baseline-2026-10-27.json\n',
   );
   process.exit(2);
 }
@@ -91,7 +91,7 @@ if (!fs.existsSync(BASELINE)) {
 {
   const r = run(scratch(), [BASELINE, PINNED]);
   check(
-    'reviewed 2026-10-10 → 2026-10-27 pair → exit 0 (covered)',
+    'reviewed 2026-10-27 → 2026-11-16 pair → exit 0 (covered)',
     r.code === 0 && /covered by the reviewed disposition/.test(r.out),
     `exit ${r.code}: ${r.out.slice(0, 240)}`,
   );
@@ -119,7 +119,7 @@ if (!fs.existsSync(BASELINE)) {
   const matrix = path.join(root, 'docs/COMPATIBILITY_MATRIX.md');
   fs.writeFileSync(
     matrix,
-    fs.readFileSync(matrix, 'utf8').replace(/Locations: \*\*\d+\*\*[^\n]*/, 'Locations: removed'),
+    fs.readFileSync(matrix, 'utf8').replace(/Locations: \*\*\d+\*\*[^\n]*/g, 'Locations: removed'),
   );
   const r = run(root, [BASELINE, PINNED]);
   check(
@@ -148,7 +148,7 @@ const { classifyDelta } = await import(
 );
 const reviewed = JSON.parse(
   fs.readFileSync(path.join(REPO, 'packages/contracts/upstream/DELTA_DISPOSITION.json'), 'utf8'),
-).transitions[0];
+).transitions.at(-1);
 const pinnedDoc = JSON.parse(fs.readFileSync(PINNED, 'utf8'));
 
 for (const [name, mutate] of [
@@ -202,7 +202,7 @@ for (const [name, mutate] of [
   const root = scratch();
   const file = path.join(root, 'packages/contracts/upstream/DELTA_DISPOSITION.json');
   const record = JSON.parse(fs.readFileSync(file, 'utf8'));
-  record.transitions[0].changeSetSha256 = '0'.repeat(64);
+  record.transitions.at(-1).changeSetSha256 = '0'.repeat(64);
   fs.writeFileSync(file, JSON.stringify(record));
   const r = run(root, [BASELINE, PINNED]);
   check(
@@ -217,7 +217,7 @@ for (const [name, mutate] of [
   const root = scratch();
   const file = path.join(root, 'packages/contracts/upstream/DELTA_DISPOSITION.json');
   const record = JSON.parse(fs.readFileSync(file, 'utf8'));
-  record.transitions[0].locations = 15;
+  record.transitions.at(-1).locations = 15;
   fs.writeFileSync(file, JSON.stringify(record));
   const r = run(root, [BASELINE, PINNED]);
   check(
