@@ -1,0 +1,102 @@
+
+## POST /crawl (1 changes)
+- [documentation] `POST /crawl.requestBody.content.application/json.schema.properties.webhook.properties.url.description` — "The URL to send the webhook to. This will trigger for crawl started (crawl.star → "The URL to send the webhook to. This will trigger for crawl started (crawl.star
+
+## GET /agent (1 changes)
+- [additive] `GET /agent.responses.200.content.application/json.schema.properties.agents.items.properties.options.properties.safe` — added {"type":"boolean","description":"Whether the run's web searches filtered explici
+
+## POST /agent (1 changes)
+- [additive] `POST /agent.requestBody.content.application/json.schema.properties.safe` — added {"type":"boolean","description":"When `true`, every web search the agent makes d
+
+## GET /agent/{jobId} (1 changes)
+- [additive] `GET /agent/{jobId}.responses.200.content.application/json.schema.properties.safe` — added {"type":"boolean","description":"Whether the run's web searches filtered explici
+
+## POST /search (4 changes)
+- [additive] `POST /search.requestBody.content.application/json.schema.properties.categories.oneOf` — added [{"type":"array","title":"Category names","items":{"type":"string","enum":["deve
+- [documentation] `POST /search.requestBody.content.application/json.schema.properties.categories.description` — "Categories to filter results by. Defaults to [], which means results will not b → "Categories to filter results by. Pass either an array of category names, such a
+- [BREAKING?] `POST /search.requestBody.content.application/json.schema.properties.categories.type` — removed "array"
+- [BREAKING?] `POST /search.requestBody.content.application/json.schema.properties.categories.items` — removed {"oneOf":[{"type":"object","title":"Developer","properties":{"type":{"type":"str
+
+## GET /search/research/papers (5 changes)
+- [additive] `GET /search/research/papers.parameters` — length 6 → 7
+- [additive] `GET /search/research/papers.parameters[6]` — added {"name":"sort","in":"query","required":false,"description":"Result order. `relev
+- [additive] `GET /search/research/papers.responses.200.content.application/json.example.results[0].authors` — added ["Prafulla Dhariwal","Alex Nichol"]
+- [additive] `GET /search/research/papers.responses.200.content.application/json.example.results[0].createdDate` — added "2021-05-11"
+- [additive] `GET /search/research/papers.responses.200.content.application/json.example.results[0].updateDate` — added "2021-06-01"
+
+## GET /search/research/papers/{id} (1 changes)
+- [value] `GET /search/research/papers/{id}.responses.200.content.application/json.example.paper.createdDate` — "Wed, 11 May 2021 18:01:01 GMT" → "2021-05-11"
+
+## GET /search/developer (4 changes)
+- [additive] `GET /search/developer.responses.200.content.application/json.example.partial` — added false
+- [BREAKING?] `GET /search/developer.responses.200.content.application/json.example.results[0].type` — removed "issue"
+- [BREAKING?] `GET /search/developer.responses.200.content.application/json.example.coverage` — removed {"doc":"ok","issue":"ok","pull_request":"ok","readme":"ok"}
+- [BREAKING?] `GET /search/developer.responses.200.content.application/json.example.reranked` — removed true
+
+## GET /search/gov (11 changes)
+- [additive] `GET /search/gov.parameters` — length 7 → 8
+- [documentation] `GET /search/gov.parameters[5].description` — "Keep only pages that cite one law or case, as a printed citation such as `42 U. → "Keep only pages that cite a law or case, as a printed citation such as `42 U.S.
+- [value] `GET /search/gov.parameters[5].schema.type` — "string" → "array"
+- [additive] `GET /search/gov.parameters[5].schema.items` — added {"type":"string","minLength":1}
+- [additive] `GET /search/gov.parameters[5].schema.minItems` — added 1
+- [additive] `GET /search/gov.parameters[5].schema.maxItems` — added 32
+- [BREAKING?] `GET /search/gov.parameters[5].schema.minLength` — removed 1
+- [additive] `GET /search/gov.parameters[5].style` — added "form"
+- [additive] `GET /search/gov.parameters[5].explode` — added true
+- [additive] `GET /search/gov.parameters[7]` — added {"name":"sources","in":"query","required":false,"description":"Result groups to 
+- [documentation] `GET /search/gov.responses.200.description` — "Ranked Government Index results in the `web` group." → "Ranked Government Index results in each group `sources` names, `web` by default
+
+## POST /search/gov (6 changes)
+- [additive] `POST /search/gov.requestBody.content.application/json.schema.properties.cites.oneOf` — added [{"type":"string","minLength":1},{"type":"array","items":{"type":"string","minLe
+- [documentation] `POST /search/gov.requestBody.content.application/json.schema.properties.cites.description` — "Keep only pages that cite one law or case, as a printed citation such as `42 U. → "Keep only pages that cite a law or case, as a printed citation such as `42 U.S.
+- [BREAKING?] `POST /search/gov.requestBody.content.application/json.schema.properties.cites.type` — removed "string"
+- [BREAKING?] `POST /search/gov.requestBody.content.application/json.schema.properties.cites.minLength` — removed 1
+- [additive] `POST /search/gov.requestBody.content.application/json.schema.properties.sources` — added {"oneOf":[{"type":"string","enum":["web","gov"]},{"type":"array","items":{"type"
+- [documentation] `POST /search/gov.responses.200.description` — "Ranked Government Index results in the `web` group." → "Ranked Government Index results in each group `sources` names, `web` by default
+
+## POST /support/docs-search (1 changes)
+- [BREAKING?] `POST /support/docs-search` — object → undefined
+
+## schema ParseOptions (1 changes)
+- [value] `schema ParseOptions.properties.skipTlsVerification.default` — true → false
+
+## schema ScrapeOptions (1 changes)
+- [value] `schema ScrapeOptions.properties.skipTlsVerification.default` — true → false
+
+## schema ResearchPaperResult (3 changes)
+- [additive] `schema ResearchPaperResult.properties.authors` — added {"type":"array","items":{"type":"string"},"description":"First 20 author names. 
+- [additive] `schema ResearchPaperResult.properties.createdDate` — added {"type":"string","format":"date","description":"Creation date, YYYY-MM-DD."}
+- [additive] `schema ResearchPaperResult.properties.updateDate` — added {"type":"string","format":"date","description":"Last update date, YYYY-MM-DD."}
+
+## schema ResearchPaperMetadata (4 changes)
+- [documentation] `schema ResearchPaperMetadata.properties.createdDate.description` — "Original creation date string." → "Creation date, YYYY-MM-DD."
+- [documentation] `schema ResearchPaperMetadata.properties.createdDate.format` — added "date"
+- [documentation] `schema ResearchPaperMetadata.properties.updateDate.description` — "Last-updated date string." → "Last update date, YYYY-MM-DD."
+- [documentation] `schema ResearchPaperMetadata.properties.updateDate.format` — added "date"
+
+## schema DeveloperSearchResult (7 changes)
+- [documentation] `schema DeveloperSearchResult.properties.id.description` — "Stable result id, such as `issue:owner/repo#123`." → "Stable result id. Its prefix names the result kind, such as `issue:owner/repo#1
+- [additive] `schema DeveloperSearchResult.properties.passages.items.properties.citation_url` — added {"type":"string","format":"uri","description":"Link to the passage's own locatio
+- [additive] `schema DeveloperSearchResult.properties.passages.items.properties.truncated` — added {"type":"boolean","description":"True when `text` omits part of the full passage
+- [additive] `schema DeveloperSearchResult.properties.passages.items.properties.served_span` — added {"type":"object","description":"Byte offsets of `text` within the full passage, 
+- [additive] `schema DeveloperSearchResult.properties.passages.items.properties.full_tokens_est` — added {"type":"integer","minimum":0,"description":"Approximate token count of the full
+- [additive] `schema DeveloperSearchResult.properties.license` — added {"type":"string","description":"SPDX license id, verbatim, including `NOASSERTIO
+- [BREAKING?] `schema DeveloperSearchResult.properties.type` — removed {"type":"string","enum":["doc","issue","pull_request","readme"],"description":"R
+
+## schema DeveloperSearchResponse (4 changes)
+- [additive] `schema DeveloperSearchResponse.properties.partial` — added {"type":"boolean","description":"True when the deadline passed before every best
+- [additive] `schema DeveloperSearchResponse.properties.repos.items.properties.canonicalRepo` — added {"type":"string","description":"The current indexed slug when `repo` is a supers
+- [BREAKING?] `schema DeveloperSearchResponse.properties.coverage` — removed {"type":"object","description":"Outcome for each result type. Check this when an
+- [BREAKING?] `schema DeveloperSearchResponse.properties.reranked` — removed {"type":"boolean","description":"Whether the ranked list went through the rerank
+
+## schema GovSearchResponse (1 changes)
+- [additive] `schema GovSearchResponse.properties.data.properties.gov` — added {"type":"array","description":"Present when `sources` includes `gov`. The same r
+
+## schema SupportDocsSearchRequest (1 changes)
+- [BREAKING?] `schema SupportDocsSearchRequest` — object → undefined
+
+## schema SupportDocsSearchResponse (1 changes)
+- [BREAKING?] `schema SupportDocsSearchResponse` — object → undefined
+
+20 changed locations · 59 leaf changes · 18 require review · 30 additive · 11 documentation
+classified change-set sha256: 136cce0a350fd49e322f62447730c888a8bcb0b859afee136ae6a92ea88045c6

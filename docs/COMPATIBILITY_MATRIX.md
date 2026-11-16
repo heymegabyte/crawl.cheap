@@ -31,8 +31,10 @@ A scheduled CI job (`.github/workflows/contract-drift.yml`) re-fetches upstream 
 A fetch failure is reported as **INCONCLUSIVE** (fails, opens the issue too), never as "no drift".
 `scripts/test/contract-drift.test.mjs` proves the gate in CI with fixtures (match / v2 drift / v1
 drift / fetch failure / tampered pin). A second CI step, `scripts/check-delta-disposition.mjs`
-(proven by `scripts/test/delta-disposition.test.mjs`), fails when upstream carries a v2 delta larger
-than the reviewed disposition below, so a changed spec cannot be re-pinned or merged unclassified.
+(proven by `scripts/test/delta-disposition.test.mjs`), binds every disposition to the full SHA-256
+**and** byte length of both documents plus a fingerprint over every classified change
+(`packages/contracts/upstream/DELTA_DISPOSITION.json`). Any other baseline/candidate pair — even a
+strictly smaller one — fails closed, so a changed spec cannot be re-pinned or merged unclassified.
 
 ### Pin identity (re-pin log)
 
@@ -53,8 +55,8 @@ added no routed-operation expectations). The status gate and its counts are in
 
 Full classification is in [`FIRECRAWL_DRIFT_2026-10-27.md`](./FIRECRAWL_DRIFT_2026-10-27.md).
 The machine-checked disposition is the next line; `scripts/check-delta-disposition.mjs` (CI:
-`contract-drift.yml`) compares the pinned v2 to upstream and fails when a delta is larger than
-what was reviewed here, so no upstream change can reach production unclassified.
+`contract-drift.yml`) only accepts this exact reviewed baseline→candidate bytes pair and its
+classified-change fingerprint, so no upstream change can reach production unclassified.
 
 Locations: **16** changed · **36** review-class leaf changes · 44 additive · 25 documentation
 
@@ -129,3 +131,15 @@ The release is **not** labeled "fully Firecrawl compatible" until the pinned v1+
 contracts and the major official-SDK paths pass. Today: core + premium families + TS/Python SDKs +
 MCP core tools are VERIFIED; the honest remaining gaps are the low-priority diagnostics endpoints and
 the externally-blocked Stripe commerce layer.
+
+### Candidate ca3d83a0: unpinned and unapproved
+
+The saved 490961-byte candidate is compared to the 485788-byte `49afc368` pin in
+[evidence/meg-1120/REVIEW.md](./evidence/meg-1120/REVIEW.md). Its fresh comparison produces
+20 locations / 59 leaves (18 review, 30 additive, 11 documentary), independently of the
+historical disposition above. [classification.json](./evidence/meg-1120/classification.json)
+records each field and unsupported user impact; specialized support/developer/government/research
+operations, object search categories, and agent safe filtering are not claimed as supported.
+TLS transport-option characterization is partial evidence only: effective certificate verification
+across runtime fetch, browser, and parser paths is **UNVERIFIED**, pending runtime certificate tests.
+The candidate remains **UNPINNED / UNAPPROVED**. No transition authorizes this pair; the guard must exit 1.

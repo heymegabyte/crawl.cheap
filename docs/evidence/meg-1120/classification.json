@@ -1,0 +1,868 @@
+{
+  "baseline": {
+    "sha256": "49afc368bf971b2321857409d18ac32915f07abf73596905e97be52b2f397cfb",
+    "bytes": 485788
+  },
+  "candidate": {
+    "sha256": "ca3d83a0ff8001f0b2e722e0fc7722e1e4e3b9e0e920a5a6d5ebec33001f2c38",
+    "bytes": 490961
+  },
+  "approval": "UNPINNED / UNAPPROVED; no transition authorized",
+  "sections": [
+    {
+      "label": "POST /crawl",
+      "changes": [
+        {
+          "at": "POST /crawl.requestBody.content.application/json.schema.properties.webhook.properties.url.description",
+          "kind": "value",
+          "from": "The URL to send the webhook to. This will trigger for crawl started (crawl.started), every page crawled (crawl.page) and when the crawl is completed (crawl.completed or crawl.failed). The response will be the same as the `/scrape` endpoint.",
+          "to": "The URL to send the webhook to. This will trigger for crawl started (crawl.started), every page crawled (crawl.page) and when the crawl is completed (crawl.completed). A page that fails to scrape is sent as crawl.page with success set to false. The response will be the same as the `/scrape` endpoint.",
+          "cls": "documentation",
+          "disposition": "DOCUMENTARY: webhook URL description change; no executable schema constraint changed and no runtime behavior is inferred from this text."
+        }
+      ]
+    },
+    {
+      "label": "GET /agent",
+      "changes": [
+        {
+          "at": "GET /agent.responses.200.content.application/json.schema.properties.agents.items.properties.options.properties.safe",
+          "kind": "added",
+          "now": {
+            "type": "boolean",
+            "description": "Whether the run's web searches filtered explicit content (only present for runs that set `safe: true`)"
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: safe is not wired to provider filtering in the local agent implementation and no effective safe response field is guaranteed. Callers cannot depend on explicit-content filtering from this addition."
+        }
+      ]
+    },
+    {
+      "label": "POST /agent",
+      "changes": [
+        {
+          "at": "POST /agent.requestBody.content.application/json.schema.properties.safe",
+          "kind": "added",
+          "now": {
+            "type": "boolean",
+            "description": "When `true`, every web search the agent makes during the run filters explicit content, the same filter as the search endpoint's `safe` option. Pages the agent scrapes or opens in a browser are not filtered. Omit to keep the default behavior, which does not apply the filter. Omitted on a follow-up turn keeps the thread's setting; `false` turns it off."
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: safe is not wired to provider filtering in the local agent implementation and no effective safe response field is guaranteed. Callers cannot depend on explicit-content filtering from this addition."
+        }
+      ]
+    },
+    {
+      "label": "GET /agent/{jobId}",
+      "changes": [
+        {
+          "at": "GET /agent/{jobId}.responses.200.content.application/json.schema.properties.safe",
+          "kind": "added",
+          "now": {
+            "type": "boolean",
+            "description": "Whether the run's web searches filtered explicit content (only present for runs that set `safe: true`)"
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: safe is not wired to provider filtering in the local agent implementation and no effective safe response field is guaranteed. Callers cannot depend on explicit-content filtering from this addition."
+        }
+      ]
+    },
+    {
+      "label": "POST /search",
+      "changes": [
+        {
+          "at": "POST /search.requestBody.content.application/json.schema.properties.categories.oneOf",
+          "kind": "added",
+          "now": [
+            {
+              "type": "array",
+              "title": "Category names",
+              "items": {
+                "type": "string",
+                "enum": ["developer", "gov", "research", "pdf"]
+              }
+            },
+            {
+              "type": "array",
+              "title": "Category objects",
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "title": "Developer",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["developer"]
+                      }
+                    },
+                    "required": ["type"]
+                  },
+                  {
+                    "type": "object",
+                    "title": "Gov",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["gov"]
+                      }
+                    },
+                    "required": ["type"]
+                  },
+                  {
+                    "type": "object",
+                    "title": "Research",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["research"]
+                      }
+                    },
+                    "required": ["type"]
+                  },
+                  {
+                    "type": "object",
+                    "title": "PDF",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["pdf"]
+                      }
+                    },
+                    "required": ["type"]
+                  }
+                ]
+              }
+            }
+          ],
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: categories object entries (including their nested filters) fail SearchRequestSchema enum validation; callers must use supported string categories. No object-filter semantics are implemented. The oneOf restructure is not proof of local support."
+        },
+        {
+          "at": "POST /search.requestBody.content.application/json.schema.properties.categories.description",
+          "kind": "value",
+          "from": "Categories to filter results by. Defaults to [], which means results will not be filtered by any categories.",
+          "to": "Categories to filter results by. Pass either an array of category names, such as `[\"research\", \"pdf\"]`, or an array of objects, such as `[{\"type\": \"research\"}]`; one array cannot mix the two forms. `developer` and `gov` must be the only entry in the array, and combining either with another category returns `400`. `research` restricts web results to academic and research websites and returns them in `data.web`; to search paper records, use `GET /search/research/papers`. Defaults to [], which means results will not be filtered by any categories.",
+          "cls": "documentation",
+          "disposition": "UNSUPPORTED: categories object entries (including their nested filters) fail SearchRequestSchema enum validation; callers must use supported string categories. No object-filter semantics are implemented. The oneOf restructure is not proof of local support."
+        },
+        {
+          "at": "POST /search.requestBody.content.application/json.schema.properties.categories.type",
+          "kind": "removed",
+          "was": "array",
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: categories object entries (including their nested filters) fail SearchRequestSchema enum validation; callers must use supported string categories. No object-filter semantics are implemented. The oneOf restructure is not proof of local support."
+        },
+        {
+          "at": "POST /search.requestBody.content.application/json.schema.properties.categories.items",
+          "kind": "removed",
+          "was": {
+            "oneOf": [
+              {
+                "type": "object",
+                "title": "Developer",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["developer"]
+                  }
+                },
+                "required": ["type"]
+              },
+              {
+                "type": "object",
+                "title": "Gov",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["gov"]
+                  }
+                },
+                "required": ["type"]
+              },
+              {
+                "type": "object",
+                "title": "Research",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["research"]
+                  }
+                },
+                "required": ["type"]
+              },
+              {
+                "type": "object",
+                "title": "PDF",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["pdf"]
+                  }
+                },
+                "required": ["type"]
+              }
+            ]
+          },
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: categories object entries (including their nested filters) fail SearchRequestSchema enum validation; callers must use supported string categories. No object-filter semantics are implemented. The oneOf restructure is not proof of local support."
+        }
+      ]
+    },
+    {
+      "label": "GET /search/research/papers",
+      "changes": [
+        {
+          "at": "GET /search/research/papers.parameters",
+          "kind": "array-length",
+          "from": 6,
+          "to": 7,
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized papers endpoints and ResearchPaperResult/Metadata are absent; sort, authors and ISO createdDate/updateDate are not provided by generic research-category search. The example date change does not establish a runtime guarantee."
+        },
+        {
+          "at": "GET /search/research/papers.parameters[6]",
+          "kind": "added",
+          "now": {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Result order. `relevance` (default) returns the most relevant papers first. `date_desc` returns the newest papers among the most relevant matches, newest first by created date, with undated papers last. It does not list every paper in a date range; use `from` and `to` for that.",
+            "schema": {
+              "type": "string",
+              "enum": ["relevance", "date_desc"],
+              "default": "relevance"
+            }
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized papers endpoints and ResearchPaperResult/Metadata are absent; sort, authors and ISO createdDate/updateDate are not provided by generic research-category search. The example date change does not establish a runtime guarantee."
+        },
+        {
+          "at": "GET /search/research/papers.responses.200.content.application/json.example.results[0].authors",
+          "kind": "added",
+          "now": ["Prafulla Dhariwal", "Alex Nichol"],
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized papers endpoints and ResearchPaperResult/Metadata are absent; sort, authors and ISO createdDate/updateDate are not provided by generic research-category search. The example date change does not establish a runtime guarantee."
+        },
+        {
+          "at": "GET /search/research/papers.responses.200.content.application/json.example.results[0].createdDate",
+          "kind": "added",
+          "now": "2021-05-11",
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized papers endpoints and ResearchPaperResult/Metadata are absent; sort, authors and ISO createdDate/updateDate are not provided by generic research-category search. The example date change does not establish a runtime guarantee."
+        },
+        {
+          "at": "GET /search/research/papers.responses.200.content.application/json.example.results[0].updateDate",
+          "kind": "added",
+          "now": "2021-06-01",
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized papers endpoints and ResearchPaperResult/Metadata are absent; sort, authors and ISO createdDate/updateDate are not provided by generic research-category search. The example date change does not establish a runtime guarantee."
+        }
+      ]
+    },
+    {
+      "label": "GET /search/research/papers/{id}",
+      "changes": [
+        {
+          "at": "GET /search/research/papers/{id}.responses.200.content.application/json.example.paper.createdDate",
+          "kind": "value",
+          "from": "Wed, 11 May 2021 18:01:01 GMT",
+          "to": "2021-05-11",
+          "cls": "value",
+          "disposition": "UNSUPPORTED: specialized papers endpoints and ResearchPaperResult/Metadata are absent; sort, authors and ISO createdDate/updateDate are not provided by generic research-category search. The example date change does not establish a runtime guarantee."
+        }
+      ]
+    },
+    {
+      "label": "GET /search/developer",
+      "changes": [
+        {
+          "at": "GET /search/developer.responses.200.content.application/json.example.partial",
+          "kind": "added",
+          "now": false,
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        },
+        {
+          "at": "GET /search/developer.responses.200.content.application/json.example.results[0].type",
+          "kind": "removed",
+          "was": "issue",
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        },
+        {
+          "at": "GET /search/developer.responses.200.content.application/json.example.coverage",
+          "kind": "removed",
+          "was": {
+            "doc": "ok",
+            "issue": "ok",
+            "pull_request": "ok",
+            "readme": "ok"
+          },
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        },
+        {
+          "at": "GET /search/developer.responses.200.content.application/json.example.reranked",
+          "kind": "removed",
+          "was": true,
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        }
+      ]
+    },
+    {
+      "label": "GET /search/gov",
+      "changes": [
+        {
+          "at": "GET /search/gov.parameters",
+          "kind": "array-length",
+          "from": 7,
+          "to": 8,
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "GET /search/gov.parameters[5].description",
+          "kind": "value",
+          "from": "Keep only pages that cite one law or case, as a printed citation such as `42 U.S.C. § 1983` or `5 U.S. 137`, or a citation id such as `us:usc:42:1983`.",
+          "to": "Keep only pages that cite a law or case, as a printed citation such as `42 U.S.C. § 1983` or `5 U.S. 137`, or a citation id such as `us:usc:42:1983`. Pass up to 32 to keep pages citing any of them. Repeat the parameter to pass more than one.",
+          "cls": "documentation",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "GET /search/gov.parameters[5].schema.type",
+          "kind": "value",
+          "from": "string",
+          "to": "array",
+          "cls": "value",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "GET /search/gov.parameters[5].schema.items",
+          "kind": "added",
+          "now": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "GET /search/gov.parameters[5].schema.minItems",
+          "kind": "added",
+          "now": 1,
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "GET /search/gov.parameters[5].schema.maxItems",
+          "kind": "added",
+          "now": 32,
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "GET /search/gov.parameters[5].schema.minLength",
+          "kind": "removed",
+          "was": 1,
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "GET /search/gov.parameters[5].style",
+          "kind": "added",
+          "now": "form",
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "GET /search/gov.parameters[5].explode",
+          "kind": "added",
+          "now": true,
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "GET /search/gov.parameters[7]",
+          "kind": "added",
+          "now": {
+            "name": "sources",
+            "in": "query",
+            "required": false,
+            "description": "Result groups to return. `web` returns plain search results. `gov` returns the same results with the index's labels: `jurisdiction`, `court`, `courtType`, `cites`, `citedAs`, `lang` and `updatedAt`. Repeat the parameter to return both.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["web", "gov"]
+              },
+              "minItems": 1,
+              "default": ["web"]
+            },
+            "style": "form",
+            "explode": true
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "GET /search/gov.responses.200.description",
+          "kind": "value",
+          "from": "Ranked Government Index results in the `web` group.",
+          "to": "Ranked Government Index results in each group `sources` names, `web` by default.",
+          "cls": "documentation",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        }
+      ]
+    },
+    {
+      "label": "POST /search/gov",
+      "changes": [
+        {
+          "at": "POST /search/gov.requestBody.content.application/json.schema.properties.cites.oneOf",
+          "kind": "added",
+          "now": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1,
+              "maxItems": 32
+            }
+          ],
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "POST /search/gov.requestBody.content.application/json.schema.properties.cites.description",
+          "kind": "value",
+          "from": "Keep only pages that cite one law or case, as a printed citation such as `42 U.S.C. § 1983` or `5 U.S. 137`, or a citation id such as `us:usc:42:1983`.",
+          "to": "Keep only pages that cite a law or case, as a printed citation such as `42 U.S.C. § 1983` or `5 U.S. 137`, or a citation id such as `us:usc:42:1983`. Pass up to 32 to keep pages citing any of them.",
+          "cls": "documentation",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "POST /search/gov.requestBody.content.application/json.schema.properties.cites.type",
+          "kind": "removed",
+          "was": "string",
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "POST /search/gov.requestBody.content.application/json.schema.properties.cites.minLength",
+          "kind": "removed",
+          "was": 1,
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "POST /search/gov.requestBody.content.application/json.schema.properties.sources",
+          "kind": "added",
+          "now": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": ["web", "gov"]
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["web", "gov"]
+                },
+                "minItems": 1
+              }
+            ],
+            "default": ["web"],
+            "description": "Result groups to return, as one name or a list. `web` returns plain search results. `gov` returns the same results with the index's labels: `jurisdiction`, `court`, `courtType`, `cites`, `citedAs`, `lang` and `updatedAt`."
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        },
+        {
+          "at": "POST /search/gov.responses.200.description",
+          "kind": "value",
+          "from": "Ranked Government Index results in the `web` group.",
+          "to": "Ranked Government Index results in each group `sources` names, `web` by default.",
+          "cls": "documentation",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        }
+      ]
+    },
+    {
+      "label": "POST /support/docs-search",
+      "changes": [
+        {
+          "at": "POST /support/docs-search",
+          "kind": "type",
+          "from": "object",
+          "to": "undefined",
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: POST /support/docs-search and SupportDocsSearchRequest/Response have no local route or contract; upstream removal creates no local removal. Callers cannot use this specialized endpoint."
+        }
+      ]
+    },
+    {
+      "label": "schema ParseOptions",
+      "changes": [
+        {
+          "at": "schema ParseOptions.properties.skipTlsVerification.default",
+          "kind": "value",
+          "from": true,
+          "to": false,
+          "cls": "value",
+          "disposition": "PARTIAL / TLS UNVERIFIED: optional scrape flag is not passed to transport; JSON parse route strips fields other than url. Omitted and false use the same transport path. Browser target certificate enforcement needs runtime evidence; no compatibility or VERIFIED claim is made."
+        }
+      ]
+    },
+    {
+      "label": "schema ScrapeOptions",
+      "changes": [
+        {
+          "at": "schema ScrapeOptions.properties.skipTlsVerification.default",
+          "kind": "value",
+          "from": true,
+          "to": false,
+          "cls": "value",
+          "disposition": "PARTIAL / TLS UNVERIFIED: optional scrape flag is not passed to transport; JSON parse route strips fields other than url. Omitted and false use the same transport path. Browser target certificate enforcement needs runtime evidence; no compatibility or VERIFIED claim is made."
+        }
+      ]
+    },
+    {
+      "label": "schema ResearchPaperResult",
+      "changes": [
+        {
+          "at": "schema ResearchPaperResult.properties.authors",
+          "kind": "added",
+          "now": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "First 20 author names. GET /search/research/papers/{id} returns the full list."
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized papers endpoints and ResearchPaperResult/Metadata are absent; sort, authors and ISO createdDate/updateDate are not provided by generic research-category search. The example date change does not establish a runtime guarantee."
+        },
+        {
+          "at": "schema ResearchPaperResult.properties.createdDate",
+          "kind": "added",
+          "now": {
+            "type": "string",
+            "format": "date",
+            "description": "Creation date, YYYY-MM-DD."
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized papers endpoints and ResearchPaperResult/Metadata are absent; sort, authors and ISO createdDate/updateDate are not provided by generic research-category search. The example date change does not establish a runtime guarantee."
+        },
+        {
+          "at": "schema ResearchPaperResult.properties.updateDate",
+          "kind": "added",
+          "now": {
+            "type": "string",
+            "format": "date",
+            "description": "Last update date, YYYY-MM-DD."
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized papers endpoints and ResearchPaperResult/Metadata are absent; sort, authors and ISO createdDate/updateDate are not provided by generic research-category search. The example date change does not establish a runtime guarantee."
+        }
+      ]
+    },
+    {
+      "label": "schema ResearchPaperMetadata",
+      "changes": [
+        {
+          "at": "schema ResearchPaperMetadata.properties.createdDate.description",
+          "kind": "value",
+          "from": "Original creation date string.",
+          "to": "Creation date, YYYY-MM-DD.",
+          "cls": "documentation",
+          "disposition": "UNSUPPORTED: specialized papers endpoints and ResearchPaperResult/Metadata are absent; sort, authors and ISO createdDate/updateDate are not provided by generic research-category search. The example date change does not establish a runtime guarantee."
+        },
+        {
+          "at": "schema ResearchPaperMetadata.properties.createdDate.format",
+          "kind": "added",
+          "now": "date",
+          "cls": "documentation",
+          "disposition": "UNSUPPORTED: specialized papers endpoints and ResearchPaperResult/Metadata are absent; sort, authors and ISO createdDate/updateDate are not provided by generic research-category search. The example date change does not establish a runtime guarantee."
+        },
+        {
+          "at": "schema ResearchPaperMetadata.properties.updateDate.description",
+          "kind": "value",
+          "from": "Last-updated date string.",
+          "to": "Last update date, YYYY-MM-DD.",
+          "cls": "documentation",
+          "disposition": "UNSUPPORTED: specialized papers endpoints and ResearchPaperResult/Metadata are absent; sort, authors and ISO createdDate/updateDate are not provided by generic research-category search. The example date change does not establish a runtime guarantee."
+        },
+        {
+          "at": "schema ResearchPaperMetadata.properties.updateDate.format",
+          "kind": "added",
+          "now": "date",
+          "cls": "documentation",
+          "disposition": "UNSUPPORTED: specialized papers endpoints and ResearchPaperResult/Metadata are absent; sort, authors and ISO createdDate/updateDate are not provided by generic research-category search. The example date change does not establish a runtime guarantee."
+        }
+      ]
+    },
+    {
+      "label": "schema DeveloperSearchResult",
+      "changes": [
+        {
+          "at": "schema DeveloperSearchResult.properties.id.description",
+          "kind": "value",
+          "from": "Stable result id, such as `issue:owner/repo#123`.",
+          "to": "Stable result id. Its prefix names the result kind, such as `issue:owner/repo#123` or `doc:<page URL>`.",
+          "cls": "documentation",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        },
+        {
+          "at": "schema DeveloperSearchResult.properties.passages.items.properties.citation_url",
+          "kind": "added",
+          "now": {
+            "type": "string",
+            "format": "uri",
+            "description": "Link to the passage's own location, such as a section anchor, when it differs from the result `url`."
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        },
+        {
+          "at": "schema DeveloperSearchResult.properties.passages.items.properties.truncated",
+          "kind": "added",
+          "now": {
+            "type": "boolean",
+            "description": "True when `text` omits part of the full passage. Absent when false."
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        },
+        {
+          "at": "schema DeveloperSearchResult.properties.passages.items.properties.served_span",
+          "kind": "added",
+          "now": {
+            "type": "object",
+            "description": "Byte offsets of `text` within the full passage, present when `text` is one contiguous span.",
+            "required": ["start", "end"],
+            "properties": {
+              "start": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "end": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        },
+        {
+          "at": "schema DeveloperSearchResult.properties.passages.items.properties.full_tokens_est",
+          "kind": "added",
+          "now": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Approximate token count of the full passage."
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        },
+        {
+          "at": "schema DeveloperSearchResult.properties.license",
+          "kind": "added",
+          "now": {
+            "type": "string",
+            "description": "SPDX license id, verbatim, including `NOASSERTION`. Absent when the license is not known."
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        },
+        {
+          "at": "schema DeveloperSearchResult.properties.type",
+          "kind": "removed",
+          "was": {
+            "type": "string",
+            "enum": ["doc", "issue", "pull_request", "readme"],
+            "description": "Result kind."
+          },
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        }
+      ]
+    },
+    {
+      "label": "schema DeveloperSearchResponse",
+      "changes": [
+        {
+          "at": "schema DeveloperSearchResponse.properties.partial",
+          "kind": "added",
+          "now": {
+            "type": "boolean",
+            "description": "True when the deadline passed before every best-effort stage finished, so the response holds the work completed by then."
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        },
+        {
+          "at": "schema DeveloperSearchResponse.properties.repos.items.properties.canonicalRepo",
+          "kind": "added",
+          "now": {
+            "type": "string",
+            "description": "The current indexed slug when `repo` is a superseded alias. Absent otherwise."
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        },
+        {
+          "at": "schema DeveloperSearchResponse.properties.coverage",
+          "kind": "removed",
+          "was": {
+            "type": "object",
+            "description": "Outcome for each result type. Check this when an expected result type is missing: `skipped` means your `types` value did not ask for that type, while `degraded` or `unavailable` means the gap came from the index or from a filter, not from the query. A repository filter is one such cause — see [how the repository filters scope a search](/api-reference/endpoint/developer-search#how-the-repository-filters-scope-a-search).",
+            "properties": {
+              "doc": {
+                "type": "string",
+                "enum": ["ok", "degraded", "unavailable", "skipped"]
+              },
+              "issue": {
+                "type": "string",
+                "enum": ["ok", "degraded", "unavailable", "skipped"]
+              },
+              "pull_request": {
+                "type": "string",
+                "enum": ["ok", "degraded", "unavailable", "skipped"]
+              },
+              "readme": {
+                "type": "string",
+                "enum": ["ok", "degraded", "unavailable", "skipped"]
+              }
+            }
+          },
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        },
+        {
+          "at": "schema DeveloperSearchResponse.properties.reranked",
+          "kind": "removed",
+          "was": {
+            "type": "boolean",
+            "description": "Whether the ranked list went through the reranking stage."
+          },
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: specialized GET /search/developer and DeveloperSearchResult/Response are not locally implemented. Removed type, coverage and reranked cannot be relied on; new partial, canonicalRepo, license and passage metadata are not returned. Generic developer category maps to github provider search, not this endpoint."
+        }
+      ]
+    },
+    {
+      "label": "schema GovSearchResponse",
+      "changes": [
+        {
+          "at": "schema GovSearchResponse.properties.data.properties.gov",
+          "kind": "added",
+          "now": {
+            "type": "array",
+            "description": "Present when `sources` includes `gov`. The same results as `web`, in the same order, with the index's labels.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Matched snippet from the source document."
+                },
+                "position": {
+                  "type": "integer",
+                  "description": "1-based rank in the result list."
+                },
+                "jurisdiction": {
+                  "type": "string",
+                  "description": "Jurisdiction label: `us` for federal, or `us-` plus a two-letter state or territory code. Absent when the index has no label."
+                },
+                "court": {
+                  "type": "string",
+                  "description": "CourtListener court id, such as `scotus` or `ca9`. Absent when the index has no label."
+                },
+                "courtType": {
+                  "type": "string",
+                  "description": "Type of court, one of the `courtType` filter values. Absent when the index has no label."
+                },
+                "cites": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Citation ids of the laws and cases the page cites. Absent when none are known."
+                },
+                "citedAs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Citation ids other pages cite this page by. Pass one as `cites` to find the pages citing it. Absent when none are known."
+                },
+                "lang": {
+                  "type": "string",
+                  "description": "Language code of the page, such as `en`. Absent when unknown."
+                },
+                "updatedAt": {
+                  "type": "integer",
+                  "description": "When the page was crawled into the index, in Unix milliseconds. Omitted for results that were never crawled into the index."
+                }
+              },
+              "required": ["url", "title", "description", "position"]
+            }
+          },
+          "cls": "additive",
+          "disposition": "UNSUPPORTED: specialized GET/POST /search/gov and GovSearchResponse are absent. GET cites arrays with form/explode, POST cites string-or-array and sources web/gov are not implemented; generic gov category does not implement legal citation filters or grouped gov results."
+        }
+      ]
+    },
+    {
+      "label": "schema SupportDocsSearchRequest",
+      "changes": [
+        {
+          "at": "schema SupportDocsSearchRequest",
+          "kind": "type",
+          "from": "object",
+          "to": "undefined",
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: POST /support/docs-search and SupportDocsSearchRequest/Response have no local route or contract; upstream removal creates no local removal. Callers cannot use this specialized endpoint."
+        }
+      ]
+    },
+    {
+      "label": "schema SupportDocsSearchResponse",
+      "changes": [
+        {
+          "at": "schema SupportDocsSearchResponse",
+          "kind": "type",
+          "from": "object",
+          "to": "undefined",
+          "cls": "BREAKING?",
+          "disposition": "UNSUPPORTED: POST /support/docs-search and SupportDocsSearchRequest/Response have no local route or contract; upstream removal creates no local removal. Callers cannot use this specialized endpoint."
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "locations": 20,
+    "review": 18,
+    "additive": 30,
+    "documentation": 11,
+    "leaves": 59
+  },
+  "changeSetSha256": "136cce0a350fd49e322f62447730c888a8bcb0b859afee136ae6a92ea88045c6"
+}
