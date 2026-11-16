@@ -1,6 +1,12 @@
 import fs from 'node:fs';
 import { classifyDelta, identityOf } from './lib/openapi-delta.mjs';
-const base = fs.readFileSync('packages/contracts/upstream/v2-openapi.json');
+// Compare against the reviewed 2026-10-27 baseline so this stays reproducible after
+// the pin file itself moves to the candidate bytes. Older checkouts predate the
+// baseline snapshot, where the pin still pointed at the reviewed 49afc368 bytes.
+const baselinePath = fs.existsSync('packages/contracts/upstream/v2-baseline-2026-10-27.json')
+  ? 'packages/contracts/upstream/v2-baseline-2026-10-27.json'
+  : 'packages/contracts/upstream/v2-openapi.json';
+const base = fs.readFileSync(baselinePath);
 const candidate = fs.readFileSync('docs/evidence/meg-1120/candidate-v2.json');
 if (
   identityOf(candidate).sha256 !==

@@ -24,6 +24,29 @@
       "reviewedIn": "MEG-99",
       "reviewedAt": "2026-10-27",
       "reviewDoc": "docs/FIRECRAWL_DRIFT_2026-10-27.md"
+    },
+    {
+      "id": "v2-2026-10-27-to-2026-11-16",
+      "spec": "v2",
+      "baseline": {
+        "sha256": "49afc368bf971b2321857409d18ac32915f07abf73596905e97be52b2f397cfb",
+        "bytes": 485788,
+        "label": "v2 pin 2026-10-27"
+      },
+      "candidate": {
+        "sha256": "ca3d83a0ff8001f0b2e722e0fc7722e1e4e3b9e0e920a5a6d5ebec33001f2c38",
+        "bytes": 490961,
+        "label": "v2 pin 2026-11-16"
+      },
+      "locations": 20,
+      "review": 18,
+      "additive": 30,
+      "documentation": 11,
+      "leaves": 59,
+      "changeSetSha256": "136cce0a350fd49e322f62447730c888a8bcb0b859afee136ae6a92ea88045c6",
+      "reviewedIn": "MEG-1126",
+      "reviewedAt": "2026-11-16",
+      "reviewDoc": "docs/FIRECRAWL_DRIFT_2026-11-16.md"
     }
   ]
 }

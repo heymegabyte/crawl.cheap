@@ -13,11 +13,11 @@ pricing `firecrawl.dev/pricing` — all re-verified **2026-10-09**.
 ## Machine contract tests (pinned OpenAPI)
 
 The official **v2 + v1 OpenAPI** are now pinned byte-exact in `packages/contracts/upstream/`
-(sha256 in `MANIFEST.json`): **v2** = 45 paths / **57 operations** / 67 schemas; **v1** = 21 paths /
+(sha256 in `MANIFEST.json`): **v2** = 44 paths / **56 operations** / 65 schemas; **v1** = 21 paths /
 **23 operations** / 12 schemas. A dependency-free OpenAPI-3.0 validator (`e2e/contract/run.mjs`) does
 two things against the **live** API:
 
-- **Coverage** (routed vs not, method-aware live probe): **v2 28/57** · **v1 2/23** operations SERVED.
+- **Coverage** (routed vs not, method-aware live probe): **v2 28/56** · **v1 2/23** operations SERVED.
   The unserved v2 ops are out-of-scope (`/support/*`, `/team/threat-protection`), Fuego-namespaced
   under different paths (upstream `/interact/*` → Fuego `/v2/browser`; `/search/developer|gov|research`
   → Fuego MCP tools + `/v2/search` categories), or low-priority (`/scrape/{jobId}` async, `/feedback`,
@@ -38,11 +38,12 @@ strictly smaller one — fails closed, so a changed spec cannot be re-pinned or 
 
 ### Pin identity (re-pin log)
 
-| Version | Retrieved               | SHA-256                                                            |  Bytes | Delta review                                                       |
-| ------- | ----------------------- | ------------------------------------------------------------------ | -----: | ------------------------------------------------------------------ |
-| v2      | **2026-10-27**          | `49afc368bf971b2321857409d18ac32915f07abf73596905e97be52b2f397cfb` | 485788 | [`FIRECRAWL_DRIFT_2026-10-27.md`](./FIRECRAWL_DRIFT_2026-10-27.md) |
-| v2      | 2026-10-10 (superseded) | `0541be01504053f8e978b60c6a12dc100cd6a76020f2a2723ecf9411f5778a3b` | 473629 | baseline                                                           |
-| v1      | 2026-10-10              | `d30b8816c05054b596b02d7dc8f39cb186ac79108b03113f3f4c9eee86300781` | 132167 | **unchanged** at the 2026-10-27 re-fetch (same bytes + hash)       |
+| Version | Retrieved                                   | SHA-256                                                            |  Bytes | Delta review                                                       |
+| ------- | ------------------------------------------- | ------------------------------------------------------------------ | -----: | ------------------------------------------------------------------ |
+| v2      | **2026-11-16** (proposed, approval pending) | `ca3d83a0ff8001f0b2e722e0fc7722e1e4e3b9e0e920a5a6d5ebec33001f2c38` | 490961 | [`FIRECRAWL_DRIFT_2026-11-16.md`](./FIRECRAWL_DRIFT_2026-11-16.md) |
+| v2      | 2026-10-27 (superseded by proposal above)   | `49afc368bf971b2321857409d18ac32915f07abf73596905e97be52b2f397cfb` | 485788 | [`FIRECRAWL_DRIFT_2026-10-27.md`](./FIRECRAWL_DRIFT_2026-10-27.md) |
+| v2      | 2026-10-10 (superseded)                     | `0541be01504053f8e978b60c6a12dc100cd6a76020f2a2723ecf9411f5778a3b` | 473629 | baseline                                                           |
+| v1      | 2026-10-10                                  | `d30b8816c05054b596b02d7dc8f39cb186ac79108b03113f3f4c9eee86300781` | 132167 | **unchanged** at the 2026-10-27 re-fetch (same bytes + hash)       |
 
 Contract run for the 2026-10-27 pin (`API=https://api.crawl.cheap node e2e/contract/run.mjs`): **exit 0**,
 7/7 gates pass — 4/4 conformance probes, the `attributes` focused probe, and the AC2 status gate
@@ -50,6 +51,14 @@ Contract run for the 2026-10-27 pin (`API=https://api.crawl.cheap node e2e/contr
 unrequested 2xx write). Coverage **v2 28/57 · v1 2/23** (identical to the 2026-10-10 run — the re-pin
 added no routed-operation expectations). The status gate and its counts are in
 `e2e/contract/report.json#statusGate`.
+
+### v2 2026-11-16 pin proposal — approval pending
+
+Locations: **20** changed · **18** review-class leaf changes · 30 additive · 11 documentation
+
+Proposed pin: `ca3d83a0ff8001f0b2e722e0fc7722e1e4e3b9e0e920a5a6d5ebec33001f2c38` (490961 B), replacing `49afc368` (485788 B). v1 is unchanged. See [the complete drift review](./FIRECRAWL_DRIFT_2026-11-16.md) and [saved field classification](./evidence/meg-1120/classification.json). This exact transition has 20 locations and 59 leaves; its identity-bound disposition preserves the prior transition.
+
+Specialized support/developer/government/research operations, object search categories, and agent safe filtering are **UNSUPPORTED**. The skipTlsVerification default delta is **KNOWN-UNSUPPORTED**; effective certificate verification remains **UNVERIFIED**. Approval from AppSec and Architect is required before this proposed pin can merge. Historical pin records below remain provenance.
 
 ### v2 2026-10-27 delta — what changed and how it is served
 
@@ -131,15 +140,3 @@ The release is **not** labeled "fully Firecrawl compatible" until the pinned v1+
 contracts and the major official-SDK paths pass. Today: core + premium families + TS/Python SDKs +
 MCP core tools are VERIFIED; the honest remaining gaps are the low-priority diagnostics endpoints and
 the externally-blocked Stripe commerce layer.
-
-### Candidate ca3d83a0: unpinned and unapproved
-
-The saved 490961-byte candidate is compared to the 485788-byte `49afc368` pin in
-[evidence/meg-1120/REVIEW.md](./evidence/meg-1120/REVIEW.md). Its fresh comparison produces
-20 locations / 59 leaves (18 review, 30 additive, 11 documentary), independently of the
-historical disposition above. [classification.json](./evidence/meg-1120/classification.json)
-records each field and unsupported user impact; specialized support/developer/government/research
-operations, object search categories, and agent safe filtering are not claimed as supported.
-TLS transport-option characterization is partial evidence only: effective certificate verification
-across runtime fetch, browser, and parser paths is **UNVERIFIED**, pending runtime certificate tests.
-The candidate remains **UNPINNED / UNAPPROVED**. No transition authorizes this pair; the guard must exit 1.
