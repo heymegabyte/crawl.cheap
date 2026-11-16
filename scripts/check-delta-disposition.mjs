@@ -3,84 +3,45 @@
  * AC1 guard for MEG-99: no upstream delta may remain unclassified.
  *
  * The reproducible differ (scripts/diff-openapi.mjs) prints every leaf change. This script
- * fails when a pinned-vs-upstream v2 delta exists that the current delta review does NOT
- * account for. The review is the disposition table in docs/COMPATIBILITY_MATRIX.md: its
- * "Locations" line states how many changed locations and review-class leaf changes were
- * classified at review time.
+ * fails closed unless the exact baseline and candidate BYTES being compared match a
+ * transition recorded in packages/contracts/upstream/DELTA_DISPOSITION.json, and the
+ * classified change-set fingerprint still matches that record.
+ *
+ * Why identity, not counts: a historical count budget ("the delta is no larger than the one
+ * we reviewed in 2026-10-27") accepts any unrelated pair that happens to be smaller. AppSec
+ * reproduced that bypass with a wholly unreviewed operation. Dispositions are therefore
+ * bound to the full SHA-256 of both documents plus a SHA-256 over every classified change.
  *
  *   node scripts/check-delta-disposition.mjs                 # upstream vs pinned (CI)
  *   node scripts/check-delta-disposition.mjs a.json b.json   # explicit pair
  *
- * Exit 0 = every delta is covered by the reviewed disposition; 1 = unclassified delta
- * (re-review required before re-pinning); 2 = usage / unreadable review.
+ * Exit 0 = the compared pair is exactly a reviewed, classified transition (or has no delta);
+ * 1 = unclassified / different pair / fingerprint mismatch; 2 = usage, missing disposition
+ * record or unreadable human-readable review.
  */
 import fs from 'node:fs';
-import crypto from 'node:crypto';
+import { classifyDelta, identityOf } from './lib/openapi-delta.mjs';
 
 const MATRIX = 'docs/COMPATIBILITY_MATRIX.md';
 const MANIFEST = 'packages/contracts/upstream/MANIFEST.json';
 const PINNED = 'packages/contracts/upstream/v2-openapi.json';
+const DISPOSITION = 'packages/contracts/upstream/DELTA_DISPOSITION.json';
 
-const M = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
+function refuse(message, code = 2) {
+  console.error(message);
+  process.exit(code);
+}
 
-/** Count locations and review-class leaves; mirrors scripts/diff-openapi.mjs exactly. */
-function countDelta(baseline, candidate) {
-  const DOC = new Set(['description', 'title', 'example', 'examples', 'summary', 'format']);
-  const changes = [];
-  function walk(a, p, at) {
-    if (a === p) return;
-    const ta = Array.isArray(a) ? 'array' : a === null ? 'null' : typeof a;
-    const tp = Array.isArray(p) ? 'array' : p === null ? 'null' : typeof p;
-    if (ta !== tp) return changes.push({ at, kind: 'type' });
-    if (ta === 'object') {
-      for (const k of new Set([...Object.keys(a || {}), ...Object.keys(p || {})])) {
-        if (!(k in (a || {}))) changes.push({ at: `${at}.${k}`, kind: 'removed' });
-        else if (!(k in (p || {}))) changes.push({ at: `${at}.${k}`, kind: 'added' });
-        else walk(a[k], p[k], `${at}.${k}`);
-      }
-      return;
-    }
-    if (ta === 'array') {
-      if (a.length !== p.length) changes.push({ at, kind: 'array-length' });
-      for (let i = 0; i < Math.max(a.length, p.length); i++) {
-        if (i >= a.length) changes.push({ at: `${at}[${i}]`, kind: 'removed' });
-        else if (i >= p.length) changes.push({ at: `${at}[${i}]`, kind: 'added' });
-        else walk(a[i], p[i], `${at}[${i}]`);
-      }
-      return;
-    }
-    changes.push({ at, kind: 'value' });
-  }
-  const scopes = [];
-  for (const [p, item] of Object.entries(candidate.paths ?? {}))
-    for (const m of Object.keys(item))
-      if (['get', 'post', 'put', 'patch', 'delete'].includes(m))
-        scopes.push([`${m.toUpperCase()} ${p}`, candidate.paths[p]?.[m], baseline.paths[p]?.[m]]);
-  for (const name of Object.keys(candidate.components?.schemas ?? {}))
-    scopes.push([
-      `schema ${name}`,
-      candidate.components?.schemas?.[name],
-      baseline.components?.schemas?.[name],
-    ]);
-  let locations = 0;
-  let review = 0;
-  for (const [, a, p] of scopes) {
-    const before = changes.length;
-    walk(a ?? {}, p ?? {}, '$');
-    const n = changes.length - before;
-    if (!n) continue;
-    locations++;
-    for (let i = before; i < changes.length; i++) {
-      const c = changes[i];
-      const leaf = c.at
-        .split('.')
-        .pop()
-        .replace(/\[\d+\]$/, '');
-      const doc = DOC.has(leaf);
-      if (!doc && c.kind !== 'added' && c.kind !== 'array-length') review++;
-    }
-  }
-  return { locations, review };
+let M;
+let disposition;
+try {
+  M = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
+  disposition = JSON.parse(fs.readFileSync(DISPOSITION, 'utf8'));
+} catch (e) {
+  refuse(`UNCLASSIFIED-DELTA: cannot read review metadata (${e.message}). Re-review is incomplete.`);
+}
+if (!Array.isArray(disposition.transitions)) {
+  refuse(`UNCLASSIFIED-DELTA: ${DISPOSITION} has no transitions array. Re-review is incomplete.`);
 }
 
 async function retrieve(url) {
@@ -90,12 +51,16 @@ async function retrieve(url) {
 }
 
 const [basePath, candPath] = process.argv.slice(2);
-let baseline;
-let candidate;
+let baselineBuf;
+let candidateBuf;
 let identity;
 if (basePath && candPath) {
-  baseline = JSON.parse(fs.readFileSync(basePath, 'utf8'));
-  candidate = JSON.parse(fs.readFileSync(candPath, 'utf8'));
+  try {
+    baselineBuf = fs.readFileSync(basePath);
+    candidateBuf = fs.readFileSync(candPath);
+  } catch (e) {
+    refuse(`UNCLASSIFIED-DELTA: unreadable pair (${e.message}).`, 2);
+  }
   identity = 'explicit pair';
 } else {
   // Compare the reviewed pin to what upstream serves now. Byte-identical means no delta
@@ -109,42 +74,97 @@ if (basePath && candPath) {
     console.error(`UNCLASSIFIED-DELTA: INCONCLUSIVE — v2 fetch failed (${e.message})`);
     process.exit(1);
   }
-  const sha = crypto.createHash('sha256').update(buf).digest('hex');
-  if (sha === meta.sha256 && buf.length === meta.bytes) {
+  const upstream = identityOf(buf);
+  if (upstream.sha256 === meta.sha256 && upstream.bytes === meta.bytes) {
     console.log('Delta disposition: no delta at review time (reviewed pin === upstream bytes).');
     process.exit(0);
   }
-  baseline = JSON.parse(fs.readFileSync(PINNED, 'utf8'));
-  candidate = JSON.parse(buf.toString('utf8'));
-  identity = `upstream ${sha.slice(0, 12)}… vs pinned ${meta.sha256.slice(0, 12)}…`;
+  baselineBuf = fs.readFileSync(PINNED);
+  candidateBuf = buf;
+  identity = `upstream ${upstream.sha256.slice(0, 12)}… vs pinned ${meta.sha256.slice(0, 12)}…`;
 }
 
-const matrix = fs.readFileSync(MATRIX, 'utf8');
-const m = matrix.match(/Locations:\s*\*\*(\d+)\*\*[^·]*·\s*\*\*(\d+)\*\*/);
-if (!m) {
-  console.error(
-    `UNCLASSIFIED-DELTA: ${MATRIX} has no reviewed disposition line ` +
-      '("Locations: **N** · **M** ..."). Re-review is incomplete.',
-  );
-  process.exit(2);
-}
-const reviewed = { locations: Number(m[1]), review: Number(m[2]) };
-const found = countDelta(baseline, candidate);
+const baselineId = identityOf(baselineBuf);
+const candidateId = identityOf(candidateBuf);
+const baseline = JSON.parse(baselineBuf.toString('utf8'));
+const candidate = JSON.parse(candidateBuf.toString('utf8'));
+const found = classifyDelta(baseline, candidate);
 
 console.log(`Delta check (${identity})`);
-console.log(`  reviewed disposition: ${reviewed.locations} locations · ${reviewed.review} review`);
-console.log(`  observed delta:       ${found.locations} locations · ${found.review} review`);
+console.log(`  baseline:  ${baselineId.sha256.slice(0, 12)}… ${baselineId.bytes} B`);
+console.log(`  candidate: ${candidateId.sha256.slice(0, 12)}… ${candidateId.bytes} B`);
+console.log(`  observed delta: ${found.totals.locations} locations · ${found.totals.review} review · ${found.totals.additive} additive · ${found.totals.documentation} documentation`);
 
-if (found.locations === 0 && found.review === 0) {
+if (found.totals.locations === 0) {
   console.log('OK — no delta between the compared documents.');
   process.exit(0);
 }
-if (found.locations <= reviewed.locations && found.review <= reviewed.review) {
-  console.log('OK — observed delta is covered by the reviewed disposition.');
-  process.exit(0);
+
+// The human-readable review is still required; it is what a reviewer reads.
+let matrix;
+try {
+  matrix = fs.readFileSync(MATRIX, 'utf8');
+} catch (e) {
+  refuse(`UNCLASSIFIED-DELTA: ${MATRIX} unreadable (${e.message}). Re-review is incomplete.`);
 }
-console.error(
-  'UNCLASSIFIED-DELTA: the observed delta is larger than the reviewed disposition. ' +
-    'Review it (docs/FIRECRAWL_DRIFT_*.md), classify every location, and re-pin before merge.',
+const m = matrix.match(/Locations:\s*\*\*(\d+)\*\*[^·]*·\s*\*\*(\d+)\*\*/);
+if (!m) {
+  refuse(
+    `UNCLASSIFIED-DELTA: ${MATRIX} has no reviewed disposition line ` +
+      '("Locations: **N** · **M** ..."). Re-review is incomplete.',
+  );
+}
+
+// Dispositions are pair identities, never count ceilings.
+const record = disposition.transitions.find(
+  (t) =>
+    t?.baseline?.sha256 === baselineId.sha256 &&
+    t?.baseline?.bytes === baselineId.bytes &&
+    t?.candidate?.sha256 === candidateId.sha256 &&
+    t?.candidate?.bytes === candidateId.bytes,
 );
-process.exit(1);
+if (!record) {
+  console.error(
+    'UNCLASSIFIED-DELTA: this exact baseline/candidate pair has no reviewed disposition in ' +
+      `${DISPOSITION}. A new upstream delta must be reviewed (docs/FIRECRAWL_DRIFT_*.md), ` +
+      'classified, and recorded as a transition before it can be pinned or merged.',
+  );
+  process.exit(1);
+}
+
+const reviewed = {
+  locations: Number(m[1]),
+  review: Number(m[2]),
+  additive: Number(record.additive),
+  documentation: Number(record.documentation),
+};
+const drift = [];
+for (const key of ['locations', 'review', 'additive', 'documentation']) {
+  if (!Number.isInteger(record[key])) drift.push(`${key}=${record[key]} (not recorded)`);
+  else if (found.totals[key] !== record[key])
+    drift.push(`${key} observed ${found.totals[key]} ≠ recorded ${record[key]}`);
+}
+if (found.changeSetSha256 !== record.changeSetSha256) {
+  drift.push(
+    `classified change-set fingerprint observed ${found.changeSetSha256.slice(0, 12)}… ≠ ` +
+      `recorded ${String(record.changeSetSha256).slice(0, 12)}…`,
+  );
+}
+if (reviewed.locations !== record.locations || reviewed.review !== record.review) {
+  drift.push(
+    `${MATRIX} documents ${reviewed.locations}/${reviewed.review} but the disposition record ` +
+      `holds ${record.locations}/${record.review}`,
+  );
+}
+if (drift.length) {
+  console.error('UNCLASSIFIED-DELTA: the compared pair no longer matches its reviewed disposition:');
+  for (const d of drift) console.error(`  - ${d}`);
+  console.error('Re-run scripts/diff-openapi.mjs, re-classify, and update the disposition record.');
+  process.exit(1);
+}
+
+console.log(
+  `OK — exact reviewed transition ${record.id} (${record.reviewedIn ?? 'review'}); ` +
+    'observed delta is covered by the reviewed disposition.',
+);
+process.exit(0);

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "note": "Machine-checked dispositions for reviewed pinned-spec transitions (MEG-99). scripts/check-delta-disposition.mjs compares exact baseline and candidate bytes and fails closed unless the pair matches a transition here AND the classified change-set fingerprint still matches. Add a transition only after the delta is reviewed and classified in docs/FIRECRAWL_DRIFT_*.md; never widen an existing transition.",
+  "transitions": [
+    {
+      "id": "v2-2026-10-10-to-2026-10-27",
+      "spec": "v2",
+      "baseline": {
+        "sha256": "0541be01504053f8e978b60c6a12dc100cd6a76020f2a2723ecf9411f5778a3b",
+        "bytes": 473629,
+        "label": "v2 pin 2026-10-10"
+      },
+      "candidate": {
+        "sha256": "49afc368bf971b2321857409d18ac32915f07abf73596905e97be52b2f397cfb",
+        "bytes": 485788,
+        "label": "v2 pin 2026-10-27"
+      },
+      "locations": 16,
+      "review": 36,
+      "additive": 44,
+      "documentation": 25,
+      "leaves": 105,
+      "changeSetSha256": "7e313349b6ee10ee06279986cd222964a4f40c92ac50f59d095862484a40b804",
+      "reviewedIn": "MEG-99",
+      "reviewedAt": "2026-10-27",
+      "reviewDoc": "docs/FIRECRAWL_DRIFT_2026-10-27.md"
+    }
+  ]
+}
