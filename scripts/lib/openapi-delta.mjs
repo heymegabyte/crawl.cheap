@@ -11,7 +11,14 @@
  */
 import crypto from 'node:crypto';
 
-export const DOC_KEYS = new Set(['description', 'title', 'example', 'examples', 'summary', 'format']);
+export const DOC_KEYS = new Set([
+  'description',
+  'title',
+  'example',
+  'examples',
+  'summary',
+  'format',
+]);
 const METHODS = ['get', 'post', 'put', 'patch', 'delete'];
 
 function walk(a, p, at, out) {
@@ -113,15 +120,18 @@ export function changeSetSha256(sections) {
   const entries = sections
     .flatMap((s) => s.changes.map((c) => ({ at: c.at, kind: c.kind, cls: c.cls })))
     .sort((a, b) => (a.at === b.at ? a.kind.localeCompare(b.kind) : a.at.localeCompare(b.at)));
-  return crypto
-    .createHash('sha256')
-    .update(JSON.stringify(entries))
-    .digest('hex');
+  return crypto.createHash('sha256').update(JSON.stringify(entries)).digest('hex');
 }
 
 export function classifyDelta(baseline, candidate) {
   const sections = deltaSections(baseline, candidate);
-  const totals = { locations: sections.length, review: 0, additive: 0, documentation: 0, leaves: 0 };
+  const totals = {
+    locations: sections.length,
+    review: 0,
+    additive: 0,
+    documentation: 0,
+    leaves: 0,
+  };
   for (const s of sections) {
     const c = classify(s.changes);
     totals.review += c.review;

@@ -38,7 +38,9 @@ try {
   M = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
   disposition = JSON.parse(fs.readFileSync(DISPOSITION, 'utf8'));
 } catch (e) {
-  refuse(`UNCLASSIFIED-DELTA: cannot read review metadata (${e.message}). Re-review is incomplete.`);
+  refuse(
+    `UNCLASSIFIED-DELTA: cannot read review metadata (${e.message}). Re-review is incomplete.`,
+  );
 }
 if (!Array.isArray(disposition.transitions)) {
   refuse(`UNCLASSIFIED-DELTA: ${DISPOSITION} has no transitions array. Re-review is incomplete.`);
@@ -93,7 +95,9 @@ const found = classifyDelta(baseline, candidate);
 console.log(`Delta check (${identity})`);
 console.log(`  baseline:  ${baselineId.sha256.slice(0, 12)}… ${baselineId.bytes} B`);
 console.log(`  candidate: ${candidateId.sha256.slice(0, 12)}… ${candidateId.bytes} B`);
-console.log(`  observed delta: ${found.totals.locations} locations · ${found.totals.review} review · ${found.totals.additive} additive · ${found.totals.documentation} documentation`);
+console.log(
+  `  observed delta: ${found.totals.locations} locations · ${found.totals.review} review · ${found.totals.additive} additive · ${found.totals.documentation} documentation`,
+);
 
 if (found.totals.locations === 0) {
   console.log('OK — no delta between the compared documents.');
@@ -157,7 +161,9 @@ if (reviewed.locations !== record.locations || reviewed.review !== record.review
   );
 }
 if (drift.length) {
-  console.error('UNCLASSIFIED-DELTA: the compared pair no longer matches its reviewed disposition:');
+  console.error(
+    'UNCLASSIFIED-DELTA: the compared pair no longer matches its reviewed disposition:',
+  );
   for (const d of drift) console.error(`  - ${d}`);
   console.error('Re-run scripts/diff-openapi.mjs, re-classify, and update the disposition record.');
   process.exit(1);
