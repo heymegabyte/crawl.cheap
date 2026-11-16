@@ -1,6 +1,6 @@
 # Firecrawl v2 drift review — 2026-11-16
 
-Status: proposed pin; AppSec and Architect approval required before merge.
+Status: confirmed pin; AppSec and Architect approved 2026-11-16, merged in PR #3 (`ddc9517`).
 
 This change records upstream bytes and known compatibility limits. It changes no runtime code. No specialized endpoint is VERIFIED by this review. The 7-gate contract suite covers its stated probes only.
 
@@ -20,7 +20,7 @@ Every BREAKING? entry below is a known-unsupported delta. Removed example fields
 
 Baseline: `49afc368bf971b2321857409d18ac32915f07abf73596905e97be52b2f397cfb` (485788 B). Candidate: `ca3d83a0ff8001f0b2e722e0fc7722e1e4e3b9e0e920a5a6d5ebec33001f2c38` (490961 B).
 
-Reproduce from repository root: `node scripts/classify-candidate-v2.mjs` and `node scripts/diff-openapi.mjs packages/contracts/upstream/v2-baseline-2026-10-27.json docs/evidence/meg-1120/candidate-v2.json`. Both compare the reviewed 2026-10-27 baseline against the saved candidate, so they stay reproducible after this pin lands. Candidate bytes are proposed as the new pin in this change; merge remains approval-gated.
+Reproduce from repository root: `node scripts/classify-candidate-v2.mjs` and `node scripts/diff-openapi.mjs packages/contracts/upstream/v2-baseline-2026-10-27.json docs/evidence/meg-1120/candidate-v2.json`. Both compare the reviewed 2026-10-27 baseline against the saved candidate, so they stay reproducible after this pin lands. Candidate bytes are the confirmed pin in this change; the merge was approved and completed in PR #3.
 
 Fresh saved-byte comparison: 20 locations, 59 leaves, 18 review, 30 additive, 11 documentary. These are mechanical classes, not support guarantees. In particular, the differ labels nested example changes as review/additive; those do not by themselves change response constraints.
 
