@@ -7,6 +7,7 @@
 - [Remote MCP](https://crawl-cheap-mcp.manhattan.workers.dev/v2/mcp): stateless Streamable-HTTP JSON-RPC, `firecrawl_*` tools (scrape/map/crawl/search/agent/monitor/research)
 
 ## Docs
+- [llms-full.txt](https://crawl.cheap/llms-full.txt): the complete knowledge corpus with full endpoint bodies for AI ingestion.
 - [README + quickstart](https://github.com/heymegabyte/crawl.cheap)
 - [Firecrawl compatibility](https://github.com/heymegabyte/crawl.cheap/blob/main/docs/firecrawl-compatibility.md)
 - [Self-hosting](https://github.com/heymegabyte/crawl.cheap/blob/main/deploy/README.md)

@@ -9,3 +9,6 @@ apps/web/public/
 # Pinned upstream Firecrawl OpenAPI specs — byte-exact for sha256 drift detection.
 # Reformatting them would break the pin/drift check. Never touch these bytes.
 packages/contracts/upstream/
+# Vendored @theme.tools/seo-geo builders (byte-faithful upstream dist — re-copy to upgrade).
+# Reformatting would drift them from the engine. Never touch these bytes.
+apps/web/vendor/
