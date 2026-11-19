@@ -52,6 +52,8 @@
   .toast.show{opacity:1}
   @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<!-- @theme.tools component layer — linked AFTER the inline <style> so .tt-* wins where applied. -->
+<link rel="stylesheet" href="/theme-tools.css" />
 </head>
 <body>
 <nav><div class="wrap">
@@ -66,35 +68,35 @@
   <p class="sub">Create a key, watch your credits, and run the API — all against the live edge.</p>
 
   <!-- KEY -->
-  <div class="card" id="keyCard">
+  <div class="card tt-card" id="keyCard">
     <h2>🔑 API key</h2>
     <div class="hint">Keys are shown once. Stored only in this browser (localStorage). Never a Firecrawl fc- key.</div>
     <div id="noKey">
       <div class="row">
-        <button class="btn btn-p" id="createKey">Create a free key</button>
+        <button class="btn btn-p tt-btn tt-btn--primary" id="createKey">Create a free key</button>
         <span style="color:var(--faint);font-size:13px">or</span>
         <input class="grow" id="pasteKey" placeholder="paste an existing cc_live_… key" />
-        <button class="btn btn-g" id="useKey">Use key</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="useKey">Use key</button>
       </div>
     </div>
     <div id="hasKey" style="display:none">
       <div class="keybox" id="keyShow"></div>
       <div class="row" style="margin-top:12px">
-        <button class="btn btn-g" id="copyKey">Copy</button>
-        <button class="btn btn-g" id="forgetKey">Forget</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="copyKey">Copy</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="forgetKey">Forget</button>
         <span class="pill" id="planPill"></span>
       </div>
       <div class="stat" id="credStat" style="margin-top:18px"></div>
       <div class="row" style="margin-top:16px">
         <input id="spendLimit" type="number" min="0" placeholder="hard spend limit (credits)" style="width:230px" />
-        <button class="btn btn-g" id="setLimit">Set spend limit</button>
-        <button class="btn btn-g" id="clearLimit">Clear</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="setLimit">Set spend limit</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="clearLimit">Clear</button>
       </div>
     </div>
   </div>
 
   <!-- PLAYGROUND -->
-  <div class="card">
+  <div class="card tt-card">
     <h2>⚡ Playground</h2>
     <div class="hint">Runs against the live API with your key (or the keyless demo, rate-limited).</div>
     <div class="tabs" id="tabs">
@@ -105,7 +107,7 @@
     </div>
     <div class="row">
       <input class="grow" id="pgInput" aria-label="URL or search query to run" value="https://example.com" />
-      <button class="btn btn-p" id="runBtn">Run →</button>
+      <button class="btn btn-p tt-btn tt-btn--primary" id="runBtn">Run →</button>
     </div>
     <div id="fmtRow" class="row" style="margin-top:10px">
       <label style="color:var(--mut);font-size:13px"><input type="checkbox" class="fmt" value="markdown" checked> markdown</label>
@@ -118,26 +120,26 @@
   </div>
 
   <!-- BROWSER SESSION -->
-  <div class="card">
+  <div class="card tt-card">
     <h2>🖥️ Interactive browser session</h2>
     <div class="hint">Drive a real headless browser live — click, type, scroll; the screenshot updates after every step. Metered: 2 credits to start, 1 per action.</div>
     <div class="row">
       <input class="grow" id="sessUrl" aria-label="URL to open in the browser session" value="https://quotes.toscrape.com/" />
-      <button class="btn btn-p" id="sessStart">Start session →</button>
+      <button class="btn btn-p tt-btn tt-btn--primary" id="sessStart">Start session →</button>
     </div>
     <div id="sessPanel" style="display:none;margin-top:14px">
       <div id="sessStatus" class="mono" style="font-size:13px;color:var(--mut);margin-bottom:10px"></div>
       <div class="row" style="margin-bottom:10px">
         <input class="grow" id="sessSel" placeholder="CSS selector — e.g. li.next a" />
-        <button class="btn btn-g" id="sessClick">Click</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="sessClick">Click</button>
         <input id="sessText" placeholder="text to type" style="width:150px" />
-        <button class="btn btn-g" id="sessType">Type</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="sessType">Type</button>
       </div>
       <div class="row" style="margin-bottom:12px">
-        <button class="btn btn-g" id="sessDown">Scroll ↓</button>
-        <button class="btn btn-g" id="sessUp">Scroll ↑</button>
-        <button class="btn btn-g" id="sessRefresh">Refresh view</button>
-        <button class="btn btn-g" id="sessClose">Close</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="sessDown">Scroll ↓</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="sessUp">Scroll ↑</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="sessRefresh">Refresh view</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="sessClose">Close</button>
       </div>
       <div id="sessJs" class="mono" style="font-size:12px;color:var(--cyan);margin-bottom:8px"></div>
       <img id="sessShot" alt="current page" style="display:none;width:100%;border:1px solid var(--line);border-radius:12px;background:#0a0a16" />
@@ -145,7 +147,7 @@
   </div>
 
   <!-- USAGE -->
-  <div class="card">
+  <div class="card tt-card">
     <h2>📊 Recent usage</h2>
     <div class="hint">Your credit ledger (keyed sessions only).</div>
     <div id="usageWrap"><span style="color:var(--faint);font-size:13px">Add a key to see usage.</span></div>

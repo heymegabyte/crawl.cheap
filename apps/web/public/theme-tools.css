@@ -1,0 +1,94 @@
+/*
+ * @theme.tools design SYSTEM — vendored, ZERO-JS, token-driven component CSS.
+ *
+ * Adopts the estate @theme.tools design system (heymegabyte/theme.tools, MIT) into crawl.cheap's
+ * static Cloudflare-Worker site, PRESERVING crawl.cheap's ACTUAL brand: cyan #00e5ff primary
+ * (verified — the site's own CSS comment notes "was fuego orange; kept var names", the ACTIVE
+ * palette is cyan), #060610 ink, Space Grotesk / JetBrains Mono. The OKLCH token roles here are
+ * the @theme.tools/blog SITE_CSS canonical tokens mapped 1:1 to the cyan hue (no hue drift),
+ * emitted under BOTH the canonical names (--primary/--card/--border/--ring/--radius) and the
+ * --tt-* names the component CSS consumes.
+ *
+ * Carries: the canonical .tt-btn / .tt-btn--primary / .tt-btn--ghost (verbatim from @theme.tools/blog
+ * SITE_CSS) + .tt-card / .tt-badge / .tt-input authored from the same token roles + the zero-JS
+ * subset of the MI01-MI30 tactile micro-interaction layer (spring-press, link-sweep, shimmer, focus
+ * rings) — every animation prefers-reduced-motion-guarded.
+ *
+ * ZERO JS: no tt-physics runtime, no <tt-*> Custom Elements, no React primitives (those need a
+ * Tailwind build this static site does not have). Pure CSS, linked from each HTML <head>.
+ * Reference adoption: ghost.claims public/theme-tools.css.
+ */
+
+/* === @theme.tools OKLCH token roles — mapped to crawl.cheap's cyan brand (no hue drift) ======== */
+:root{
+  /* Canonical @theme-tools/themes role names, pinned to the crawl.cheap cyan palette. */
+  --primary:#00e5ff;--primary-foreground:#04141c;
+  --card:#0a0a16;--card-foreground:#eef2f7;
+  --border:rgba(255,255,255,.09);--ring:#00e5ff;--radius:16px;
+  --font-sans:'Space Grotesk',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  /* --tt-* aliases consumed by the component bodies below (parity with the blog package SITE_CSS). */
+  --tt-ink:#060610;--tt-panel:#0a0a16;--tt-panel-2:#0d1420;
+  --tt-line:rgba(255,255,255,.09);--tt-line-2:rgba(0,229,255,.3);
+  --tt-cyan:#00e5ff;--tt-cyan-soft:#8ff6ff;--tt-cyan-deep:#2aa7c7;
+  --tt-text:#eef2f7;--tt-muted:#9aa3b5;--tt-faint:#7b8498;
+  --tt-heading:#ffffff;--tt-body:#d4dee6;--tt-on-accent:#04141c;
+  --tt-radius:16px;--tt-sans:var(--font-sans);--tt-mono:var(--font-mono);
+  --tt-ease:cubic-bezier(.16,1,.3,1);
+}
+
+/* === Buttons (verbatim from @theme.tools/blog SITE_CSS) ========================================= */
+.tt-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 22px;
+  border-radius:12px;font-weight:600;font-size:15px;font-family:var(--tt-sans);cursor:pointer;
+  border:0;background:transparent;color:var(--tt-text);text-decoration:none;
+  transition:transform .15s var(--tt-ease),box-shadow .15s var(--tt-ease),border-color .15s var(--tt-ease),background .15s var(--tt-ease)}
+.tt-btn--primary{background:linear-gradient(100deg,var(--tt-cyan),var(--tt-cyan-deep));color:var(--tt-on-accent);
+  box-shadow:0 10px 34px -8px rgba(0,229,255,.5),0 0 0 1px rgba(0,229,255,.25) inset}
+.tt-btn--primary:hover{transform:translateY(-2px);box-shadow:0 16px 46px -8px rgba(0,229,255,.65)}
+.tt-btn--ghost{border:1px solid var(--tt-line-2);color:var(--tt-text);background:rgba(0,229,255,.03)}
+.tt-btn--ghost:hover{border-color:var(--tt-cyan);background:rgba(0,229,255,.08);transform:translateY(-2px)}
+.tt-btn:focus-visible{outline:2px solid var(--ring);outline-offset:3px}
+.tt-btn[disabled],.tt-btn:disabled{opacity:.5;pointer-events:none}
+
+/* === Card (authored from the token roles) ====================================================== */
+.tt-card{background:linear-gradient(180deg,var(--tt-panel),var(--tt-panel-2));
+  border:1px solid var(--tt-line);border-radius:var(--tt-radius);padding:28px;color:var(--tt-body);
+  transition:transform .2s var(--tt-ease),border-color .2s var(--tt-ease),box-shadow .2s var(--tt-ease)}
+.tt-card--interactive:hover{transform:translateY(-4px);border-color:var(--tt-line-2);
+  box-shadow:0 18px 50px -24px rgba(0,229,255,.4)}
+
+/* === Badge (authored from the token roles) ===================================================== */
+.tt-badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--tt-mono);font-size:.7rem;
+  letter-spacing:.08em;text-transform:uppercase;padding:4px 11px;border-radius:999px;
+  border:1px solid var(--tt-line);background:rgba(0,229,255,.06);color:var(--tt-cyan);line-height:1}
+.tt-badge--muted{color:var(--tt-muted);background:transparent}
+
+/* === Input (authored from the token roles) ===================================================== */
+.tt-input{display:block;width:100%;font-family:var(--tt-sans);font-size:15px;color:var(--tt-text);
+  background:var(--tt-panel);border:1px solid var(--tt-line);border-radius:12px;padding:12px 15px;
+  transition:border-color .15s var(--tt-ease),box-shadow .15s var(--tt-ease)}
+.tt-input::placeholder{color:var(--tt-faint)}
+.tt-input:focus,.tt-input:focus-visible{outline:0;border-color:var(--tt-cyan);
+  box-shadow:0 0 0 3px rgba(0,229,255,.18)}
+
+/* === MI01–MI30 tactile micro-interactions — zero-JS subset (no tt-physics runtime) ============= */
+@layer theme-tools-tactile{
+  /* Spring-press (MI: press) — CSS-only via :active; no JS data-pressed needed. */
+  .tt-btn:active,.tt-spring-press:active{transition-duration:80ms;transform:scale(.975)}
+  /* Link-sweep (MI: underline grow) — pure hover, GPU-cheap background-size. */
+  .tt-link-sweep{background-image:linear-gradient(currentColor,currentColor);background-repeat:no-repeat;
+    background-position:100% 100%;background-size:0% 1.5px;
+    transition:background-size .26s var(--tt-ease),color .22s var(--tt-ease)}
+  .tt-link-sweep:hover{background-position:0% 100%;background-size:100% 1.5px}
+  /* Shimmer (MI: sheen) — a slow brand sheen used on skeletons/accents. */
+  @keyframes tt-shimmer{to{background-position:200% 0}}
+  .tt-shimmer{background:linear-gradient(100deg,transparent 20%,rgba(0,229,255,.14) 50%,transparent 80%);
+    background-size:200% 100%;animation:tt-shimmer 2.4s linear infinite}
+  /* Focus ring parity for any interactive element opting in. */
+  .tt-interactive:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+}
+@media (prefers-reduced-motion:reduce){
+  .tt-btn,.tt-card,.tt-input,.tt-link-sweep{transition:none!important}
+  .tt-btn:hover,.tt-card--interactive:hover{transform:none!important}
+  .tt-shimmer{animation:none!important}
+}
