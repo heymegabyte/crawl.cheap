@@ -1,0 +1,146 @@
+{
+  "name": "@theme.tools/blog",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "sideEffects": false,
+  "description": "ArticleDocument v1.0.0, Plate Studio & 100 Editorial Components — Lossless Plate <-> ArticleDocument v1.0.0 serialization, citation/media/data validators, and 20 article fixtures.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./markdown": {
+      "types": "./dist/markdown.d.ts",
+      "import": "./dist/markdown.js",
+      "default": "./dist/markdown.js"
+    },
+    "./editor": {
+      "types": "./dist/editor.d.ts",
+      "import": "./dist/editor.js",
+      "default": "./dist/editor.js"
+    },
+    "./cms": {
+      "types": "./dist/cms.d.ts",
+      "import": "./dist/cms.js",
+      "default": "./dist/cms.js"
+    },
+    "./contracts": {
+      "types": "./dist/contracts.d.ts",
+      "import": "./dist/contracts.js",
+      "default": "./dist/contracts.js"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js",
+      "default": "./dist/core.js"
+    },
+    "./cloudflare": {
+      "types": "./dist/cloudflare.d.ts",
+      "import": "./dist/cloudflare.js",
+      "default": "./dist/cloudflare.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js",
+      "default": "./dist/react.js"
+    },
+    "./elements": {
+      "types": "./dist/elements.d.ts",
+      "import": "./dist/elements.js",
+      "default": "./dist/elements.js"
+    },
+    "./widgets": {
+      "types": "./dist/widgets.d.ts",
+      "import": "./dist/widgets.js",
+      "default": "./dist/widgets.js"
+    },
+    "./media": {
+      "types": "./dist/media.d.ts",
+      "import": "./dist/media.js",
+      "default": "./dist/media.js"
+    },
+    "./site": {
+      "types": "./dist/site.d.ts",
+      "import": "./dist/site.js",
+      "default": "./dist/site.js"
+    },
+    "./components-registry": {
+      "types": "./dist/components-registry.d.ts",
+      "import": "./dist/components-registry.js",
+      "default": "./dist/components-registry.js"
+    },
+    "./related-posts": {
+      "types": "./dist/related-posts.d.ts",
+      "import": "./dist/related-posts.js",
+      "default": "./dist/related-posts.js"
+    },
+    "./topic-strategy": {
+      "types": "./dist/topic-strategy.d.ts",
+      "import": "./dist/topic-strategy.js",
+      "default": "./dist/topic-strategy.js"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "import": "./dist/testing.js",
+      "default": "./dist/testing.js"
+    },
+    "./modules": {
+      "types": "./dist/modules/index.d.ts",
+      "import": "./dist/modules/index.js",
+      "default": "./dist/modules/index.js"
+    },
+    "./upstream": {
+      "types": "./dist/upstream/index.d.ts",
+      "import": "./dist/upstream/index.js",
+      "default": "./dist/upstream/index.js"
+    },
+    "./domain-algorithms": {
+      "types": "./dist/upstream/domain-algorithms.d.ts",
+      "import": "./dist/upstream/domain-algorithms.js",
+      "default": "./dist/upstream/domain-algorithms.js"
+    },
+    "./benchmarks": {
+      "types": "./dist/upstream/benchmark-and-stress-suite.d.ts",
+      "import": "./dist/upstream/benchmark-and-stress-suite.js",
+      "default": "./dist/upstream/benchmark-and-stress-suite.js"
+    },
+    "./protocol-engine": {
+      "types": "./dist/upstream/bespoke-protocol-engine.d.ts",
+      "import": "./dist/upstream/bespoke-protocol-engine.js",
+      "default": "./dist/upstream/bespoke-protocol-engine.js"
+    },
+    "./release-lineage": {
+      "types": "./dist/upstream/release-lineage-ledger.d.ts",
+      "import": "./dist/upstream/release-lineage-ledger.js",
+      "default": "./dist/upstream/release-lineage-ledger.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test test/markdown.test.ts test/blog-conformance.test.ts test/upstream-compat.test.ts test/original-upstream-repo.test.ts test/bespoke-protocol-engine.test.ts test/site.test.ts",
+    "build:distribution": "node ../../scripts/package-distribution-contracts.mjs build --package @theme.tools/blog",
+    "prepack": "pnpm build:distribution"
+  },
+  "dependencies": {
+    "@theme-tools/shared-utils": "workspace:*"
+  },
+  "devDependencies": {
+    "jsdom": "^21.1.2"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heymegabyte/theme.tools.git",
+    "directory": "packages/blog"
+  }
+}

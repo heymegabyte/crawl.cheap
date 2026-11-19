@@ -18,3 +18,10 @@ e2e/contract/report.json
 contract-drift-summary.md
 .pnpm-store/
 *.tsbuildinfo
+
+# Vendored @theme.tools/blog — the generator (apps/web/scripts/sync-theme-tools.mjs) imports its
+# dist CSS exports. Un-ignore so a fresh clone can regenerate theme-tools.css offline.
+!apps/web/vendor/theme-tools/**
+
+# Local render-is-truth before/after evidence (not committed).
+.screenshots/

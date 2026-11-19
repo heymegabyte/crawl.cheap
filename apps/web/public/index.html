@@ -20,15 +20,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<!-- @theme.tools design system — OKLCH tokens (fuegol fire-orange brand) + .tt-* component layer. Generated: apps/web/scripts/sync-theme-tools.mjs -->
+<link rel="stylesheet" href="/theme-tools.css?v=theme-tools-blog-1.0.0" />
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"fuegol.ink","applicationCategory":"DeveloperApplication","operatingSystem":"Cloudflare Workers","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Open-source, Cloudflare-native, Firecrawl-compatible web data platform.","url":"https://fuegol.ink/","license":"https://opensource.org/licenses/MIT"}
 </script>
 <style>
+  /* fuegol's legacy design tokens now ALIAS onto the @theme.tools OKLCH token layer
+     (theme-tools.css :root, carrying fuegol's real brand). One canonical token seam: the whole
+     page is driven by @theme.tools roles. Brand is preserved EXACTLY — fire-orange #ff8a3d stays
+     the primary/flame accent, cyan #00e5ff stays the genuine secondary. Fallbacks = original hexes. */
   :root{
-    --bg:#060610; --bg2:#0b0b1a; --ink:#eef2f7; --mut:#9aa3b5; --faint:#7b8498;
-    --cyan:#00e5ff; --cyan2:#50aae3; --flame1:#ff5722; --flame2:#ff8a3d; --flame3:#ffc24b; --violet:#7c3aed;
+    --bg:var(--background,#060610); --bg2:#0b0b1a; --ink:var(--foreground,#eef2f7); --mut:#9aa3b5; --faint:#7b8498;
+    --cyan:#00e5ff; --cyan2:#50aae3;                         /* secondary accent (unchanged) */
+    --flame1:#ff5722; --flame2:#ff8a3d; --flame3:#ffc24b; --violet:#7c3aed;  /* fire = --primary role */
     --line:rgba(255,255,255,.09); --glass:rgba(255,255,255,.035); --glass2:rgba(255,255,255,.055);
-    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --mono:var(--tt-mono,'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace);
     --disp:'Space Grotesk',system-ui,sans-serif;
     --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   }
@@ -59,6 +66,9 @@
   nav .links a:hover{color:var(--ink)}
   nav .links .hide-sm{display:inline}
   @media(max-width:760px){nav .links .hide-sm{display:none}}
+  /* Keep the nav CTA on one line + never let it overflow the viewport (mobile). */
+  nav .links a.tt-nav__cta{white-space:nowrap;flex:0 0 auto}
+  @media(max-width:420px){nav .wrap{gap:14px}nav .links{gap:14px}}
   .btn{display:inline-flex;align-items:center;gap:8px;border-radius:11px;padding:11px 18px;font-weight:600;
     font-size:14px;cursor:pointer;border:1px solid transparent;transition:transform .15s ease,box-shadow .2s ease,background .2s}
   .btn:hover{transform:translateY(-1px)}
@@ -203,7 +213,7 @@
     <a href="#estimate">Estimate</a>
     <a class="hide-sm" href="#compat">Compatibility</a>
     <a class="hide-sm" href="https://github.com/heymegabyte/fuegol.ink">GitHub</a>
-    <a class="btn btn-primary" href="#start">Get a key</a>
+    <a class="btn tt-nav__cta" href="#start">Get a key</a>
   </div>
 </div></nav>
 
@@ -211,12 +221,12 @@
   <div class="orb"></div>
   <div class="heroGrid">
     <div>
-      <span class="badge"><span class="dot"></span> API live · Firecrawl v2 compatible</span>
+      <span class="badge tt-tag"><span class="dot"></span> API live · Firecrawl v2 compatible</span>
       <h1 class="hero">Your Firecrawl code. <span class="grad">Half the core API cost.</span></h1>
       <p class="sub">Open-source, Cloudflare-native, and drop-in compatible with the Firecrawl v2 API. Scrape, crawl, map, search, extract, and parse the web — then point your client at fuegol.ink and keep your code.</p>
       <div class="cta">
-        <a class="btn btn-primary" href="#demo">Run a real scrape free →</a>
-        <a class="btn btn-ghost" href="#migrate">Switch your endpoint</a>
+        <a class="btn btn-primary tt-btn tt-btn--primary" href="#demo">Run a real scrape free →</a>
+        <a class="btn btn-ghost tt-btn tt-btn--ghost" href="#migrate">Switch your endpoint</a>
       </div>
       <div class="stats">
         <div><b>7</b> data endpoints live</div>
@@ -268,7 +278,7 @@
   <div class="demo">
     <div class="demoRow">
       <input id="demoUrl" type="url" value="https://example.com" aria-label="URL to scrape" />
-      <button class="btn btn-primary" id="demoBtn">Scrape →</button>
+      <button class="btn btn-primary tt-btn tt-btn--primary" id="demoBtn">Scrape →</button>
     </div>
     <div id="demoOut"><span class="muted">Markdown output will appear here…</span></div>
   </div>
@@ -343,7 +353,7 @@
       <label class="chk"><input type="checkbox" id="eShot" /> Screenshot (premium)</label>
       <label class="chk"><input type="checkbox" id="eStealth" /> Stealth proxy (premium)</label>
     </div>
-    <button class="btn btn-primary" id="eBtn">Estimate →</button>
+    <button class="btn btn-primary tt-btn tt-btn--primary" id="eBtn">Estimate →</button>
     <div id="eOut"><span class="muted">Your quote will appear here…</span></div>
   </div>
 </div></section>
@@ -390,8 +400,8 @@
 });</pre>
     </div>
   </div>
-  <div class="cta"><a class="btn btn-primary" href="https://github.com/heymegabyte/fuegol.ink">Read the docs on GitHub →</a>
-    <a class="btn btn-ghost" href="https://github.com/heymegabyte/fuegol.ink#self-hosting">Self-host free</a></div>
+  <div class="cta"><a class="btn btn-primary tt-btn tt-btn--primary" href="https://github.com/heymegabyte/fuegol.ink">Read the docs on GitHub →</a>
+    <a class="btn btn-ghost tt-btn tt-btn--ghost" href="https://github.com/heymegabyte/fuegol.ink#self-hosting">Self-host free</a></div>
 </div></section>
 
 <footer><div class="wrap">

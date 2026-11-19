@@ -9,8 +9,12 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23060610'/%3E%3Cpath d='M18 4C13 11 20 15 13 24c-3 4-9 2-8-5-4 5-2 12 6 12 9 0 12-9 8-16-2-4-1-8-1-11z' fill='%23FF8A3D'/%3E%3Ccircle cx='13' cy='23' r='3.4' fill='%2300E5FF'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<!-- @theme.tools design system — OKLCH tokens (fuegol fire-orange brand) + .tt-* component layer. Generated: apps/web/scripts/sync-theme-tools.mjs -->
+<link rel="stylesheet" href="/theme-tools.css?v=theme-tools-blog-1.0.0" />
 <style>
-  :root{--bg:#060610;--ink:#eef2f7;--mut:#9aa3b5;--faint:#7b8498;--cyan:#00e5ff;--cyan2:#50aae3;--flame1:#ff5722;--flame2:#ff8a3d;--flame3:#ffc24b;--violet:#7c3aed;--line:rgba(255,255,255,.09);--glass:rgba(255,255,255,.04);--glass2:rgba(255,255,255,.06);--mono:'JetBrains Mono',ui-monospace,monospace;--disp:'Space Grotesk',system-ui,sans-serif;--sans:system-ui,-apple-system,'Segoe UI',sans-serif}
+  /* Legacy tokens alias onto the @theme.tools OKLCH layer (theme-tools.css :root). Brand preserved:
+     fire-orange #ff8a3d primary/flame, cyan #00e5ff secondary. Fallbacks = original hexes. */
+  :root{--bg:var(--background,#060610);--ink:var(--foreground,#eef2f7);--mut:#9aa3b5;--faint:#7b8498;--cyan:#00e5ff;--cyan2:#50aae3;--flame1:#ff5722;--flame2:#ff8a3d;--flame3:#ffc24b;--violet:#7c3aed;--line:rgba(255,255,255,.09);--glass:rgba(255,255,255,.04);--glass2:rgba(255,255,255,.06);--mono:var(--tt-mono,'JetBrains Mono',ui-monospace,monospace);--disp:'Space Grotesk',system-ui,sans-serif;--sans:system-ui,-apple-system,'Segoe UI',sans-serif}
   *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
   body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.4;background:radial-gradient(50vw 50vw at 90% -10%,rgba(255,87,34,.12),transparent 55%),radial-gradient(55vw 55vw at 5% 0,rgba(0,229,255,.12),transparent 60%)}
   .wrap{max-width:1000px;margin:0 auto;padding:0 22px;position:relative;z-index:1}
@@ -55,7 +59,7 @@
 <body>
 <nav><div class="wrap">
   <a class="brand" href="/"><svg viewBox="0 0 32 32"><path d="M18 4C13 11 20 15 13 24c-3 4-9 2-8-5-4 5-2 12 6 12 9 0 12-9 8-16-2-4-1-8-1-11z" fill="#ff8a3d"/><circle cx="13" cy="23" r="3.4" fill="#00e5ff"/></svg> fuegol<span class="a">.ink</span></a>
-  <span class="pill">console</span>
+  <span class="pill tt-tag">console</span>
   <span class="sp"></span>
   <a class="home" href="/">← home</a>
 </div></nav>
@@ -70,24 +74,24 @@
     <div class="hint">Keys are shown once. Stored only in this browser (localStorage). Never a Firecrawl fc- key.</div>
     <div id="noKey">
       <div class="row">
-        <button class="btn btn-p" id="createKey">Create a free key</button>
+        <button class="btn btn-p tt-btn tt-btn--primary" id="createKey">Create a free key</button>
         <span style="color:var(--faint);font-size:13px">or</span>
         <input class="grow" id="pasteKey" placeholder="paste an existing fgl_live_… key" />
-        <button class="btn btn-g" id="useKey">Use key</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="useKey">Use key</button>
       </div>
     </div>
     <div id="hasKey" style="display:none">
       <div class="keybox" id="keyShow"></div>
       <div class="row" style="margin-top:12px">
-        <button class="btn btn-g" id="copyKey">Copy</button>
-        <button class="btn btn-g" id="forgetKey">Forget</button>
-        <span class="pill" id="planPill"></span>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="copyKey">Copy</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="forgetKey">Forget</button>
+        <span class="pill tt-tag" id="planPill"></span>
       </div>
       <div class="stat" id="credStat" style="margin-top:18px"></div>
       <div class="row" style="margin-top:16px">
         <input id="spendLimit" type="number" min="0" placeholder="hard spend limit (credits)" style="width:230px" />
-        <button class="btn btn-g" id="setLimit">Set spend limit</button>
-        <button class="btn btn-g" id="clearLimit">Clear</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="setLimit">Set spend limit</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="clearLimit">Clear</button>
       </div>
     </div>
   </div>
@@ -104,7 +108,7 @@
     </div>
     <div class="row">
       <input class="grow" id="pgInput" aria-label="URL or search query to run" value="https://example.com" />
-      <button class="btn btn-p" id="runBtn">Run →</button>
+      <button class="btn btn-p tt-btn tt-btn--primary" id="runBtn">Run →</button>
     </div>
     <div id="fmtRow" class="row" style="margin-top:10px">
       <label style="color:var(--mut);font-size:13px"><input type="checkbox" class="fmt" value="markdown" checked> markdown</label>
@@ -122,21 +126,21 @@
     <div class="hint">Drive a real headless browser live — click, type, scroll; the screenshot updates after every step. Metered: 2 credits to start, 1 per action.</div>
     <div class="row">
       <input class="grow" id="sessUrl" aria-label="URL to open in the browser session" value="https://quotes.toscrape.com/" />
-      <button class="btn btn-p" id="sessStart">Start session →</button>
+      <button class="btn btn-p tt-btn tt-btn--primary" id="sessStart">Start session →</button>
     </div>
     <div id="sessPanel" style="display:none;margin-top:14px">
       <div id="sessStatus" class="mono" style="font-size:13px;color:var(--mut);margin-bottom:10px"></div>
       <div class="row" style="margin-bottom:10px">
         <input class="grow" id="sessSel" placeholder="CSS selector — e.g. li.next a" />
-        <button class="btn btn-g" id="sessClick">Click</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="sessClick">Click</button>
         <input id="sessText" placeholder="text to type" style="width:150px" />
-        <button class="btn btn-g" id="sessType">Type</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="sessType">Type</button>
       </div>
       <div class="row" style="margin-bottom:12px">
-        <button class="btn btn-g" id="sessDown">Scroll ↓</button>
-        <button class="btn btn-g" id="sessUp">Scroll ↑</button>
-        <button class="btn btn-g" id="sessRefresh">Refresh view</button>
-        <button class="btn btn-g" id="sessClose">Close</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="sessDown">Scroll ↓</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="sessUp">Scroll ↑</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="sessRefresh">Refresh view</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="sessClose">Close</button>
       </div>
       <div id="sessJs" class="mono" style="font-size:12px;color:var(--cyan);margin-bottom:8px"></div>
       <img id="sessShot" alt="current page" style="display:none;width:100%;border:1px solid var(--line);border-radius:12px;background:#0a0a16" />
@@ -300,7 +304,7 @@ async function sessAct(actions, label) {
   if (!json || json.success === false) { $('sessStatus').textContent = 'Error: ' + ((json && json.error) || status); return; }
   const shot = json.actions && json.actions.screenshots && json.actions.screenshots[0];
   if (shot) { $('sessShot').src = shot; $('sessShot').style.display = ''; }
-  $('sessStatus').innerHTML = '<span class="pill">live</span> ' + (json.url || '') + ' · ' + (json.actCount ?? 0) + ' actions';
+  $('sessStatus').innerHTML = '<span class="pill tt-tag">live</span> ' + (json.url || '') + ' · ' + (json.actCount ?? 0) + ' actions';
   const jr = json.actions && json.actions.javascriptReturns && json.actions.javascriptReturns[0];
   $('sessJs').textContent = jr ? 'JS → ' + JSON.stringify(jr.value) : '';
   refreshAccount();
