@@ -9,7 +9,6 @@ apps/web/public/
 # Pinned upstream Firecrawl OpenAPI specs — byte-exact for sha256 drift detection.
 # Reformatting them would break the pin/drift check. Never touch these bytes.
 packages/contracts/upstream/
-
-# Saved upstream OpenAPI candidate bytes — evidence for MEG-99 drift review.
-# Byte-exact for sha256 identity (ca3d83a0…, 490961 B). Never reformat.
-docs/evidence/meg-1120/candidate-v2.json
+# Vendored @theme.tools/seo-geo builders (byte-faithful upstream dist — re-copy to upgrade).
+# Reformatting would drift them from the engine. Never touch these bytes.
+apps/web/vendor/

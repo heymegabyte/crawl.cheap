@@ -1,0 +1,52 @@
+# crawl.cheap — Complete Knowledge Corpus
+
+> Open-source, Cloudflare-native web data engine that speaks the Firecrawl v2 API. Scrape, crawl, map, search, extract, parse, run AI Search (RAG) and persistent interactive browser sessions — at roughly half Firecrawl’s price. Point an existing Firecrawl client at crawl.cheap and keep your code.
+
+MIT-licensed; self-hostable on your own Cloudflare account with no dependency on crawl.cheap.
+Firecrawl v2 compatibility = change the base URL + swap in a crawl.cheap `cc_` key; request/response business logic is unchanged.
+One Cloudflare Worker terminates the REST API; a second serves the marketing site + remote MCP.
+
+## API
+
+### Firecrawl v2-compatible REST API
+Source: https://api.crawl.cheap
+
+## Firecrawl v2-compatible REST API
+
+Base URL `https://api.crawl.cheap`. Every endpoint mirrors the Firecrawl v2 request/response contract, so an existing Firecrawl client works after changing only the base URL and the API key (use a crawl.cheap `cc_` key, never a Firecrawl `fc-` key).
+
+- `POST /v2/scrape` — fetch one URL as clean markdown / HTML / links / screenshot.
+- `POST /v2/map` — enumerate a site’s URLs from sitemaps + link discovery.
+- `POST /v2/crawl` — recursively crawl a site with include/exclude rules.
+- `POST /v2/batch/scrape` — scrape many URLs in one job.
+- `POST /v2/search` — web / news / images search with `tbs` time filters.
+- `POST /v2/extract` — structured JSON extraction against a schema.
+- `POST /v2/parse` — parse an already-fetched document.
+- `POST /v2/agent` — autonomous multi-step research.
+- `POST /v2/monitor` — scheduled change detection.
+- `POST /v2/browser` — persistent interactive browser sessions.
+- `POST /v2/ai-search` — semantic RAG over crawled content.
+
+### Remote MCP server
+Source: https://crawl-cheap-mcp.manhattan.workers.dev/v2/mcp
+
+## Remote MCP server
+
+A stateless Streamable-HTTP JSON-RPC MCP endpoint at `https://crawl-cheap-mcp.manhattan.workers.dev/v2/mcp`. It exposes `firecrawl_*` tools (scrape, map, crawl, search, agent, monitor, research) so an MCP-capable agent can use crawl.cheap directly as a first-class tool provider.
+
+## Docs
+
+### README + quickstart
+Source: https://github.com/heymegabyte/crawl.cheap
+
+Install, quickstart, and the full endpoint reference.
+
+### Firecrawl compatibility
+Source: https://github.com/heymegabyte/crawl.cheap/blob/main/docs/firecrawl-compatibility.md
+
+Exactly which Firecrawl v2 behaviours are mirrored and how to migrate.
+
+### Self-hosting
+Source: https://github.com/heymegabyte/crawl.cheap/blob/main/deploy/README.md
+
+Deploy crawl.cheap to your own Cloudflare account with no dependency on us.
