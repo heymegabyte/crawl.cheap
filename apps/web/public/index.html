@@ -204,6 +204,8 @@
   .note{color:var(--faint);font-size:12.5px;margin-top:8px}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}html.js .reveal{opacity:1!important;transform:none!important}}
 </style>
+<!-- @theme.tools component layer — linked AFTER the inline <style> so .tt-* wins where applied. -->
+<link rel="stylesheet" href="/theme-tools.css" />
 </head>
 <body>
 <nav><div class="wrap">
@@ -218,7 +220,7 @@
     <a href="#estimate">Estimate</a>
     <a class="hide-sm" href="#compat">Compatibility</a>
     <a class="hide-sm" href="https://github.com/heymegabyte/crawl.cheap">GitHub</a>
-    <a class="btn btn-primary" href="#start">Get a key</a>
+    <a class="btn btn-primary tt-btn tt-btn--primary" href="#start">Get a key</a>
   </div>
 </div></nav>
 
@@ -293,16 +295,16 @@
   <span class="eyebrow">One engine, every surface</span>
   <h2 class="sec">The complete web-data toolkit.</h2>
   <div class="bento">
-    <div class="tile card lg flame"><h3><span class="ic">🔥</span> Cheapest-adequate-tier planner</h3><p>Static HTTP fetch → readability extraction → HTML→Markdown for free. Escalates to a rendered browser only when a page truly needs JS, actions, or a screenshot. Margin by design.</p></div>
-    <div class="tile card"><h3><span class="ic">📄</span> Scrape</h3><p>Markdown, HTML, links, summary, and schema-guided JSON via Workers AI.</p></div>
-    <div class="tile card"><h3><span class="ic">🕸️</span> Crawl</h3><p>Async multi-page crawl on a Durable Object — robots-aware, resumable, cancelable.</p></div>
-    <div class="tile card"><h3><span class="ic">🗺️</span> Map</h3><p>Enumerate a site's URLs from sitemaps + link discovery in one call.</p></div>
-    <div class="tile card"><h3><span class="ic">🔎</span> Search</h3><p>Web / news / images search with optional result-scraping + time filters.</p></div>
-    <div class="tile card"><h3><span class="ic">🧩</span> Extract</h3><p>Structured JSON across many URLs, guided by your prompt + JSON Schema.</p></div>
-    <div class="tile card"><h3><span class="ic">🤖</span> Agent &amp; Monitor</h3><p>Autonomous research runs, plus scheduled change monitoring with signed webhook alerts.</p></div>
-    <div class="tile card flame"><h3><span class="ic">🖱️</span> Interactive browser</h3><p>Persistent Puppeteer sessions — click, type, scroll across requests. Metered by the minute.</p></div>
-    <div class="tile card"><h3><span class="ic">🔌</span> Remote MCP</h3><p>Firecrawl-compatible <code>firecrawl_*</code> tools over Streamable HTTP for Claude, Cursor &amp; co.</p></div>
-    <div class="tile card lg"><h3><span class="ic">💳</span> Real credit ledger + preflight quotes</h3><p>A transactional D1 ledger is the live authority for balance + usage — with enforced spend ceilings, user-set hard limits, and a deterministic <code>/v2/quote</code> that bounds cost before any job runs. Not an eventually-consistent meter.</p></div>
+    <div class="tile card lg flame tt-card tt-card--interactive"><h3><span class="ic">🔥</span> Cheapest-adequate-tier planner</h3><p>Static HTTP fetch → readability extraction → HTML→Markdown for free. Escalates to a rendered browser only when a page truly needs JS, actions, or a screenshot. Margin by design.</p></div>
+    <div class="tile card tt-card tt-card--interactive"><h3><span class="ic">📄</span> Scrape</h3><p>Markdown, HTML, links, summary, and schema-guided JSON via Workers AI.</p></div>
+    <div class="tile card tt-card tt-card--interactive"><h3><span class="ic">🕸️</span> Crawl</h3><p>Async multi-page crawl on a Durable Object — robots-aware, resumable, cancelable.</p></div>
+    <div class="tile card tt-card tt-card--interactive"><h3><span class="ic">🗺️</span> Map</h3><p>Enumerate a site's URLs from sitemaps + link discovery in one call.</p></div>
+    <div class="tile card tt-card tt-card--interactive"><h3><span class="ic">🔎</span> Search</h3><p>Web / news / images search with optional result-scraping + time filters.</p></div>
+    <div class="tile card tt-card tt-card--interactive"><h3><span class="ic">🧩</span> Extract</h3><p>Structured JSON across many URLs, guided by your prompt + JSON Schema.</p></div>
+    <div class="tile card tt-card tt-card--interactive"><h3><span class="ic">🤖</span> Agent &amp; Monitor</h3><p>Autonomous research runs, plus scheduled change monitoring with signed webhook alerts.</p></div>
+    <div class="tile card flame tt-card tt-card--interactive"><h3><span class="ic">🖱️</span> Interactive browser</h3><p>Persistent Puppeteer sessions — click, type, scroll across requests. Metered by the minute.</p></div>
+    <div class="tile card tt-card tt-card--interactive"><h3><span class="ic">🔌</span> Remote MCP</h3><p>Firecrawl-compatible <code>firecrawl_*</code> tools over Streamable HTTP for Claude, Cursor &amp; co.</p></div>
+    <div class="tile card lg tt-card tt-card--interactive"><h3><span class="ic">💳</span> Real credit ledger + preflight quotes</h3><p>A transactional D1 ledger is the live authority for balance + usage — with enforced spend ceilings, user-set hard limits, and a deterministic <code>/v2/quote</code> that bounds cost before any job runs. Not an eventually-consistent meter.</p></div>
   </div>
 </div></section>
 
@@ -311,13 +313,13 @@
   <h2 class="sec">Half the price. Same API.</h2>
   <p class="lead">Managed-edition plans at <strong>exactly half of Firecrawl's month-to-month price</strong>, with like-for-like included credits. Self-hosting is free forever on your own Cloudflare account.</p>
   <div class="prices">
-    <div class="price card"><div class="nm">Free</div><div class="amt">$0</div><div class="cr">1,000 credits/mo</div></div>
-    <div class="price card"><div class="nm">Hobby</div><div class="amt">$9.50<small>/mo</small></div><div class="cr">5,000 credits</div><div class="fc">Firecrawl $19</div></div>
-    <div class="price card pop"><div class="nm">Standard</div><div class="amt">$49.50<small>/mo</small></div><div class="cr">100,000 credits</div><div class="fc">Firecrawl $99</div></div>
-    <div class="price card"><div class="nm">Growth</div><div class="amt">$199.50<small>/mo</small></div><div class="cr">500,000 credits</div><div class="fc">Firecrawl $399</div></div>
-    <div class="price card"><div class="nm">Scale</div><div class="amt">$374.50<small>/mo</small></div><div class="cr">1,000,000 credits</div><div class="fc">Firecrawl $749</div></div>
+    <div class="price card tt-card tt-card--interactive"><div class="nm">Free</div><div class="amt">$0</div><div class="cr">1,000 credits/mo</div></div>
+    <div class="price card tt-card tt-card--interactive"><div class="nm">Hobby</div><div class="amt">$9.50<small>/mo</small></div><div class="cr">5,000 credits</div><div class="fc">Firecrawl $19</div></div>
+    <div class="price card pop tt-card tt-card--interactive"><div class="nm">Standard</div><div class="amt">$49.50<small>/mo</small></div><div class="cr">100,000 credits</div><div class="fc">Firecrawl $99</div></div>
+    <div class="price card tt-card tt-card--interactive"><div class="nm">Growth</div><div class="amt">$199.50<small>/mo</small></div><div class="cr">500,000 credits</div><div class="fc">Firecrawl $399</div></div>
+    <div class="price card tt-card tt-card--interactive"><div class="nm">Scale</div><div class="amt">$374.50<small>/mo</small></div><div class="cr">1,000,000 credits</div><div class="fc">Firecrawl $749</div></div>
   </div>
-  <div class="calc card">
+  <div class="calc card tt-card">
     <div class="calcRow">
       <label>Plan
         <select id="calcPlan"><option value="hobby">Hobby</option><option value="standard" selected>Standard</option><option value="growth">Growth</option><option value="scale">Scale</option></select>
@@ -336,7 +338,7 @@
   <span class="eyebrow">Price before you crawl</span>
   <h2 class="sec">Know the cost before you run it.</h2>
   <p class="lead">A deterministic preflight quote from the live API — credits, dollars at your plan rate, and a firm ceiling. Open-ended jobs must carry a cap: crawl.cheap never runs an unbounded-cost job.</p>
-  <div class="est card">
+  <div class="est card tt-card">
     <div class="estGrid">
       <label>Operation
         <select id="eOp">
@@ -405,8 +407,8 @@
 });</pre>
     </div>
   </div>
-  <div class="cta"><a class="btn btn-primary" href="https://github.com/heymegabyte/crawl.cheap">Read the docs on GitHub →</a>
-    <a class="btn btn-ghost" href="https://github.com/heymegabyte/crawl.cheap#self-hosting">Self-host free</a></div>
+  <div class="cta"><a class="btn btn-primary tt-btn tt-btn--primary" href="https://github.com/heymegabyte/crawl.cheap">Read the docs on GitHub →</a>
+    <a class="btn btn-ghost tt-btn tt-btn--ghost" href="https://github.com/heymegabyte/crawl.cheap#self-hosting">Self-host free</a></div>
 </div></section>
 
 <footer><div class="wrap">

@@ -54,6 +54,8 @@
   .toast.show{opacity:1}
   @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<!-- @theme.tools component layer — linked AFTER the inline <style> so .tt-* wins where applied. -->
+<link rel="stylesheet" href="/theme-tools.css" />
 </head>
 <body>
 <nav><div class="wrap">
@@ -68,7 +70,7 @@
   <p class="sub">Create a key, watch your credits, and run the API — all against the live edge.</p>
 
   <!-- KEY -->
-  <div class="card" id="keyCard">
+  <div class="card tt-card" id="keyCard">
     <h2>🔑 API key</h2>
     <div class="hint">Keys are shown once. Stored only in this browser (localStorage). Never a Firecrawl fc- key.</div>
     <div id="noKey">
@@ -76,7 +78,7 @@
         <button class="btn btn-p tt-btn tt-btn--primary" id="createKey">Create a free key</button>
         <span style="color:var(--faint);font-size:13px">or</span>
         <input class="grow" id="pasteKey" placeholder="paste an existing cc_live_… key" />
-        <button class="btn btn-g" id="useKey">Use key</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="useKey">Use key</button>
       </div>
     </div>
     <div id="hasKey" style="display:none">
@@ -84,7 +86,7 @@
       <div class="row" style="margin-top:12px">
         <button class="btn btn-g tt-btn tt-btn--ghost" id="copyKey">Copy</button>
         <button class="btn btn-g tt-btn tt-btn--ghost" id="forgetKey">Forget</button>
-        <span class="pill tt-tag" id="planPill"></span>
+        <span class="pill" id="planPill"></span>
       </div>
       <div class="stat" id="credStat" style="margin-top:18px"></div>
       <div class="row" style="margin-top:16px">
@@ -96,7 +98,7 @@
   </div>
 
   <!-- PLAYGROUND -->
-  <div class="card">
+  <div class="card tt-card">
     <h2>⚡ Playground</h2>
     <div class="hint">Runs against the live API with your key (or the keyless demo, rate-limited).</div>
     <div class="tabs" id="tabs">
@@ -120,7 +122,7 @@
   </div>
 
   <!-- BROWSER SESSION -->
-  <div class="card">
+  <div class="card tt-card">
     <h2>🖥️ Interactive browser session</h2>
     <div class="hint">Drive a real headless browser live — click, type, scroll; the screenshot updates after every step. Metered: 2 credits to start, 1 per action.</div>
     <div class="row">
@@ -147,7 +149,7 @@
   </div>
 
   <!-- USAGE -->
-  <div class="card">
+  <div class="card tt-card">
     <h2>📊 Recent usage</h2>
     <div class="hint">Your credit ledger (keyed sessions only).</div>
     <div id="usageWrap"><span style="color:var(--faint);font-size:13px">Add a key to see usage.</span></div>
