@@ -127,6 +127,36 @@ const INFO = {
 app.get('/', (c) => c.json(INFO));
 app.get('/health', (c) => c.json({ status: 'ok', service: 'crawl-cheap-mcp' }));
 
+// RFC 9728 Protected Resource Metadata & RFC 8414 Authorization Server Metadata for MCP OAuth 2.1 clients
+app.get('/.well-known/oauth-protected-resource', (c) => {
+  const origin = new URL(c.req.url).origin;
+  const authServer = c.env.API_BASE || 'https://api.crawl.cheap';
+  return c.json({
+    resource: `${origin}/v2/mcp`,
+    authorization_servers: [authServer],
+    bearer_methods_supported: ['header'],
+    scopes_supported: ['mcp', 'crawl', 'scrape', 'search', 'extract'],
+    resource_name: 'crawl.cheap Remote MCP Server (Firecrawl-compatible)',
+  });
+});
+
+app.get('/.well-known/oauth-authorization-server', (c) => {
+  const issuer = (c.env.API_BASE || 'https://api.crawl.cheap').replace(/\/+$/, '');
+  return c.json({
+    issuer,
+    authorization_endpoint: `${issuer}/authorize`,
+    token_endpoint: `${issuer}/token`,
+    registration_endpoint: `${issuer}/register`,
+    revocation_endpoint: `${issuer}/revoke`,
+    introspection_endpoint: `${issuer}/introspect`,
+    response_types_supported: ['code'],
+    grant_types_supported: ['authorization_code', 'refresh_token', 'client_credentials'],
+    code_challenge_methods_supported: ['S256'],
+    token_endpoint_auth_methods_supported: ['none', 'client_secret_post', 'client_secret_basic'],
+    scopes_supported: ['mcp', 'crawl', 'scrape', 'search', 'extract'],
+  });
+});
+
 app.onError((err, c) => {
   Sentry.captureException(err);
   return c.json(rpcError(null, -32603, 'Internal error'), 500);

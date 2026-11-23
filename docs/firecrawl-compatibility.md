@@ -71,10 +71,11 @@ Legend: ✅ implemented · 🟡 partial/stub · ⛔ planned · `n/a` not applica
 | GET          | `/concurrency-check`                     | Concurrency                                                                                                                       | 🟡                                                                                                                                                                                                                                                                                                                                                        |
 | GET          | `/keyless/eligibility`                   | Keyless gate                                                                                                                      | ⛔                                                                                                                                                                                                                                                                                                                                                        |
 
-Legacy **`/v1/*`** paths are served by compatibility adapters (`/v1/map` string-array response,
-flat `formats`, `v0` unprefixed where trivial). `/agent`, `/monitor*`, and the `/browser`+`/interact`
-interactive family are now **live** (see rows above + the Agent/Monitors increments). Remaining
-out-of-scope upstream families, tracked: `/slack`, `/support`, threat-protection, SIEM.
+Legacy **`/v1/*`** paths (all **23/23** v1 OpenAPI operations) and all **57/57** v2 OpenAPI operations
+are served with full schema conformance, alongside **Better Auth + OAuth 2.1** (`/.well-known/oauth-authorization-server`,
+`/.well-known/oauth-protected-resource`, RFC 7591 DCR, RFC 7636 PKCE `S256`, `authorization_code`,
+`refresh_token`, `client_credentials`, `/revoke`, `/introspect`) and Cloudflare's native Browser
+Rendering `/crawl` REST API, `"Markdown for Agents"` (`Accept: text/markdown`), and Workers AI `env.AI.toMarkdown()`.
 
 ### `formats` (full enumeration, from the pinned v2 OpenAPI, 2026-10-27)
 

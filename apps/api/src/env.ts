@@ -35,6 +35,15 @@ export interface Env {
   VECTORIZE?: VectorizeIndex;
   /** Secret used to HMAC-sign outbound crawl/batch webhooks. */
   WEBHOOK_SECRET?: string;
+  /** Secret used to HMAC-sign Better Auth TT-SESSION tokens. */
+  AUTH_SIGNING_SECRET?: string;
+  /** Optional OAuth social provider credentials for Better Auth. */
+  GITHUB_CLIENT_ID?: string;
+  GITHUB_CLIENT_SECRET?: string;
+  GOOGLE_CLIENT_ID?: string;
+  GOOGLE_CLIENT_SECRET?: string;
+  /** Set to "true" to prefer Cloudflare Browser Rendering /crawl REST API when credentials are present. */
+  CF_CRAWL_ENABLED?: string;
   /** Sentry DSN (server-side `@sentry/cloudflare`) — estate observability baseline. */
   SENTRY_DSN?: string;
 }

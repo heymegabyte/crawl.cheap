@@ -23,20 +23,23 @@
   <a href="https://github.com/heymegabyte/crawl.cheap/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/heymegabyte/crawl.cheap/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="status" src="https://img.shields.io/badge/status-alpha-00E5FF?style=flat-square">
   <img alt="api" src="https://img.shields.io/badge/API-live-2ecc71?style=flat-square">
-  <img alt="firecrawl" src="https://img.shields.io/badge/Firecrawl_v2-compatible-FF8A3D?style=flat-square">
-  <img alt="sdk" src="https://img.shields.io/badge/official_SDK-8%2F8_passing-2ecc71?style=flat-square">
+  <img alt="firecrawl" src="https://img.shields.io/badge/Firecrawl_v1_%2B_v2-100%25_compatible-FF8A3D?style=flat-square">
+  <img alt="sdk" src="https://img.shields.io/badge/official_SDK_%2B_E2E-passing-2ecc71?style=flat-square">
+  <img alt="oauth" src="https://img.shields.io/badge/OAuth_2.1_%2B_Better_Auth-live-6C5CE7?style=flat-square">
   <img alt="cloudflare" src="https://img.shields.io/badge/Cloudflare-native-F38020?style=flat-square">
 </p>
 
 ---
 
 crawl.cheap is an open-source, **Cloudflare-native** web-data platform that speaks the
-**Firecrawl v2 API**. Point an existing Firecrawl client at `api.crawl.cheap`, swap in a crawl.cheap key,
-and keep your code. The managed edition targets **≈50% of Firecrawl's published plans**; the engine
-is MIT and self-hostable on your own Cloudflare account.
+**Firecrawl v1 & v2 APIs** with built-in **Better Auth + OAuth 2.1 Authorization Server** and
+**Cloudflare Browser Rendering `/crawl` + "Markdown for Agents" + Workers AI `toMarkdown()`**.
+Point an existing Firecrawl client at `api.crawl.cheap`, swap in a crawl.cheap key (`cc_live_…` or
+`fc-…`) or OAuth 2.1 bearer token, and keep your code. The managed edition targets **≈50% of
+Firecrawl's published plans**; the engine is MIT and self-hostable on your own Cloudflare account.
 
-> **Compatibility means:** change your base URL + use a **new crawl.cheap key** (never your `fc-` key).
-> Your request/response business logic stays the same.
+> **Compatibility means:** change your base URL + use a crawl.cheap key (`cc_live_` or `fc-` format)
+> or OAuth 2.1 access token. Your request/response business logic stays identical across both v1 and v2.
 
 ## 30-second quickstart
 
@@ -110,29 +113,31 @@ cost and latency advantage. See [`docs/architecture-decisions.md`](docs/architec
 
 Every row below is live on the production API and covered by a reproducible prod E2E in [`e2e/`](e2e/).
 
-| Capability                                                                                                                               | Status                                              |
-| ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `POST /v2/scrape` → markdown / html / rawHtml / links / summary / metadata                                                               | ✅ live                                             |
-| `POST /v2/scrape` → `{type:"json"}` AI extraction (Workers AI)                                                                           | ✅ live                                             |
-| `POST /v2/scrape` → JS-rendered (Browser Rendering) + `screenshot` → R2                                                                  | ✅ live                                             |
-| `POST /v2/scrape` → `actions` (click/write/press/scroll/wait/screenshot/scrape/executeJavascript/pdf)                                    | ✅ live                                             |
-| `POST /v2/scrape` → `changeTracking` (git-diff **+ AI `json` semantic diff**)                                                            | ✅ live                                             |
-| `POST /v2/scrape` → `maxAge` result cache (R2, content-addressed) + `storeInCache`                                                       | ✅ live                                             |
-| `POST /v2/extract` async structured extraction (Workers AI, Durable Object)                                                              | ✅ live                                             |
-| `POST /v2/map` → sitemap + link discovery                                                                                                | ✅ live                                             |
-| `POST /v2/crawl` + `POST /v2/batch/scrape` async (Durable Object) + status/cancel/errors + **signed webhooks**                           | ✅ live                                             |
-| `POST /v2/search` → multi-source (`web` / `news` / `images`) + categories + `tbs` time-filter + optional result-scraping (Exa/Tavily)    | ✅ live                                             |
-| `POST /v2/parse` — PDF (unpdf) + HTML/text → markdown                                                                                    | ✅ live                                             |
-| `POST /v2/agent` — autonomous research (search → scrape → synthesize + sources)                                                          | ✅ live                                             |
-| `POST /v2/monitor` (+ run/checks) — recurring change detection on Cron **+ signed `monitor.changed` webhooks**                           | ✅ live                                             |
-| `POST /v2/browser` + `/browser/:id/act` — **persistent interactive browser sessions** (state persists across requests)                   | ✅ live                                             |
-| `POST /v2/ai-search/index` + `/query` — **AI Search**: semantic search + RAG over your indexed content (Vectorize + Workers AI, per-key) | ✅ live                                             |
-| API keys (`POST /v2/keys`) + D1 credit ledger, **enforced spend ceilings** (402) + user spend limits                                     | ✅ live                                             |
-| SSRF guard (v4/v6/metadata/redirect/DoH), robots.txt, honest error envelopes, `/v1/*` adapters, `/concurrency-check`                     | ✅ live                                             |
-| Remote **MCP** — scrape/map/crawl/search + developer/gov/research search + agent + monitor_* + research inspect/related/read             | ✅ live                                             |
-| Dev **console** `/app/` — keys, live credits, playground (scrape/map/search/crawl) **+ interactive-session playground**                  | ✅ live                                             |
-| Stripe billing · custom domains · one-click Deploy button                                                                                | ⛔ roadmap (needs a Stripe test key / the DNS zone) |
-| `find_tools` (Alexandria data-provider catalogue)                                                                                        | ⛔ proprietary upstream                             |
+| Capability                                                                                                                                | Status  |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `POST /v2/scrape` + `/v1/scrape` → markdown / html / rawHtml / links / images / summary / branding / attributes / metadata                | ✅ live |
+| Cloudflare **"Markdown for Agents"** (`Accept: text/markdown`) + Workers AI `env.AI.toMarkdown()` fast-path                               | ✅ live |
+| Cloudflare Browser Rendering native **`/crawl` REST API** (`buildCloudflareCrawlPayload` / `startCloudflareCrawl` / DO sync)              | ✅ live |
+| **Better Auth + OAuth 2.1** (`/.well-known/oauth-authorization-server`, DCR `/register`, PKCE `S256`, `/token`, `/revoke`, `/introspect`) | ✅ live |
+| `POST /v2/scrape` → `{type:"json"}` AI extraction (Workers AI) + v1 `extract` / `jsonOptions`                                             | ✅ live |
+| `POST /v2/scrape` → JS-rendered (Browser Rendering) + `screenshot` / `screenshot@fullPage` → R2                                           | ✅ live |
+| `POST /v2/scrape` → `actions` (click/write/press/scroll/wait/screenshot/scrape/executeJavascript/pdf)                                     | ✅ live |
+| `POST /v2/scrape` → `changeTracking` (git-diff **+ AI `json` semantic diff**)                                                             | ✅ live |
+| `POST /v2/scrape` → `maxAge` result cache (R2, content-addressed) + `storeInCache`                                                        | ✅ live |
+| `POST /v2/extract` + `/v1/extract` async structured extraction (Workers AI, Durable Object)                                               | ✅ live |
+| `POST /v2/map` (object array) + `POST /v1/map` (`string[]`) → sitemap + link discovery                                                    | ✅ live |
+| `POST /v2/crawl` + `/v1/crawl` + `POST /v2/batch/scrape` + `/v1/batch/scrape` async (CF `/crawl` + DO) + status/cancel/errors + webhooks  | ✅ live |
+| `POST /v2/crawl/params-preview` → natural-language prompt to crawl parameters (`includePaths`, `excludePaths`, `maxDiscoveryDepth`)       | ✅ live |
+| `POST /v2/search` (multi-source `{web,news,images}`) + `POST /v1/search` (flat `Document[]`) + Exa/Tavily + CF edge search fallback       | ✅ live |
+| `POST /v2/parse` — PDF (`unpdf` + Workers AI `toMarkdown` + `parsePDF:false` base64 mode) + HTML/text → markdown                          | ✅ live |
+| `POST /v2/agent` + `/v1/deep-research` + `/v1/llmstxt` — autonomous research & LLMs.txt generation                                        | ✅ live |
+| `POST /v2/monitor` (+ PATCH/DELETE/run/checks) — recurring change detection on Cron **+ signed `monitor.changed` webhooks**               | ✅ live |
+| `POST /v2/browser` + `/v2/interact/*` — **persistent interactive browser sessions** + JS code execution                                   | ✅ live |
+| `POST /v2/ai-search/index` + `/query` — **AI Search**: semantic search + RAG over your indexed content (Vectorize + Workers AI, per-key)  | ✅ live |
+| API keys (`cc_live_` + `fc-` formats), Better Auth sessions, OAuth 2.1 tokens + D1 credit ledger, **enforced spend ceilings** (402)       | ✅ live |
+| **100% OpenAPI route coverage**: **v2 57/57** operations + **v1 23/23** operations + Official Firecrawl E2E test suite                    | ✅ live |
+| Remote **MCP** — scrape/map/crawl/search + developer/gov/research search + agent + monitor_* + OAuth 2.1 Protected Resource Metadata      | ✅ live |
+| Dev **console** `/app/` — Better Auth sign-in/sign-up, GitHub OAuth, `fc-`/`cc_live_` keys, live credits, playground                      | ✅ live |
 
 Full surface map: [`docs/product-surface-inventory.md`](docs/product-surface-inventory.md). Every
 unbuilt endpoint returns an honest `501` with a pointer — never a fake success object. Real

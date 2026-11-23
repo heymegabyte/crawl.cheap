@@ -9,6 +9,7 @@
   "workers_dev": false,
   "preview_urls": false,
 
+  "workers_dev": true,
   "routes": [{ "pattern": "api.crawl.cheap", "custom_domain": true }],
 
   "triggers": { "crons": ["*/15 * * * *"] },

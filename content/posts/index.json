@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "packageContract": "@theme.tools/blog",
+  "editorContract": "@theme.tools/blog/editor",
+  "repository": "crawl.cheap",
+  "domain": "crawl.cheap",
+  "updatedAt": "2026-11-19T01:58:55.529Z",
+  "files": ["content/posts/edge-web-scraping-for-ai-agents.json"]
+}

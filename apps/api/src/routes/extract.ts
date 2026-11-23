@@ -3,14 +3,16 @@ import type { Context } from 'hono';
 import { ExtractRequestSchema } from '@crawlcheap/contracts';
 import type { Env } from '../env';
 import type { ExtractStatusResult } from '../extract-do';
-import { fail, parseBody } from '../lib/respond';
+import { fail, parseBody, assertUuidOrFail } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
 import { allowDemo } from '../lib/ratelimit';
+import { getExtractRunner } from '../lib/local-jobs';
 
 const route = new Hono<{ Bindings: Env; Variables: Vars }>();
 
 function gate(c: Context<{ Bindings: Env; Variables: Vars }>): Response | null {
   const p = c.get('principal');
+  if (p.invalidCredentials) return requireAuth(c)!;
   if (p.authed) return null;
   if (c.env.DEMO_MODE !== 'true') {
     const denied = requireAuth(c);
@@ -29,14 +31,12 @@ function gate(c: Context<{ Bindings: Env; Variables: Vars }>): Response | null {
 route.post('/extract', async (c) => {
   const denied = gate(c);
   if (denied) return denied;
-  if (!c.env.EXTRACT)
-    return fail(c, 501, 'Extract requires the EXTRACT Durable Object binding.', 'UNKNOWN_ERROR');
   const parsed = await parseBody(c, ExtractRequestSchema);
   if (!parsed.ok) return parsed.response;
 
   const id = crypto.randomUUID();
-  const stub = c.env.EXTRACT.get(c.env.EXTRACT.idFromName(id));
-  const { invalidURLs } = await stub.start(parsed.data);
+  const runner = getExtractRunner(c.env, id);
+  const { invalidURLs } = await runner.start(parsed.data);
   return c.json({
     success: true as const,
     id,
@@ -45,16 +45,23 @@ route.post('/extract', async (c) => {
 });
 
 route.get('/extract/:id', async (c) => {
-  if (!c.env.EXTRACT) return fail(c, 501, 'Extract not configured.', 'UNKNOWN_ERROR');
-  const stub = c.env.EXTRACT.get(c.env.EXTRACT.idFromName(c.req.param('id')));
-  const s = (await stub.status()) as ExtractStatusResult | null;
+  const denied = gate(c);
+  if (denied) return denied;
+  const id = c.req.param('id');
+  const invalid = assertUuidOrFail(c, id);
+  if (invalid) return invalid;
+
+  const runner = getExtractRunner(c.env, id);
+  const s = (await runner.status()) as ExtractStatusResult | null;
   if (!s) return fail(c, 404, 'Extract job not found.');
   return c.json({
     success: s.status !== 'failed',
+    id,
     status: s.status,
     ...(s.data !== undefined ? { data: s.data } : {}),
     ...(s.sources ? { sources: s.sources } : {}),
     ...(s.error ? { error: s.error } : {}),
+    expiresAt: new Date(Date.parse(s.createdAt) + 86_400_000).toISOString(),
   });
 });
 

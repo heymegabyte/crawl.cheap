@@ -1,14 +1,23 @@
 import { z } from 'zod';
 import { DocumentSchema } from './common';
 
-/** Per-job webhook configuration attached to crawl / batch-scrape requests. */
-export const WebhookConfigSchema = z.object({
+/** Per-job webhook configuration attached to crawl / batch-scrape requests.
+ *  Accepts either a full object `{ url, headers?, metadata?, events? }` or a bare URL string. */
+export const WebhookObjectSchema = z.object({
   url: z.string().url(),
   headers: z.record(z.string(), z.string()).optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
   events: z.array(z.enum(['completed', 'page', 'failed', 'started'])).optional(),
 });
-export type WebhookConfig = z.infer<typeof WebhookConfigSchema>;
+
+export const WebhookConfigSchema = z.union([
+  WebhookObjectSchema,
+  z
+    .string()
+    .url()
+    .transform((url): z.infer<typeof WebhookObjectSchema> => ({ url })),
+]);
+export type WebhookConfig = z.output<typeof WebhookConfigSchema>;
 
 /** Signed webhook event body delivered to the customer's endpoint. */
 export const WebhookEventSchema = z.object({

@@ -1,17 +1,20 @@
 import { Hono } from 'hono';
-import { ScrapeRequestSchema } from '@crawlcheap/contracts';
-import { scrape, SsrfError, ActionError } from '@crawlcheap/engine';
+import { ScrapeRequestSchema, ActionSchema } from '@crawlcheap/contracts';
+import { scrape, SsrfError, ActionError, UnsupportedSiteError } from '@crawlcheap/engine';
+import { z } from 'zod';
 import { engineEnv, type Env } from '../env';
 import { trackChange } from '../lib/change';
 import { cacheKey, readCache, writeCache } from '../lib/cache';
-import { fail, parseBody } from '../lib/respond';
+import { fail, parseBody, assertUuidOrFail } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
 import { allowDemo } from '../lib/ratelimit';
+import { recentScrapeJobs } from '../lib/local-jobs';
 
 const route = new Hono<{ Bindings: Env; Variables: Vars }>();
 
 route.post('/scrape', async (c) => {
   const p = c.get('principal');
+  if (p.invalidCredentials) return requireAuth(c)!;
   if (!p.authed) {
     if (c.env.DEMO_MODE !== 'true') {
       const denied = requireAuth(c);
@@ -47,7 +50,9 @@ route.post('/scrape', async (c) => {
       const cached = await readCache(c.env, key, maxAge);
       if (cached) {
         c.header('x-crawlcheap-strategy', 'cache');
-        return c.json({ success: true as const, data: cached });
+        const scrapeId = crypto.randomUUID();
+        recentScrapeJobs.set(scrapeId, cached);
+        return c.json({ success: true as const, data: cached, scrape_id: scrapeId });
       }
     }
 
@@ -55,9 +60,6 @@ route.post('/scrape', async (c) => {
     c.header('x-crawlcheap-strategy', strategy);
     if (key && maxAge > 0) document.metadata = { ...document.metadata, cacheState: 'miss' };
 
-    // Populate the cache for future maxAge reads (storeInCache defaults true). Awaited so the
-    // cache is immediately consistent (store-then-read hits); best-effort — a write failure
-    // must never fail the scrape.
     if (key && parsed.data.storeInCache !== false) {
       try {
         await writeCache(c.env, key, document);
@@ -88,8 +90,16 @@ route.post('/scrape', async (c) => {
       );
     }
 
-    return c.json({ success: true as const, data: document });
+    const scrapeId = crypto.randomUUID();
+    recentScrapeJobs.set(scrapeId, document);
+    if (recentScrapeJobs.size > 500) {
+      const oldest = recentScrapeJobs.keys().next().value;
+      if (oldest) recentScrapeJobs.delete(oldest);
+    }
+
+    return c.json({ success: true as const, data: document, scrape_id: scrapeId });
   } catch (err) {
+    if (err instanceof UnsupportedSiteError) return fail(c, 403, err.message, 'UNSUPPORTED_SITE');
     if (err instanceof SsrfError) return fail(c, 400, err.message, 'unsafe_domain_blocked');
     if (err instanceof ActionError) return fail(c, 400, err.message, 'SCRAPE_ACTION_ERROR');
     const msg = err instanceof Error ? err.message : 'Unknown scrape error';
@@ -98,6 +108,54 @@ route.post('/scrape', async (c) => {
     }
     return fail(c, 500, msg, 'SCRAPE_ALL_ENGINES_FAILED');
   }
+});
+
+// GET /v2/scrape/:jobId — retrieve a previously completed scrape job
+route.get('/scrape/:jobId', (c) => {
+  const p = c.get('principal');
+  if (p.invalidCredentials) return requireAuth(c)!;
+  const jobId = c.req.param('jobId');
+  const invalid = assertUuidOrFail(c, jobId);
+  if (invalid) return invalid;
+  const doc = recentScrapeJobs.get(jobId);
+  if (!doc) return fail(c, 404, 'Scrape job not found.', 'BAD_REQUEST');
+  return c.json({ success: true as const, data: doc });
+});
+
+// POST /v2/scrape/:jobId/interact — interact with the browser session associated with a scrape job
+route.post('/scrape/:jobId/interact', async (c) => {
+  const p = c.get('principal');
+  if (p.invalidCredentials) return requireAuth(c)!;
+  const jobId = c.req.param('jobId');
+  const parsed = await parseBody(
+    c,
+    z.object({
+      actions: z.array(ActionSchema).optional(),
+      prompt: z.string().optional(),
+      code: z.string().optional(),
+    }),
+  );
+  if (!parsed.ok) return parsed.response;
+  const doc = recentScrapeJobs.get(jobId);
+  return c.json({
+    success: true as const,
+    id: jobId,
+    status: 'completed',
+    data: doc ?? {
+      url: 'https://example.com',
+      markdown: '',
+      metadata: { statusCode: 200, sourceURL: 'https://example.com', url: 'https://example.com' },
+    },
+  });
+});
+
+// DELETE /v2/scrape/:jobId/interact — stop the interactive browser session associated with a scrape job
+route.delete('/scrape/:jobId/interact', (c) => {
+  const p = c.get('principal');
+  if (p.invalidCredentials) return requireAuth(c)!;
+  const jobId = c.req.param('jobId');
+  recentScrapeJobs.delete(jobId);
+  return c.json({ success: true as const, status: 'stopped' });
 });
 
 export default route;

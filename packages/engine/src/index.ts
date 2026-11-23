@@ -3,8 +3,28 @@
  * execution planner over a free static-HTTP path (SSRF-guarded fetch → readability
  * extraction → HTML→Markdown) with escalation to the Browser Rendering tier.
  */
-export { scrape, type ScrapeResult } from './scrape';
-export { mapSite } from './map';
+export { scrape, synthesizeDeterministicJson, type ScrapeResult } from './scrape';
+export {
+  mapSite,
+  mapSiteWithMeta,
+  assertSupportedSite,
+  UnsupportedSiteError,
+  type MapSiteResult,
+} from './map';
+export {
+  cloudflareCrawlAvailable,
+  buildCloudflareCrawlPayload,
+  startCloudflareCrawl,
+  getCloudflareCrawlStatus,
+  normalizeCloudflareCrawlResult,
+  cancelCloudflareCrawl,
+  deriveCrawlParamsFromPrompt,
+  type CloudflareCrawlRecord,
+  type CloudflareCrawlStatusPayload,
+  type CloudflareCrawlNormalizedStatus,
+  type CloudflareCrawlRequestPayload,
+  type CrawlParamsPreviewResult,
+} from './cf-crawl';
 export { planScrape, formatTypes, type ScrapePlan, type Tier } from './planner';
 export { discoverSitemapUrls } from './sitemap';
 export { fetchRobots, isAllowed } from './robots';
@@ -24,7 +44,14 @@ export {
   parseIpv4,
 } from './ssrf';
 export { htmlToMarkdown, stripBase64Images, type MarkdownContext } from './html-to-markdown';
-export { parseHtml, selectContent, extractLinks } from './extract-content';
+export {
+  parseHtml,
+  selectContent,
+  extractLinks,
+  extractImages,
+  extractAttributes,
+  extractBranding,
+} from './extract-content';
 export { extractMetadata } from './metadata';
 export { browserAvailable, browserQuickAction } from './browser';
 export {
@@ -45,5 +72,5 @@ export {
   type ImageResult,
   type SearchSources,
 } from './search';
-export { parseDocument, type ParseResult } from './parse';
+export { parseDocument, looksLikePdf, type ParseResult } from './parse';
 export type { EngineEnv, BrowserQuickAction, WorkersAiBinding } from './types';

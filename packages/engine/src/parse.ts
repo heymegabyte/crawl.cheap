@@ -1,32 +1,41 @@
 import { extractText, getDocumentProxy } from 'unpdf';
 import { parseHtml, selectContent } from './extract-content';
 import { htmlToMarkdown } from './html-to-markdown';
+import type { EngineEnv } from './types';
 
 /**
- * Document parsing → Markdown. PDF via unpdf (Workers-compatible serverless PDF.js),
- * HTML via the readability engine, plain text passthrough. DOCX/XLSX/PPTX are an
- * explicit unsupported-format error (no Workers-safe parser yet) — never a silent empty.
+ * Document parsing → Markdown.
+ * Leverages Cloudflare Workers AI `env.AI.toMarkdown()` when bound, with deterministic
+ * serverless fallback: PDF via unpdf (Workers-compatible PDF.js), HTML via readability,
+ * plain text passthrough.
  */
 
 export interface ParseResult {
   markdown: string;
-  metadata: { contentType?: string; numPages?: number; title?: string };
+  metadata: {
+    contentType?: string;
+    numPages?: number;
+    title?: string;
+    creditsUsed?: number;
+    statusCode?: number;
+  };
   pages?: Array<{ pageNumber: number; markdown: string }>;
 }
 
-function looksLikePdf(bytes: ArrayBuffer): boolean {
+export function looksLikePdf(bytes: ArrayBuffer): boolean {
   const head = new Uint8Array(bytes.slice(0, 5));
   return head[0] === 0x25 && head[1] === 0x50 && head[2] === 0x44 && head[3] === 0x46; // %PDF
 }
 
 function looksLikeHtml(text: string): boolean {
-  return /^\s*<(!doctype|html|head|body)/i.test(text);
+  return /^\s*<(!doctype|html|head|body|h1|div|p|article|main|section)/i.test(text);
 }
 
 export async function parseDocument(
   bytes: ArrayBuffer,
   contentType: string,
   baseUrl = '',
+  env?: EngineEnv,
 ): Promise<ParseResult> {
   const ct = (contentType || '').toLowerCase();
 
@@ -41,12 +50,36 @@ export async function parseDocument(
       pageNumber: i + 1,
       markdown: (t ?? '').replace(/[ \t]+\n/g, '\n').trim(),
     }));
-    const markdown = pages
+    let markdown = pages
       .map((p) => p.markdown)
       .filter(Boolean)
       .join('\n\n')
       .trim();
-    return { markdown, metadata: { contentType: 'application/pdf', numPages: totalPages }, pages };
+
+    // If unpdf text extraction is empty (e.g. scanned PDF) and Cloudflare Workers AI toMarkdown() is available, use it.
+    if (!markdown && env?.AI?.toMarkdown) {
+      try {
+        const converted = await env.AI.toMarkdown([
+          { name: baseUrl || 'document.pdf', blob: new Blob([bytes], { type: 'application/pdf' }) },
+        ]);
+        if (converted?.[0]?.data) {
+          markdown = converted[0].data.trim();
+        }
+      } catch {
+        /* keep unpdf result */
+      }
+    }
+
+    return {
+      markdown,
+      metadata: {
+        contentType: 'application/pdf',
+        numPages: totalPages,
+        creditsUsed: 1,
+        statusCode: 200,
+      },
+      pages,
+    };
   }
 
   // Note: match XML narrowly — DOCX's mimetype contains the substring "xml"
@@ -56,7 +89,7 @@ export async function parseDocument(
     const content = selectContent(parseHtml(html), { onlyMainContent: true });
     return {
       markdown: htmlToMarkdown(content, { baseUrl }),
-      metadata: { contentType: 'text/html' },
+      metadata: { contentType: 'text/html', creditsUsed: 1, statusCode: 200 },
     };
   }
 
@@ -66,10 +99,13 @@ export async function parseDocument(
       const content = selectContent(parseHtml(decoded), { onlyMainContent: true });
       return {
         markdown: htmlToMarkdown(content, { baseUrl }),
-        metadata: { contentType: 'text/html' },
+        metadata: { contentType: 'text/html', creditsUsed: 1, statusCode: 200 },
       };
     }
-    return { markdown: decoded.trim(), metadata: { contentType: ct || 'text/plain' } };
+    return {
+      markdown: decoded.trim(),
+      metadata: { contentType: ct || 'text/plain', creditsUsed: 1, statusCode: 200 },
+    };
   }
 
   throw new Error(

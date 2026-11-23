@@ -69,16 +69,23 @@
   <h1 class="t">Developer Console</h1>
   <p class="sub">Create a key, watch your credits, and run the API — all against the live edge.</p>
 
-  <!-- KEY -->
+  <!-- BETTER AUTH & OAUTH 2.1 + KEY -->
   <div class="card tt-card" id="keyCard">
-    <h2>🔑 API key</h2>
-    <div class="hint">Keys are shown once. Stored only in this browser (localStorage). Never a Firecrawl fc- key.</div>
+    <h2>🔐 Better Auth · OAuth 2.1 &amp; API Key</h2>
+    <div class="hint">Sign in with Better Auth (Cloudflare D1 + WebCrypto session rotation) or OAuth 2.1 + PKCE S256, or mint a drop-in Firecrawl-compatible API key (<code>cc_live_…</code> or <code>fc-…</code>).</div>
     <div id="noKey">
+      <div class="row" style="margin-bottom:12px">
+        <input id="authEmail" type="email" placeholder="email@domain.com" style="width:200px" />
+        <input id="authPass" type="password" placeholder="password (6+ chars)" style="width:170px" />
+        <button class="btn btn-p tt-btn tt-btn--primary" id="btnSignUp">Sign up / Sign in</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="btnGithubOAuth">GitHub OAuth</button>
+      </div>
       <div class="row">
-        <button class="btn btn-p tt-btn tt-btn--primary" id="createKey">Create a free key</button>
+        <button class="btn btn-p tt-btn tt-btn--primary" id="createKey">Create cc_live_ key</button>
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="createFcKey">Create fc- compat key</button>
         <span style="color:var(--faint);font-size:13px">or</span>
-        <input class="grow" id="pasteKey" placeholder="paste an existing cc_live_… key" />
-        <button class="btn btn-g tt-btn tt-btn--ghost" id="useKey">Use key</button>
+        <input class="grow" id="pasteKey" placeholder="paste an existing cc_live_… / fc-… / OAuth ccat_… token" />
+        <button class="btn btn-g tt-btn tt-btn--ghost" id="useKey">Use token</button>
       </div>
     </div>
     <div id="hasKey" style="display:none">
@@ -273,9 +280,36 @@ function curl() {
 
 // wire up
 $('createKey').onclick = async () => {
-  const { json } = await api('/v2/keys', { method: 'POST', body: JSON.stringify({ name: 'console' }) });
-  if (json && json.apiKey) { key = json.apiKey; localStorage.setItem('crawlcheap_key', key); renderKey(); refreshAccount(); toast('Key created — copy it, it is shown once'); }
+  const { json } = await api('/v2/keys', { method: 'POST', body: JSON.stringify({ name: 'console', prefix: 'cc_live_' }) });
+  if (json && json.apiKey) { key = json.apiKey; localStorage.setItem('crawlcheap_key', key); renderKey(); refreshAccount(); toast('cc_live_ key created'); }
   else toast('Could not create key');
+};
+$('createFcKey').onclick = async () => {
+  const { json } = await api('/v2/keys', { method: 'POST', body: JSON.stringify({ name: 'console-fc', prefix: 'fc-' }) });
+  if (json && json.apiKey) { key = json.apiKey; localStorage.setItem('crawlcheap_key', key); renderKey(); refreshAccount(); toast('Firecrawl-compatible fc- key created'); }
+  else toast('Could not create fc- key');
+};
+$('btnSignUp').onclick = async () => {
+  const email = $('authEmail').value.trim();
+  const password = $('authPass').value;
+  if (!email || !password) { toast('Enter email + password'); return; }
+  let res = await api('/api/auth/sign-in/email', { method: 'POST', body: JSON.stringify({ email, password }) });
+  if (res.status === 401) {
+    res = await api('/api/auth/sign-up/email', { method: 'POST', body: JSON.stringify({ email, password }) });
+  }
+  if (res.json && (res.json.apiKey || res.json.token)) {
+    key = res.json.apiKey || res.json.token;
+    localStorage.setItem('crawlcheap_key', key);
+    renderKey();
+    refreshAccount();
+    toast('Authenticated with Better Auth (' + email + ')');
+  } else {
+    toast((res.json && res.json.error) || 'Auth failed');
+  }
+};
+$('btnGithubOAuth').onclick = async () => {
+  const res = await api('/api/auth/sign-in/social', { method: 'POST', body: JSON.stringify({ provider: 'github', callbackURL: location.href }) });
+  if (res.json && res.json.url) location.href = res.json.url;
 };
 $('useKey').onclick = () => { const v = $('pasteKey').value.trim(); if (v) { key = v; localStorage.setItem('crawlcheap_key', key); renderKey(); refreshAccount(); } };
 $('copyKey').onclick = () => { navigator.clipboard.writeText(key); toast('Copied'); };

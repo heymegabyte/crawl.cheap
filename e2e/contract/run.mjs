@@ -17,7 +17,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const API = process.env.API ?? 'https://crawl-cheap-api.manhattan.workers.dev';
+const API = process.env.API ?? 'https://api.crawl.cheap';
 const DIR = path.dirname(new URL(import.meta.url).pathname);
 const UP = path.resolve(DIR, '../../packages/contracts/upstream');
 const SPECS = {

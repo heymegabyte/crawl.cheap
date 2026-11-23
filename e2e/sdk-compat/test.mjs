@@ -2,7 +2,7 @@
 // pointed at the crawl.cheap API with a crawl.cheap key. No business-logic changes.
 import { Firecrawl } from '@mendable/firecrawl-js';
 
-const API = process.env.CRAWLCHEAP_API || 'https://crawl-cheap-api.manhattan.workers.dev';
+const API = process.env.CRAWLCHEAP_API || 'https://api.crawl.cheap';
 let pass = 0,
   fail = 0;
 const ok = (n, cond, extra = '') => {

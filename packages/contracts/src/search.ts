@@ -5,14 +5,44 @@ import { ScrapeOptionsSchema } from './scrape';
 export const SearchRequestSchema = z.object({
   query: z.string().min(1),
   limit: z.number().int().positive().max(100).default(10),
-  sources: z.array(z.enum(['web', 'news', 'images', 'alexandria'])).default(['web']),
-  categories: z.array(z.enum(['github', 'research', 'pdf', 'developer', 'gov'])).optional(),
+  sources: z
+    .array(
+      z.union([
+        z.enum(['web', 'news', 'images', 'alexandria']),
+        z
+          .object({ type: z.enum(['web', 'news', 'images', 'alexandria']) })
+          .transform((o) => o.type),
+      ]),
+    )
+    .default(['web']),
+  categories: z
+    .array(
+      z.union([
+        z.enum(['github', 'research', 'pdf', 'developer', 'gov']),
+        z
+          .object({ type: z.enum(['github', 'research', 'pdf', 'developer', 'gov']) })
+          .transform((o) => o.type),
+      ]),
+    )
+    .optional(),
+  includeDomains: z.array(z.string()).optional(),
+  excludeDomains: z.array(z.string()).optional(),
   tbs: z.string().optional(),
+  lang: z.string().optional(),
   country: z.string().optional(),
-  location: z.string().optional(),
+  location: z
+    .union([
+      z.string(),
+      z
+        .object({ country: z.string().optional(), languages: z.array(z.string()).optional() })
+        .transform((o) => o.country ?? 'us'),
+    ])
+    .optional(),
   ignoreInvalidURLs: z.boolean().optional(),
   timeout: z.number().int().positive().default(60000),
   scrapeOptions: ScrapeOptionsSchema.optional(),
+  origin: z.string().optional(),
+  integration: z.string().optional(),
 });
 export type SearchRequest = z.input<typeof SearchRequestSchema>;
 

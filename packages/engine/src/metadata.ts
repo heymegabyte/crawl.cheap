@@ -13,8 +13,11 @@ function decode(s: string): string {
 
 export interface MetadataInput {
   url: string;
+  sourceURL?: string;
   statusCode: number;
   contentType?: string;
+  proxyUsed?: string;
+  creditsUsed?: number;
 }
 
 /** Extract document metadata from <head> + the HTTP response. Reads <title>, meta
@@ -57,8 +60,10 @@ export function extractMetadata(root: HTMLElement, info: MetadataInput): Documen
 
   const md: Record<string, string | number | string[] | null> = {
     statusCode: info.statusCode,
-    sourceURL: info.url,
+    sourceURL: info.sourceURL ?? info.url,
     url: info.url,
+    proxyUsed: info.proxyUsed ?? 'basic',
+    ...(info.creditsUsed !== undefined ? { creditsUsed: info.creditsUsed } : {}),
   };
   const put = (key: string, value: string | undefined): void => {
     if (value) md[key] = value;

@@ -3,6 +3,8 @@
 export interface BrowserQuickAction {
   /** env.BROWSER.quickAction("markdown"|"json"|"scrape"|..., body) */
   quickAction(action: string, body: Record<string, unknown>): Promise<Response>;
+  /** Optional native Browser Rendering /crawl binding method. */
+  crawl?(body: Record<string, unknown>): Promise<Response>;
 }
 
 export interface WorkersAiBinding {
@@ -11,6 +13,10 @@ export interface WorkersAiBinding {
     inputs: Record<string, unknown>,
     options?: Record<string, unknown>,
   ): Promise<unknown>;
+  /** Cloudflare Workers AI native document-to-Markdown conversion utility. */
+  toMarkdown?(
+    files: Array<{ name: string; blob: Blob }>,
+  ): Promise<Array<{ name: string; format: string; tokens?: number; data: string }>>;
 }
 
 export interface EngineEnv {

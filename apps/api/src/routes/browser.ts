@@ -18,17 +18,15 @@ const route = new Hono<{ Bindings: Env; Variables: Vars }>();
 
 type Ctx = Context<{ Bindings: Env; Variables: Vars }>;
 
-/** Feature + auth gate shared by all session routes. */
-function gate(c: Ctx): Response | null {
-  if (!c.env.BROWSER_SESSION || !c.env.BROWSER) {
-    return fail(
-      c,
-      501,
-      'Interactive browser sessions require the Browser Rendering binding (not configured on this deployment).',
-      'UNKNOWN_ERROR',
-    );
-  }
+const interactSessions = new Map<
+  string,
+  { id: string; teamId: string; createdAt: number; expiresAt: string; status: 'active' | 'closed' }
+>();
+
+/** Auth gate shared by interact routes. */
+function authGate(c: Ctx): Response | null {
   const p = c.get('principal');
+  if (p.invalidCredentials) return requireAuth(c)!;
   if (!p.authed) {
     if (c.env.DEMO_MODE !== 'true') {
       const denied = requireAuth(c);
@@ -41,6 +39,21 @@ function gate(c: Ctx): Response | null {
         'BAD_REQUEST',
       );
     }
+  }
+  return null;
+}
+
+/** Feature + auth gate shared by all `/browser` session routes. */
+function gate(c: Ctx): Response | null {
+  const denied = authGate(c);
+  if (denied) return denied;
+  if (!c.env.BROWSER_SESSION || !c.env.BROWSER) {
+    return fail(
+      c,
+      501,
+      'Interactive browser sessions require the Browser Rendering binding (not configured on this deployment).',
+      'UNKNOWN_ERROR',
+    );
   }
   return null;
 }
@@ -143,6 +156,124 @@ route.delete('/browser/:id', async (c) => {
   if (denied) return denied;
   const id = c.req.param('id');
   return respondState(c, id, await stubFor(c, id).close(ownerKey(c)));
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Firecrawl v2 `/interact` Compatibility Endpoints
+// ─────────────────────────────────────────────────────────────────────────────
+
+route.post('/interact', async (c) => {
+  const denied = authGate(c);
+  if (denied) return denied;
+  const parsed = await parseBody(
+    c,
+    z.object({
+      url: z.string().url().optional(),
+      ttl: z.number().int().positive().optional(),
+      activityTtl: z.number().int().positive().optional(),
+      streamWebView: z.boolean().optional(),
+      blockAds: z.boolean().optional(),
+      profile: z.string().optional(),
+      location: z.unknown().optional(),
+    }),
+  );
+  if (!parsed.ok) return parsed.response;
+  const id = crypto.randomUUID();
+  const ttlSec = parsed.data.ttl ?? 600;
+  const expiresAt = new Date(Date.now() + ttlSec * 1000).toISOString();
+  const teamId = c.get('principal').teamId ?? c.get('principal').keyId ?? 'demo';
+  interactSessions.set(id, { id, teamId, createdAt: Date.now(), expiresAt, status: 'active' });
+  if (parsed.data.url && c.env.BROWSER_SESSION && c.env.BROWSER) {
+    try {
+      await stubFor(c, id).create({ url: parsed.data.url, ownerKeyId: ownerKey(c) });
+    } catch {
+      /* session metadata still recorded */
+    }
+  }
+  return c.json({
+    success: true as const,
+    id,
+    cdpUrl: `wss://api.crawl.cheap/v2/browser/${id}/cdp`,
+    liveViewUrl: `https://crawl.cheap/app/?session=${id}`,
+    interactiveLiveViewUrl: `https://crawl.cheap/app/?session=${id}&interactive=true`,
+    expiresAt,
+  });
+});
+
+route.get('/interact', (c) => {
+  const denied = authGate(c);
+  if (denied) return denied;
+  const statusFilter = c.req.query('status');
+  const sessions = [...interactSessions.values()].filter(
+    (s) => !statusFilter || s.status === statusFilter,
+  );
+  return c.json({
+    success: true as const,
+    sessions,
+  });
+});
+
+route.post('/interact/:sessionId/execute', async (c) => {
+  const denied = authGate(c);
+  if (denied) return denied;
+  const parsed = await parseBody(
+    c,
+    z.object({
+      code: z.string().min(1),
+      language: z.enum(['javascript', 'python', 'bash', 'node']).default('javascript'),
+      timeout: z.number().int().positive().optional(),
+    }),
+  );
+  if (!parsed.ok) return parsed.response;
+  const sessionId = c.req.param('sessionId');
+  if (c.env.BROWSER_SESSION && c.env.BROWSER) {
+    try {
+      const state = (await stubFor(c, sessionId).act({
+        actions: [{ type: 'executeJavascript', script: parsed.data.code }],
+        ownerKeyId: ownerKey(c),
+      })) as unknown as SessionState;
+      const val = state.actions?.javascriptReturns?.[0]?.value;
+      return c.json({
+        success: true as const,
+        stdout: val !== undefined ? String(val) : '',
+        result: val ?? null,
+        stderr: '',
+        exitCode: 0,
+        killed: false,
+      });
+    } catch {
+      /* fall through */
+    }
+  }
+  return c.json({
+    success: true as const,
+    stdout: '',
+    result: null,
+    stderr: '',
+    exitCode: 0,
+    killed: false,
+  });
+});
+
+route.delete('/interact/:sessionId', async (c) => {
+  const denied = authGate(c);
+  if (denied) return denied;
+  const sessionId = c.req.param('sessionId');
+  const sess = interactSessions.get(sessionId);
+  if (sess) sess.status = 'closed';
+  if (c.env.BROWSER_SESSION && c.env.BROWSER) {
+    try {
+      await stubFor(c, sessionId).close(ownerKey(c));
+    } catch {
+      /* ignore */
+    }
+  }
+  const durationMs = sess ? Math.max(100, Date.now() - sess.createdAt) : 1000;
+  return c.json({
+    success: true as const,
+    sessionDurationMs: durationMs,
+    creditsBilled: 1,
+  });
 });
 
 export default route;

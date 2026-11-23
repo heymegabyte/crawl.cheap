@@ -1,7 +1,7 @@
 import puppeteer from '@cloudflare/puppeteer';
 import type { BrowserWorker, Browser, Page, PaperFormat } from '@cloudflare/puppeteer';
 import type { Action, Document, ScrapeRequest } from '@crawlcheap/contracts';
-import { parseHtml, selectContent, extractLinks } from './extract-content';
+import { parseHtml, selectContent, extractLinks, extractImages } from './extract-content';
 import { extractMetadata } from './metadata';
 import { htmlToMarkdown } from './html-to-markdown';
 import { assertSafeUrl } from './ssrf';
@@ -165,6 +165,7 @@ export async function captureDocument(
   if (formats.has('html')) doc.html = content.toString();
   if (formats.has('rawHtml')) doc.rawHtml = rawHtml;
   if (formats.has('links')) doc.links = links;
+  if (formats.has('images')) doc.images = extractImages(root, finalUrl);
   if (formats.has('screenshot')) {
     const bytes = (await page.screenshot({ type: 'png', fullPage: false })) as Uint8Array;
     const u = await storeArtifact(env, bytes, 'png');

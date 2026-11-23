@@ -8,7 +8,7 @@
  *   node e2e/quote/run.mjs            # against prod
  *   API=https://… node e2e/quote/run.mjs
  */
-const API = process.env.API ?? 'https://crawl-cheap-api.manhattan.workers.dev';
+const API = process.env.API ?? 'https://api.crawl.cheap';
 
 let pass = 0;
 let fail = 0;

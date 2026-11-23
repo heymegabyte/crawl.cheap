@@ -6,10 +6,19 @@ export const MapRequestSchema = z.object({
   search: z.string().optional(),
   limit: z.number().int().positive().max(30000).default(5000),
   sitemap: z.enum(['include', 'only', 'skip']).default('include'),
+  /** Legacy v1 alias for sitemap: 'only'. */
+  sitemapOnly: z.boolean().optional(),
+  /** Legacy v1 alias for sitemap: 'skip'. */
+  ignoreSitemap: z.boolean().optional(),
   includeSubdomains: z.boolean().default(true),
   ignoreQueryParameters: z.boolean().default(true),
+  ignoreCache: z.boolean().optional(),
+  useIndex: z.boolean().optional(),
+  useMock: z.string().optional(),
   timeout: z.number().int().positive().optional(),
   location: LocationSchema.optional(),
+  origin: z.string().optional(),
+  integration: z.string().optional(),
 });
 export type MapRequest = z.input<typeof MapRequestSchema>;
 

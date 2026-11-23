@@ -6,6 +6,8 @@ export const BatchScrapeRequestSchema = ScrapeOptionsSchema.extend({
   // Lenient: invalid entries are filtered + reported as `invalidURLs` (honours ignoreInvalidURLs),
   // matching Firecrawl. URL validity is enforced per-item in the batch handler + SSRF guard.
   urls: z.array(z.string()).min(1),
+  /** Optional nested scrape options wrapper used by some SDK call paths (`{ urls, options: { formats } }`). */
+  options: ScrapeOptionsSchema.optional(),
   webhook: WebhookConfigSchema.optional(),
   appendToId: z.string().optional(),
   ignoreInvalidURLs: z.boolean().default(true),

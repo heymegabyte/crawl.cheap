@@ -57,13 +57,26 @@ against the defined contract rather than a fake 200. Specifically:
   available today** via `POST /v2/scrape` with `{type:"json"}`; the async batch-extract jobs are
   what remain planned.
 
-## Legacy v1 adapters
+## Legacy v1 adapters (23/23 operations — 100% live)
 
-| Method | Path          | Purpose                             | Status  |
-| ------ | ------------- | ----------------------------------- | ------- |
-| POST   | `/v1/scrape`  | v1 scrape adapter                   | 🟡 live |
-| POST   | `/v1/map`     | v1 map adapter (returns `string[]`) | 🟡 live |
-| —      | other `/v1/*` | remaining v1 surface                | ⛔      |
+| Method | Path                                              | Purpose                                                      | Status  |
+| ------ | ------------------------------------------------- | ------------------------------------------------------------ | ------- |
+| POST   | `/v1/scrape`                                      | v1 scrape (`extract`/`jsonOptions`, `parsePDF`, `actions`)   | ✅ live |
+| POST   | `/v1/map`                                         | v1 map (returns `links: string[]`)                           | ✅ live |
+| POST   | `/v1/crawl`                                       | v1 crawl (`maxDepth`, `ignoreSitemap`, `allowBackwardLinks`) | ✅ live |
+| GET    | `/v1/crawl/:id`                                   | v1 crawl status (`next` pagination, omitted on completion)   | ✅ live |
+| DELETE | `/v1/crawl/:id`                                   | v1 crawl cancel                                              | ✅ live |
+| GET    | `/v1/crawl/:id/errors`                            | v1 crawl errors + `robotsBlocked`                            | ✅ live |
+| GET    | `/v1/crawl/active` · `/v1/crawl/ongoing`          | v1 active crawls list                                        | ✅ live |
+| POST   | `/v1/batch/scrape` (+ status/cancel/errors)       | v1 batch scrape                                              | ✅ live |
+| POST   | `/v1/search`                                      | v1 search (returns flat `data: Document[]`)                  | ✅ live |
+| POST   | `/v1/extract` · GET `/v1/extract/:id`             | v1 structured extraction                                     | ✅ live |
+| POST   | `/v1/deep-research` · GET `/v1/deep-research/:id` | v1 deep research                                             | ✅ live |
+| POST   | `/v1/llmstxt` · GET `/v1/llmstxt/:id`             | v1 LLMs.txt generation (+ `/v1/generate-llmstxt*` aliases)   | ✅ live |
+| GET    | `/v1/team/credit-usage` (+ historical)            | v1 team credit usage                                         | ✅ live |
+| GET    | `/v1/team/token-usage` (+ historical)             | v1 team token usage                                          | ✅ live |
+| GET    | `/v1/team/queue-status` · `/v1/concurrency-check` | v1 queue & concurrency check                                 | ✅ live |
+| POST   | `/v1/x402/search`                                 | v1 x402 search endpoint                                      | ✅ live |
 
 ## Out-of-scope-for-now upstream families
 

@@ -30,31 +30,115 @@ export function extractLinks(root: HTMLElement, baseUrl: string): string[] {
   return [...out];
 }
 
-/**
- * Extract attribute values for each `{selector, attribute}` pair against the whole
- * document (before boilerplate stripping), matching the upstream `attributes` format.
- * `values` are attribute values (or `textContent` for the pseudo-attribute `text`),
- * empty when no element matches.
- */
+/** Collect every absolute http(s) image URL on the page (img src/srcset, picture source, meta og:image/twitter:image, icons). */
+export function extractImages(root: HTMLElement, baseUrl: string): string[] {
+  const out = new Set<string>();
+  const addUrl = (raw: string | undefined) => {
+    const resolved = resolveUrl(raw, baseUrl);
+    if (resolved && /^https?:/i.test(resolved)) out.add(resolved);
+  };
+  const addSrcset = (srcset: string | undefined) => {
+    if (!srcset) return;
+    for (const part of srcset.split(',')) {
+      const urlPart = part.trim().split(/\s+/)[0];
+      if (urlPart) addUrl(urlPart);
+    }
+  };
+
+  for (const img of root.querySelectorAll('img')) {
+    addUrl(img.getAttribute('src'));
+    addUrl(img.getAttribute('data-src'));
+    addUrl(img.getAttribute('data-lazy-src'));
+    addSrcset(img.getAttribute('srcset'));
+    addSrcset(img.getAttribute('data-srcset'));
+  }
+  for (const source of root.querySelectorAll('source')) {
+    addSrcset(source.getAttribute('srcset'));
+    addUrl(source.getAttribute('src'));
+  }
+  for (const meta of root.querySelectorAll('meta')) {
+    const key = (
+      meta.getAttribute('property') ??
+      meta.getAttribute('name') ??
+      meta.getAttribute('itemprop') ??
+      ''
+    ).toLowerCase();
+    if (
+      key === 'og:image' ||
+      key === 'og:image:url' ||
+      key === 'og:image:secure_url' ||
+      key === 'twitter:image' ||
+      key === 'twitter:image:src' ||
+      key === 'image'
+    ) {
+      addUrl(meta.getAttribute('content'));
+    }
+  }
+  for (const link of root.querySelectorAll('link')) {
+    const rel = (link.getAttribute('rel') ?? '').toLowerCase();
+    if (rel.includes('icon') || rel.includes('apple-touch-icon') || rel === 'image_src') {
+      addUrl(link.getAttribute('href'));
+    }
+  }
+  return [...out];
+}
+
+/** Extract arbitrary DOM attributes matching CSS selectors (`{ type: 'attributes', selectors }`). */
 export function extractAttributes(
   root: HTMLElement,
-  selectors: ReadonlyArray<{ selector: string; attribute: string }>,
+  selectors: Array<{ selector: string; attribute: string }>,
 ): Array<{ selector: string; attribute: string; values: string[] }> {
   return selectors.map(({ selector, attribute }) => {
     const values: string[] = [];
     try {
       for (const el of root.querySelectorAll(selector)) {
-        const v =
-          attribute === 'text' || attribute === 'textContent'
-            ? (el.textContent ?? '').trim()
-            : (el.getAttribute(attribute) ?? '');
-        if (v) values.push(v);
+        const val =
+          attribute === 'text' || attribute === 'textContent' || attribute === 'innerText'
+            ? el.text.trim()
+            : el.getAttribute(attribute);
+        if (val !== undefined && val !== null && val !== '') values.push(val);
       }
     } catch {
-      /* invalid CSS selector — return the pair with no values */
+      /* ignore invalid selector */
     }
     return { selector, attribute, values };
   });
+}
+
+/** Extract structured branding signals (logo, favicon, colors, fonts, brand name) from HTML. */
+export function extractBranding(
+  root: HTMLElement,
+  baseUrl: string,
+  meta: { title?: string; ogSiteName?: string; favicon?: string; ogImage?: string },
+): Record<string, unknown> {
+  const themeColor =
+    root.querySelector('meta[name="theme-color"]')?.getAttribute('content') ?? '#00E5FF';
+  let logoUrl: string | undefined;
+  for (const img of root.querySelectorAll('img')) {
+    const src = img.getAttribute('src') ?? '';
+    const alt = (img.getAttribute('alt') ?? '').toLowerCase();
+    const cls = (img.getAttribute('class') ?? '').toLowerCase();
+    if (
+      src &&
+      (src.toLowerCase().includes('logo') || alt.includes('logo') || cls.includes('logo'))
+    ) {
+      logoUrl = resolveUrl(src, baseUrl) || undefined;
+      if (logoUrl) break;
+    }
+  }
+  return {
+    brandName: meta.ogSiteName ?? meta.title ?? new URL(baseUrl).hostname,
+    logo: logoUrl ?? meta.favicon ?? meta.ogImage ?? null,
+    favicon: meta.favicon ?? null,
+    colors: {
+      primary: themeColor,
+      background: '#ffffff',
+      textPrimary: '#111111',
+    },
+    typography: {
+      fontFamilies: { primary: 'sans-serif' },
+    },
+  };
 }
 
 function textLength(el: HTMLElement): number {

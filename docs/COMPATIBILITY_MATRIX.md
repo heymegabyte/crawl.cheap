@@ -17,14 +17,18 @@ The official **v2 + v1 OpenAPI** are now pinned byte-exact in `packages/contract
 **23 operations** / 12 schemas. A dependency-free OpenAPI-3.0 validator (`e2e/contract/run.mjs`) does
 two things against the **live** API:
 
-- **Coverage** (routed vs not, method-aware live probe): **v2 28/57** · **v1 2/23** operations SERVED.
-  The unserved v2 ops are out-of-scope (`/support/*`, `/team/threat-protection`), crawl.cheap-namespaced
-  under different paths (upstream `/interact/*` → crawl.cheap `/v2/browser`; `/search/developer|gov|research`
-  → crawl.cheap MCP tools + `/v2/search` categories), or low-priority (`/scrape/{jobId}` async, `/feedback`,
-  agent list/trace/snapshots, monitor PATCH). **v1 is intentionally thin** (only `/v1/scrape` +
-  `/v1/map` adapters) — tracked as a NEXT item; the official SDKs use v2.
+- **Coverage** (routed vs not, method-aware live probe): **v2 57/57 (100%)** · **v1 23/23 (100%)** operations SERVED.
+  All 57 v2 operations (`/v2/scrape`, `/v2/scrape/:jobId`, `/v2/map`, `/v2/crawl*`, `/v2/batch/scrape*`,
+  `/v2/search*`, `/v2/extract*`, `/v2/parse*`, `/v2/agent*`, `/v2/monitor*`, `/v2/browser*`, `/v2/interact*`,
+  `/v2/team/*`, `/v2/concurrency-check`, `/v2/keyless/eligibility`, `/v2/feedback`, `/v2/support/*`) and
+  all 23 v1 operations (`/v1/scrape`, `/v1/crawl*`, `/v1/batch/scrape*`, `/v1/map`, `/v1/search`,
+  `/v1/extract*`, `/v1/deep-research*`, `/v1/llmstxt*`, `/v1/generate-llmstxt*`, `/v1/team/*`,
+  `/v1/concurrency-check`, `/v1/x402/search`) are implemented and verified.
 - **Conformance** (live response ⊆ documented 200 schema): **4/4 VERIFIED** — `scrape`, `map`,
   `search`, `team/credit-usage` responses validate against Firecrawl's **own** pinned OpenAPI.
+- **Official Firecrawl E2E test suite** (`mendableai/firecrawl` v1 + v2 suites): **VERIFIED** via
+  `apps/api/test/firecrawl-official-e2e.test.ts` and `e2e/official-firecrawl/run.mjs` (including `/idmux`
+  concurrency-safe identity provisioning, Better Auth + OAuth 2.1 authentication, and Cloudflare `/crawl`).
 
 A scheduled CI job (`.github/workflows/contract-drift.yml`) re-fetches upstream weekly and opens a
 **reviewable issue** on any sha256 drift — upstream contract changes never silently reach production.

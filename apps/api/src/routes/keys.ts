@@ -8,18 +8,13 @@ import { allowDemo } from '../lib/ratelimit';
 
 const route = new Hono<{ Bindings: Env; Variables: Vars }>();
 
-/** Self-serve API-key issuance (free tier). Paid plans are provisioned via Stripe
- *  (a later increment); self-serve only mints `free`. The key is returned once. */
+/**
+ * Self-serve API-key issuance (free tier). Supports both native `cc_live_` keys
+ * and Firecrawl-compatible `fc-` prefix keys when `prefix: "fc-"` is requested.
+ */
 route.post('/keys', async (c) => {
-  if (!c.env.DB) {
-    return fail(
-      c,
-      501,
-      'Key management requires the D1 (DB) binding on this deployment.',
-      'UNKNOWN_ERROR',
-    );
-  }
   const p = c.get('principal');
+  if (p.invalidCredentials) return requireAuth(c)!;
   if (!p.authed) {
     if (c.env.DEMO_MODE !== 'true') {
       const denied = requireAuth(c);
@@ -30,15 +25,24 @@ route.post('/keys', async (c) => {
   }
   const parsed = await parseBody(
     c,
-    z.object({ name: z.string().max(100).optional(), plan: z.enum(['free']).default('free') }),
+    z.object({
+      name: z.string().max(100).optional(),
+      plan: z.enum(['free']).default('free'),
+      prefix: z.enum(['cc_live_', 'fc-']).default('cc_live_'),
+    }),
   );
   if (!parsed.ok) return parsed.response;
 
-  const created = await createKey(c.env.DB, { name: parsed.data.name, plan: parsed.data.plan });
+  const created = await createKey(c.env.DB, {
+    name: parsed.data.name,
+    plan: parsed.data.plan,
+    prefix: parsed.data.prefix,
+  });
   return c.json({
     success: true as const,
     apiKey: created.key,
     keyId: created.id,
+    teamId: created.teamId,
     plan: created.plan,
     monthlyCredits: created.monthlyCredits,
     note: 'Store this key now — it is shown only once. Send it as: Authorization: Bearer <key>',

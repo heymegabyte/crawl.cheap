@@ -14,12 +14,19 @@ export const FormatStringSchema = z.enum([
   'links',
   'images',
   'screenshot',
+  'screenshot@fullPage',
   'audio',
   'video',
   'product',
   'menu',
   'json',
+  'extract',
   'changeTracking',
+  'branding',
+  'attributes',
+  'question',
+  'highlights',
+  'query',
 ]);
 
 /** Structured (object) format descriptors. */
@@ -158,11 +165,43 @@ export const ScrapeOptionsSchema = z.object({
   safeMode: z.boolean().optional(),
   redactPII: RedactPiiSchema.optional(),
   zeroDataRetention: z.boolean().optional(),
+  /** Legacy v1 PDF toggle (true by default; false returns base64 PDF content). */
+  parsePDF: z.boolean().optional(),
+  /** Legacy v1 structured extraction options (`formats: ['json']` or `formats: ['extract']`). */
+  jsonOptions: z
+    .object({
+      prompt: z.string().max(10000).optional(),
+      schema: z.record(z.string(), z.unknown()).optional(),
+      systemPrompt: z.string().max(10000).optional(),
+    })
+    .optional(),
+  extract: z
+    .object({
+      prompt: z.string().max(10000).optional(),
+      schema: z.record(z.string(), z.unknown()).optional(),
+      systemPrompt: z.string().max(10000).optional(),
+    })
+    .optional(),
+  pageOptions: z.record(z.string(), z.unknown()).optional(),
+  extractorOptions: z.record(z.string(), z.unknown()).optional(),
+  origin: z.string().optional(),
+  integration: z.string().optional(),
+  useMock: z.string().optional(),
 });
 export type ScrapeOptions = z.infer<typeof ScrapeOptionsSchema>;
 
 export const ScrapeRequestSchema = ScrapeOptionsSchema.extend({
   url: z.string().url(),
+}).superRefine((val, ctx) => {
+  if (val.timeout !== undefined && val.waitFor !== undefined && val.waitFor > 0) {
+    if (val.waitFor * 2 > val.timeout) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['waitFor'],
+        message: 'waitFor must not exceed half of timeout',
+      });
+    }
+  }
 });
 export type ScrapeRequest = z.input<typeof ScrapeRequestSchema>;
 
