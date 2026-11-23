@@ -270,7 +270,7 @@
   // 8. Popped-Out Collapsible References Drawer (Collapsed by default, auto-opens on #bib-source-* / #references click, interactive tier filters)
   function syncReferencesDrawerFromHash() {
     var h = location.hash || '';
-    if (h === '#references' || h === '#bibliography' || h === '#bibliography-heading' || /^#bib-source-d+$/.test(h)) {
+    if (h === '#references' || h === '#bibliography' || h === '#bibliography-heading' || h.indexOf('#bib-source-') === 0) {
       var drawer = document.querySelector('[data-testid="collapsible-citations-drawer"]');
       if (drawer && !drawer.open) {
         drawer.open = true;
@@ -305,6 +305,63 @@
       });
     }
   });
+
+  // 9. Universal Google / GitHub Avatar Image & Account Initials Hydration for .tt-avatar-circle
+  function computeAccountInitials(name, email) {
+    var cleanName = String(name || '').trim();
+    if (cleanName) {
+      var parts = cleanName.split(' ').filter(Boolean);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return cleanName.slice(0, 2).toUpperCase();
+    }
+    var cleanEmail = String(email || '').trim();
+    if (cleanEmail) {
+      var local = cleanEmail.split('@')[0] || '';
+      var segs = local.split(/[._-]+/).filter(Boolean);
+      if (segs.length >= 2) {
+        return (segs[0][0] + segs[1][0]).toUpperCase();
+      }
+      return local.slice(0, 2).toUpperCase();
+    }
+    return '';
+  }
+
+  function hydrateUniversalAvatarCircles() {
+    var avatarUrl = '';
+    var name = '';
+    var email = '';
+    var provider = '';
+    try {
+      avatarUrl = localStorage.getItem('crawlcheap_avatar') || '';
+      name = localStorage.getItem('crawlcheap_name') || '';
+      email = localStorage.getItem('crawlcheap_email') || '';
+      provider = localStorage.getItem('crawlcheap_provider') || '';
+    } catch (_) {}
+
+    var initials = computeAccountInitials(name, email);
+    var circles = document.querySelectorAll('.tt-avatar-circle');
+    circles.forEach(function (el) {
+      if (avatarUrl && (avatarUrl.indexOf('https://') === 0 || avatarUrl.indexOf('http://') === 0)) {
+        var img = document.createElement('img');
+        img.src = avatarUrl;
+        img.alt = name || email || 'User avatar';
+        el.innerHTML = '';
+        el.appendChild(img);
+        el.setAttribute('title', (name || email) + (provider ? ' (' + provider + ')' : ''));
+      } else if (initials) {
+        el.textContent = initials;
+        el.setAttribute('title', (name || email) + (provider ? ' (' + provider + ')' : ''));
+      } else {
+        el.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>';
+        el.setAttribute('title', 'Sign in with Google or GitHub');
+      }
+    });
+  }
+
+  window.__TT_HYDRATE_AVATAR__ = hydrateUniversalAvatarCircles;
+  hydrateUniversalAvatarCircles();
 })();
 
 (function () {

@@ -4,8 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <script>document.documentElement.className = 'js';</script>
-<title>Firecrawl Admin Dashboard &amp; Developer Studio · crawl.cheap</title>
-<meta name="description" content="Complete Firecrawl-compatible Admin Dashboard & Developer Studio with Google OAuth, GitHub OAuth, Magic Email Links, 7-mode Playground, Activity Logs, Usage & Billing, API Keys, Monitors, and 30-Tool MCP." />
+<title>Dashboard · crawl.cheap</title>
+<meta name="description" content="crawl.cheap Dashboard — Overview, Playground, Activity Logs, Usage & Billing, API Keys, and Settings." />
 <meta name="robots" content="noindex" />
 <link rel="icon" type="image/png" href="/assets/crawl-cheap-icon-64.png" />
 <link rel="apple-touch-icon" href="/assets/crawl-cheap-icon.png" />
@@ -25,10 +25,10 @@
     --emerald: #2ecc71;
     --violet: #7c3aed;
     --danger: #ff5c7c;
-    --line: rgba(255, 255, 255, 0.09);
+    --line: rgba(255, 255, 255, 0.085);
     --line-hi: rgba(0, 229, 255, 0.34);
-    --glass: rgba(255, 255, 255, 0.035);
-    --glass2: rgba(255, 255, 255, 0.065);
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass2: rgba(255, 255, 255, 0.055);
     --mono: 'JetBrains Mono', ui-monospace, monospace;
     --disp: 'Space Grotesk', system-ui, sans-serif;
     --sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -51,11 +51,10 @@
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.45;
+    opacity: 0.4;
     background:
-      radial-gradient(50vw 50vw at 90% -10%, rgba(124, 58, 237, 0.16), transparent 55%),
-      radial-gradient(55vw 55vw at 5% 0%, rgba(0, 229, 255, 0.14), transparent 60%),
-      radial-gradient(45vw 45vw at 50% 100%, rgba(255, 138, 61, 0.08), transparent 60%);
+      radial-gradient(50vw 50vw at 90% -10%, rgba(124, 58, 237, 0.14), transparent 55%),
+      radial-gradient(55vw 55vw at 5% 0%, rgba(0, 229, 255, 0.12), transparent 60%);
   }
   a { color: var(--cyan); text-decoration: none; transition: color var(--tr); }
   a:hover { color: #7ef0ff; }
@@ -65,18 +64,18 @@
   nav.topnav {
     border-bottom: 1px solid var(--line);
     backdrop-filter: blur(14px);
-    background: rgba(6, 6, 16, 0.84);
+    background: rgba(6, 6, 16, 0.86);
     position: sticky;
     top: 0;
     z-index: 40;
   }
   nav.topnav .nav-inner {
-    max-width: 1400px;
+    max-width: 1380px;
     margin: 0 auto;
-    padding: 0 18px;
+    padding: 0 20px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     min-height: 70px;
     flex-wrap: wrap;
   }
@@ -91,18 +90,18 @@
     line-height: 1;
   }
   .brand-logo {
-    height: 46px;
+    height: 44px;
     width: auto;
-    max-width: 240px;
+    max-width: 230px;
     display: block;
     flex: none;
     object-fit: contain;
-    filter: drop-shadow(0 0 14px rgba(0, 229, 255, 0.28));
+    filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.25));
     transition: transform var(--tr), filter var(--tr);
   }
   .brand:hover .brand-logo {
     transform: translateY(-1px) scale(1.015);
-    filter: drop-shadow(0 0 20px rgba(0, 229, 255, 0.45));
+    filter: drop-shadow(0 0 18px rgba(0, 229, 255, 0.42));
   }
   .sr-only {
     position: absolute;
@@ -116,45 +115,43 @@
     border: 0;
   }
   @media (max-width: 560px) {
-    .brand-logo { height: 34px; max-width: 168px; }
+    .brand-logo { height: 34px; max-width: 164px; }
   }
   nav .sp { margin-left: auto; }
-  nav a.home { color: var(--mut); font-size: 12.5px; font-family: var(--mono); }
 
-  /* Full Firecrawl Admin Dashboard Layout (Sidebar + Main Workspace) */
+  /* Dashboard Layout (Sidebar + Focused Main Workspace) */
   .dash-shell {
-    max-width: 1400px;
+    max-width: 1380px;
     margin: 0 auto;
-    padding: 18px 18px 72px;
+    padding: 22px 20px 64px;
     position: relative;
     z-index: 1;
     display: grid;
-    grid-template-columns: 245px minmax(0, 1fr);
-    gap: 22px;
+    grid-template-columns: 224px minmax(0, 1fr);
+    gap: 26px;
     align-items: start;
   }
-  @media (max-width: 980px) {
+  @media (max-width: 960px) {
     .dash-shell {
       grid-template-columns: minmax(0, 1fr);
-      padding: 12px 12px 56px;
-      gap: 14px;
+      padding: 14px 12px 48px;
+      gap: 16px;
     }
   }
 
-  /* Left Sidebar cloning Firecrawl Cloud Dashboard */
   .dash-sidebar {
     position: sticky;
-    top: 86px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+    top: 90px;
+    background: rgba(11, 13, 26, 0.72);
     border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 14px 10px;
+    border-radius: 14px;
+    padding: 12px 8px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
   }
   .sidebar-section-label {
-    font: 600 10.5px var(--mono);
+    font: 600 10px var(--mono);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--faint);
@@ -163,145 +160,159 @@
   .studio-tab {
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: 10px;
     width: 100%;
     text-align: left;
     padding: 9px 11px;
-    border-radius: 10px;
+    border-radius: 9px;
     background: transparent;
     border: 1px solid transparent;
     color: var(--mut);
-    font: 600 13px var(--disp);
+    font: 500 13.5px var(--sans);
     cursor: pointer;
     transition: all var(--tr);
   }
+  .studio-tab svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    opacity: 0.78;
+    transition: opacity var(--tr), color var(--tr);
+  }
   .studio-tab:hover {
     color: var(--ink);
-    background: rgba(255, 255, 255, 0.045);
-    border-color: rgba(0, 229, 255, 0.18);
+    background: rgba(255, 255, 255, 0.04);
   }
   .studio-tab.active {
-    color: #04141c;
-    background: linear-gradient(100deg, var(--cyan), var(--cyan2));
-    box-shadow: 0 6px 20px -6px rgba(0, 229, 255, 0.45);
+    color: var(--cyan);
+    font-weight: 600;
+    background: rgba(0, 229, 255, 0.09);
+    border-color: rgba(0, 229, 255, 0.24);
   }
-  .studio-tab .badge-mini {
-    margin-left: auto;
-    font: 600 10px var(--mono);
-    padding: 2px 6px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    color: inherit;
+  .studio-tab.active svg {
+    opacity: 1;
+    color: var(--cyan);
   }
-  @media (max-width: 980px) {
+  @media (max-width: 960px) {
     .dash-sidebar {
       position: static;
       flex-direction: row;
       flex-wrap: wrap;
-      padding: 8px;
-      gap: 6px;
+      padding: 6px;
+      gap: 4px;
     }
     .sidebar-section-label { display: none; }
     .studio-tab {
       width: auto;
-      flex: 1 1 135px;
+      flex: 1 1 120px;
       justify-content: center;
       font-size: 12px;
       padding: 7px 9px;
     }
-    .studio-tab .badge-mini { display: none; }
   }
 
   .dash-main { min-width: 0; }
 
-  .hero-header {
+  .view-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin: 4px 0 18px;
-  }
-  h1.t { font-size: clamp(1.45rem, 3.2vw, 2.15rem); margin: 0 0 4px; }
-  .sub { color: var(--mut); margin: 0; font-size: 0.92rem; }
-
-  .badge-strip {
-    display: flex;
-    gap: 7px;
-    flex-wrap: wrap;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0 0 20px;
   }
+  h1.t {
+    font-size: clamp(1.45rem, 2.6vw, 1.85rem);
+    font-weight: 700;
+    margin: 0;
+  }
+  .sub {
+    color: var(--mut);
+    margin: 3px 0 0;
+    font-size: 0.9rem;
+  }
+
   .pill {
     font: 600 11px var(--mono);
-    padding: 4px 10px;
+    padding: 3px 9px;
     border-radius: 999px;
-    background: rgba(0, 229, 255, 0.1);
+    background: rgba(0, 229, 255, 0.09);
     color: var(--cyan);
-    border: 1px solid rgba(0, 229, 255, 0.28);
+    border: 1px solid rgba(0, 229, 255, 0.24);
     display: inline-flex;
     align-items: center;
     gap: 5px;
     white-space: nowrap;
   }
-  .pill.ember {
-    background: rgba(255, 138, 61, 0.12);
-    color: var(--ember);
-    border-color: rgba(255, 138, 61, 0.3);
-  }
   .pill.emerald {
     background: rgba(46, 204, 113, 0.12);
     color: var(--emerald);
-    border-color: rgba(46, 204, 113, 0.3);
+    border-color: rgba(46, 204, 113, 0.28);
   }
 
   .card {
     background: linear-gradient(180deg, var(--glass2), var(--glass));
     border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 18px;
-    margin-bottom: 16px;
-    transition: border-color var(--tr), box-shadow var(--tr);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 18px;
+    transition: border-color var(--tr);
     min-width: 0;
   }
-  .card:hover { border-color: rgba(255, 255, 255, 0.16); }
   .card h2 {
-    font-size: 1.12rem;
+    font-size: 1.05rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 8px;
     margin-bottom: 4px;
     flex-wrap: wrap;
   }
-  .card .hint { color: var(--faint); font-size: 0.85rem; margin: 2px 0 14px; }
+  .card .hint {
+    color: var(--mut);
+    font-size: 0.85rem;
+    margin: 2px 0 14px;
+  }
 
   .grid-2 {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
     gap: 16px;
   }
   .grid-4 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
     gap: 14px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
   .metric-card {
-    background: #0a0b18;
+    background: rgba(11, 13, 26, 0.8);
     border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 14px 16px;
+    border-radius: 13px;
+    padding: 16px 18px;
     display: flex;
     flex-direction: column;
     gap: 6px;
   }
-  .metric-card .lbl { font: 600 11px var(--mono); color: var(--mut); text-transform: uppercase; }
-  .metric-card .val { font: 700 1.55rem var(--disp); color: var(--ink); }
-  .metric-card .subval { font: 11.5px var(--mono); color: var(--faint); }
+  .metric-card .lbl {
+    font: 600 11px var(--mono);
+    color: var(--mut);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .metric-card .val {
+    font: 700 1.6rem var(--disp);
+    color: var(--ink);
+  }
+  .metric-card .subval {
+    font: 11.5px var(--mono);
+    color: var(--faint);
+  }
   .prog-track {
     width: 100%;
-    height: 6px;
+    height: 5px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.07);
     overflow: hidden;
     margin-top: 4px;
   }
@@ -311,12 +322,10 @@
     background: linear-gradient(90deg, var(--cyan), var(--cyan2));
     transition: width var(--tr);
   }
-  .prog-fill.ember { background: linear-gradient(90deg, var(--ember), #ff5c7c); }
 
-  /* Social OAuth + Magic Link Grid */
   .oauth-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
     gap: 10px;
     margin-bottom: 12px;
   }
@@ -325,27 +334,26 @@
     align-items: center;
     justify-content: center;
     gap: 9px;
-    padding: 11px 14px;
-    border-radius: 11px;
+    padding: 10px 14px;
+    border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(255, 255, 255, 0.045);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--ink);
-    font: 600 13.5px var(--disp);
+    font: 600 13px var(--sans);
     cursor: pointer;
     transition: all var(--tr);
   }
   .oauth-btn:hover {
     border-color: var(--cyan);
-    background: rgba(0, 229, 255, 0.09);
-    transform: translateY(-1px);
+    background: rgba(0, 229, 255, 0.08);
   }
 
   .row { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
 
   input, select, textarea {
-    background: #0a0a16;
+    background: #090a15;
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 9px;
     color: var(--ink);
     padding: 9px 12px;
     font: 13px var(--mono);
@@ -355,13 +363,13 @@
   input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--cyan);
-    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.14);
+    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.13);
   }
   input.grow, textarea.grow { flex: 1 1 180px; min-width: 0; }
 
   .btn {
     border: 1px solid transparent;
-    border-radius: 10px;
+    border-radius: 9px;
     padding: 9px 14px;
     font-weight: 600;
     font-size: 13px;
@@ -374,57 +382,57 @@
   .btn-p {
     background: linear-gradient(100deg, var(--cyan), var(--cyan2));
     color: #04141c;
-    box-shadow: 0 8px 26px -10px rgba(0, 229, 255, 0.45);
+    box-shadow: 0 6px 20px -8px rgba(0, 229, 255, 0.45);
   }
   .btn-g { background: var(--glass); border-color: var(--line); color: var(--ink); }
   .btn-g:hover { border-color: var(--cyan); }
   .btn-ember {
     background: linear-gradient(100deg, var(--ember), #ff6b4a);
     color: #160702;
-    box-shadow: 0 8px 24px -10px rgba(255, 138, 61, 0.45);
   }
 
   .keybox {
     font: 600 13px var(--mono);
-    background: #0a0a16;
+    background: #090a15;
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 9px;
     padding: 10px 13px;
     word-break: break-all;
     color: var(--cyan);
   }
   .stat { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 8px; }
-  .stat div b { display: block; font-family: var(--disp); font-size: 1.45rem; color: var(--ink); }
+  .stat div b { display: block; font-family: var(--disp); font-size: 1.4rem; color: var(--ink); }
   .stat div span { color: var(--mut); font-size: 0.78rem; }
 
-  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
   .tab {
-    padding: 7px 12px;
-    border-radius: 9px;
+    padding: 7px 14px;
+    border-radius: 8px;
     background: var(--glass);
     border: 1px solid var(--line);
     color: var(--mut);
     cursor: pointer;
-    font: 600 12px var(--mono);
+    font: 600 12.5px var(--sans);
     transition: all var(--tr);
   }
+  .tab:hover { color: var(--ink); }
   .tab.on {
-    color: var(--ink);
-    border-color: var(--cyan);
-    background: rgba(0, 229, 255, 0.12);
+    color: var(--cyan);
+    border-color: rgba(0, 229, 255, 0.45);
+    background: rgba(0, 229, 255, 0.1);
   }
 
   pre.out {
     margin: 12px 0 0;
-    background: #080814;
+    background: #070812;
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: 11px;
     padding: 14px;
     font: 12px/1.6 var(--mono);
     color: #cfe8ff;
     white-space: pre-wrap;
     word-break: break-word;
-    max-height: 420px;
+    max-height: 440px;
     overflow: auto;
   }
   pre.out .muted { color: var(--faint); }
@@ -433,54 +441,25 @@
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
-    margin-top: 12px;
+    align-items: center;
+    margin-top: 14px;
     border-bottom: 1px solid var(--line);
     padding-bottom: 10px;
   }
   .insp-btn {
-    padding: 5px 10px;
-    border-radius: 8px;
+    padding: 5px 12px;
+    border-radius: 7px;
     background: transparent;
     border: 1px solid var(--line);
     color: var(--mut);
-    font: 600 11.5px var(--mono);
+    font: 600 12px var(--sans);
     cursor: pointer;
     transition: all var(--tr);
   }
   .insp-btn.on {
     color: var(--cyan);
     border-color: var(--cyan);
-    background: rgba(0, 229, 255, 0.08);
-  }
-  .brand-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
-    gap: 10px;
-    margin-top: 12px;
-  }
-  .swatch-card {
-    background: #0a0a16;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .swatch-dot {
-    width: 26px;
-    height: 26px;
-    border-radius: 7px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    flex: none;
-  }
-  .graph-box {
-    margin-top: 12px;
-    background: #080814;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 14px;
-    min-height: 220px;
+    background: rgba(0, 229, 255, 0.09);
   }
   .trace-list {
     margin-top: 12px;
@@ -489,10 +468,10 @@
     gap: 8px;
   }
   .trace-item {
-    background: #080814;
+    background: #070812;
     border: 1px solid var(--line);
     border-left: 3px solid var(--cyan);
-    border-radius: 9px;
+    border-radius: 8px;
     padding: 9px 12px;
     font: 12px var(--mono);
     display: flex;
@@ -501,7 +480,6 @@
     flex-wrap: wrap;
   }
 
-  /* Plan Cards in Usage & Billing */
   .plan-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 175px), 1fr));
@@ -509,10 +487,10 @@
     margin: 12px 0;
   }
   .plan-card {
-    background: #090a17;
+    background: #080915;
     border: 1px solid var(--line);
     border-radius: 12px;
-    padding: 13px;
+    padding: 14px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -520,17 +498,54 @@
   }
   .plan-card.active {
     border-color: var(--cyan);
-    box-shadow: 0 0 24px -8px rgba(0, 229, 255, 0.45);
+    box-shadow: 0 0 22px -10px rgba(0, 229, 255, 0.4);
   }
   .plan-card .p-name { font: 700 12px var(--mono); color: var(--cyan); text-transform: uppercase; }
   .plan-card .p-price { font: 700 1.35rem var(--disp); color: var(--ink); }
   .plan-card .p-fc { font: 11px var(--mono); color: var(--faint); text-decoration: line-through; }
 
   .table-wrap { width: 100%; overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
-  th, td { text-align: left; padding: 8px 9px; border-bottom: 1px solid var(--line); }
-  th { color: var(--mut); font: 600 10.5px var(--mono); text-transform: uppercase; }
-  .getcode { color: var(--cyan); font: 600 12px var(--mono); cursor: pointer; margin-top: 10px; display: inline-block; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 6px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--mut); font: 600 11px var(--mono); text-transform: uppercase; }
+  .getcode {
+    color: var(--cyan);
+    font: 600 12px var(--mono);
+    cursor: pointer;
+    padding: 5px 11px;
+    border-radius: 7px;
+    border: 1px solid rgba(0, 229, 255, 0.28);
+    background: rgba(0, 229, 255, 0.06);
+    transition: all var(--tr);
+  }
+  .getcode:hover {
+    background: rgba(0, 229, 255, 0.15);
+    border-color: var(--cyan);
+  }
+
+  /* Clean Sign-In Modal Overlay */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(4, 5, 14, 0.78);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-sheet {
+    width: 100%;
+    max-width: 440px;
+    background: #0b0d1d;
+    border: 1px solid rgba(0, 229, 255, 0.28);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 28px 80px -20px rgba(0, 0, 0, 0.9);
+  }
+
   .toast {
     position: fixed;
     bottom: 22px;
@@ -539,19 +554,19 @@
     background: #0a0a16;
     border: 1px solid var(--cyan);
     color: var(--ink);
-    padding: 11px 18px;
-    border-radius: 10px;
-    font: 600 13px var(--mono);
+    padding: 10px 16px;
+    border-radius: 9px;
+    font: 600 12.5px var(--mono);
     opacity: 0;
     transition: opacity 0.25s;
-    z-index: 50;
+    z-index: 70;
     pointer-events: none;
     max-width: 92vw;
     text-align: center;
   }
   .toast.show { opacity: 1; }
   @media (max-width: 640px) {
-    .card { padding: 13px; }
+    .card { padding: 14px; }
     .btn, .oauth-btn { padding: 8px 11px; font-size: 12px; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -562,7 +577,7 @@
 <nav class="topnav">
   <div class="nav-inner">
     <a class="brand" href="/" aria-label="crawl.cheap home">
-      <img class="brand-logo" src="/assets/crawl-cheap-nav-logo.png" width="240" height="46" alt="crawl.cheap" />
+      <img class="brand-logo" src="/assets/crawl-cheap-nav-logo.png" width="230" height="44" alt="crawl.cheap" />
       <span class="wm sr-only">crawl<span class="a">.cheap</span></span>
     </a>
     <nav class="tt-mm" aria-label="Explore &amp; Guides Mega-Menu" data-tt-mm-root data-tt-mm-uid="ttmm-studio">
@@ -579,232 +594,259 @@
           <div class="tt-mm__panel" id="ttmm-studio-panel-0" role="region" aria-labelledby="ttmm-studio-trigger-0" data-tt-mm-panel="0">
             <div class="tt-mm__panel-grid">
               <div class="tt-mm__panel-col">
-                <p class="tt-mm__blurb">Sourced from @theme.tools/blog, @theme.tools/ui, @theme.tools/catalog, and @theme.tools/telemetry.</p>
+                <p class="tt-mm__blurb">Explore live API capabilities, SDK migration, and in-depth Cloudflare edge engineering guides.</p>
                 <ul class="tt-mm__list" role="menu" aria-label="Explore &amp; Guides">
-                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/" tabindex="-1" data-tt-mm-preview-src="/blog/edge-web-scraping-for-ai-agents/featured.svg" data-tt-mm-preview-alt="crawl.cheap Engineering Blog" data-tt-mm-preview-href="/blog/" data-tt-mm-preview-title="@theme.tools/blog Magazine &amp; PlateJS Inline Studio">Engineering Blog &amp; All 4 Reference Guides</a></li>
-                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/edge-web-scraping-for-ai-agents/" tabindex="-1" data-tt-mm-preview-src="/blog/edge-web-scraping-for-ai-agents/featured.svg" data-tt-mm-preview-alt="Edge Web Scraping for AI Agents" data-tt-mm-preview-href="/blog/edge-web-scraping-for-ai-agents/" data-tt-mm-preview-title="Sub-45ms Edge TTFB · 16 OKLCH States · 2500ms Langfuse">1. Edge Web Scraping for AI Agents</a></li>
-                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/cloudflare-browser-rendering-crawl-and-durable-objects/" tabindex="-1" data-tt-mm-preview-src="/blog/cloudflare-browser-rendering-crawl-and-durable-objects/featured.svg" data-tt-mm-preview-alt="Cloudflare Browser Rendering /crawl" data-tt-mm-preview-href="/blog/cloudflare-browser-rendering-crawl-and-durable-objects/" data-tt-mm-preview-title="Hibernatable WebSocket Watchers · Signed Webhooks">2. Cloudflare Browser Rendering /crawl &amp; DOs</a></li>
-                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/" tabindex="-1" data-tt-mm-preview-src="/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/featured.svg" data-tt-mm-preview-alt="OAuth 2.1 PKCE &amp; 30-Tool MCP" data-tt-mm-preview-href="/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/" data-tt-mm-preview-title="Google + GitHub + Magic Link Auth · 30 MCP Tools">3. OAuth 2.1 PKCE, Better Auth &amp; 30-Tool MCP</a></li>
-                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/" tabindex="-1" data-tt-mm-preview-src="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/featured.svg" data-tt-mm-preview-alt="11-Format Document Parsing &amp; Co-Pilots" data-tt-mm-preview-href="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/" data-tt-mm-preview-title="Workers AI toMarkdown() · Presigned R2 · 7-Rail Telemetry">4. 11-Format Document Parsing &amp; AI Co-Pilots</a></li>
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/" tabindex="-1" data-tt-mm-preview-src="/assets/previews/blog-hub.svg" data-tt-mm-preview-alt="crawl.cheap Engineering Blog" data-tt-mm-preview-href="/blog/" data-tt-mm-preview-title="Engineering Blog — All 4 In-Depth Architecture Guides &amp; Inline Editor">Engineering Blog &amp; All Reference Guides</a></li>
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/#demo" tabindex="-1" data-tt-mm-preview-src="/assets/previews/section-demo.svg" data-tt-mm-preview-alt="Interactive Live Scrape Demo" data-tt-mm-preview-href="/#demo" data-tt-mm-preview-title="Run a Live Edge Scrape in Your Browser — Zero Signup Required">Interactive Live Scrape Demo</a></li>
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/edge-web-scraping-for-ai-agents/" tabindex="-1" data-tt-mm-preview-src="/assets/previews/blog-edge-scraping.svg" data-tt-mm-preview-alt="Edge Web Scraping for AI Agents" data-tt-mm-preview-href="/blog/edge-web-scraping-for-ai-agents/" data-tt-mm-preview-title="High-Throughput Markdown Extraction for RAG &amp; AI Agents on Cloudflare Workers">Guide: Edge Web Scraping for AI Agents</a></li>
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/#features" tabindex="-1" data-tt-mm-preview-src="/assets/previews/section-features.svg" data-tt-mm-preview-alt="Core Capabilities &amp; API Endpoints" data-tt-mm-preview-href="/#features" data-tt-mm-preview-title="Scrape, Crawl, Map, Search, Extract, Batch &amp; 11-Format Document Parse">Core Capabilities &amp; API Endpoints</a></li>
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/cloudflare-browser-rendering-crawl-and-durable-objects/" tabindex="-1" data-tt-mm-preview-src="/assets/previews/blog-cf-crawl.svg" data-tt-mm-preview-alt="Cloudflare Browser Rendering /crawl &amp; Durable Objects" data-tt-mm-preview-href="/blog/cloudflare-browser-rendering-crawl-and-durable-objects/" data-tt-mm-preview-title="Distributed Web Crawling with Hibernatable WebSockets &amp; Signed Webhooks">Guide: Cloudflare Browser Rendering /crawl &amp; DOs</a></li>
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/#migrate" tabindex="-1" data-tt-mm-preview-src="/assets/previews/section-migrate.svg" data-tt-mm-preview-alt="1-Line Firecrawl SDK Migration" data-tt-mm-preview-href="/#migrate" data-tt-mm-preview-title="Keep @mendable/firecrawl-js or firecrawl-py — Just Point apiUrl at crawl.cheap">1-Line Firecrawl SDK Migration</a></li>
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/" tabindex="-1" data-tt-mm-preview-src="/assets/previews/blog-oauth-mcp.svg" data-tt-mm-preview-alt="OAuth 2.1 PKCE, Better Auth &amp; 30-Tool Remote MCP" data-tt-mm-preview-href="/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/" data-tt-mm-preview-title="Zero-Trust OAuth 2.1 PKCE S256 &amp; 30-Tool Streamable-HTTP MCP Server">Guide: OAuth 2.1 PKCE &amp; 30-Tool Remote MCP</a></li>
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/#estimator" tabindex="-1" data-tt-mm-preview-src="/assets/previews/section-estimator.svg" data-tt-mm-preview-alt="Preflight Cost &amp; Credit Estimator" data-tt-mm-preview-href="/#estimator" data-tt-mm-preview-title="Calculate Exact Credit Burn &amp; Hard Caps Before Starting Any Job">Preflight Cost &amp; Credit Estimator</a></li>
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/" tabindex="-1" data-tt-mm-preview-src="/assets/previews/blog-doc-parsing.svg" data-tt-mm-preview-alt="11-Format Document Parsing &amp; Autonomous Browser Co-Pilots" data-tt-mm-preview-href="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/" data-tt-mm-preview-title="Workers AI toMarkdown(), Vectorize RAG &amp; Autonomous Browser Co-Pilots">Guide: 11-Format Document Parsing &amp; Co-Pilots</a></li>
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/#compat" tabindex="-1" data-tt-mm-preview-src="/assets/previews/section-compat.svg" data-tt-mm-preview-alt="v1 &amp; v2 OpenAPI Compatibility Matrix" data-tt-mm-preview-href="/#compat" data-tt-mm-preview-title="100% Drop-In Parity Across Firecrawl v1 (23 Ops) &amp; v2 (57 Ops)">v1 &amp; v2 OpenAPI Compatibility Matrix</a></li>
                 </ul>
               </div>
               <a class="tt-mm__panel-featured" href="/blog/edge-web-scraping-for-ai-agents/" tabindex="-1">
-                <img class="tt-mm__panel-featured-img" src="/blog/edge-web-scraping-for-ai-agents/featured.svg" alt="Edge Web Scraping for AI Agents" loading="lazy" decoding="async" width="480" height="270" />
-                <span class="tt-mm__panel-featured-title">@theme.tools/blog + PlateJS Reference Architecture</span>
+                <img class="tt-mm__panel-featured-img" src="/assets/previews/blog-edge-scraping.svg" alt="Edge Web Scraping for AI Agents" loading="lazy" decoding="async" width="480" height="270" />
+                <span class="tt-mm__panel-featured-title">Edge Web Scraping for AI Agents — Sub-45ms Edge TTFB &amp; Markdown Distillation</span>
               </a>
             </div>
           </div>
         </li>
       </ul>
     </nav>
-    <span class="pill" id="authProviderBadge">firecrawl admin v2</span>
-    <span class="pill emerald" id="liveEdgePill">● edge online</span>
     <span class="sp"></span>
-    <a class="home" href="/blog/" style="margin-right:10px">blog</a>
-    <a class="home" href="/" style="margin-right:10px">← home</a>
-    <a class="tt-avatar-circle" id="navAvatarCircle" href="#keyCard" title="Better Auth &amp; OAuth 2.1 Account" aria-label="Developer Account &amp; API Keys">CC</a>
+    <button type="button" class="btn btn-g" id="btnTopSignIn" style="padding:7px 13px;font-size:12.5px;">Sign in</button>
+    <button type="button" class="tt-avatar-circle" id="navAvatarCircle" title="Sign in with Google or GitHub" aria-label="Account">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
   </div>
 </nav>
 
 <div class="dash-shell">
-  <!-- LEFT SIDEBAR: COMPLETE FIRECRAWL CLOUD DASHBOARD NAVIGATION -->
-  <aside class="dash-sidebar" role="tablist" aria-label="Firecrawl Admin Dashboard Navigation">
-    <div class="sidebar-section-label">Firecrawl Cloud</div>
-    <button class="studio-tab active" data-ws="all" role="tab" aria-selected="true">✦ All Dashboard Views <span class="badge-mini">10</span></button>
-    <button class="studio-tab" data-ws="overview" role="tab" aria-selected="false">📊 Overview</button>
-    <button class="studio-tab" data-ws="playground" role="tab" aria-selected="false">⚡ Playground <span class="badge-mini">7</span></button>
-    <button class="studio-tab" data-ws="copilot" role="tab" aria-selected="false">🖥️ Browser &amp; Co-Pilot</button>
-    <button class="studio-tab" data-ws="research" role="tab" aria-selected="false">🧠 Extract &amp; Research</button>
-    <div class="sidebar-section-label">Workspace &amp; Billing</div>
-    <button class="studio-tab" data-ws="activity" role="tab" aria-selected="false">📋 Activity Logs</button>
-    <button class="studio-tab" data-ws="usage" role="tab" aria-selected="false">📈 Usage &amp; Billing</button>
-    <button class="studio-tab" data-ws="keys" role="tab" aria-selected="false">🔑 API Keys</button>
-    <div class="sidebar-section-label">Integrations &amp; Ops</div>
-    <button class="studio-tab" data-ws="monitors" role="tab" aria-selected="false">📡 Monitors &amp; Webhooks</button>
-    <button class="studio-tab" data-ws="auth" role="tab" aria-selected="false">🔐 Auth · MCP &amp; OAuth 2.1</button>
-    <button class="studio-tab" data-ws="observability" role="tab" aria-selected="false">🔭 7-Rail Telemetry</button>
+  <!-- LEFT SIDEBAR: CLEAN MONOCHROME SVG ICONS, ZERO EMOJIS -->
+  <aside class="dash-sidebar" role="tablist" aria-label="Dashboard Navigation">
+    <div class="sidebar-section-label">Workspace</div>
+    <button class="studio-tab active" data-ws="overview" data-title="Overview" data-desc="Real-time credit balance, token consumption, and recent jobs." role="tab" aria-selected="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Overview</span>
+    </button>
+    <button class="studio-tab" data-ws="playground" data-title="Playground" data-desc="Test scrape, crawl, map, search, extract, batch, and document parse endpoints." role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span>Playground</span>
+    </button>
+    <button class="studio-tab" data-ws="research" data-title="Extract &amp; Research" data-desc="Run multi-step web research agents and generate llms.txt files." role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Extract &amp; Research</span>
+    </button>
+    <button class="studio-tab" data-ws="copilot" data-title="Browser Sandbox" data-desc="Control persistent remote browser sessions with selectors or natural language." role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="8" x2="22" y2="8"/></svg>
+      <span>Browser Sandbox</span>
+    </button>
+    <div class="sidebar-section-label">Account</div>
+    <button class="studio-tab" data-ws="activity" data-title="Activity Logs" data-desc="Inspect recent scrape, crawl, extract, and agent jobs." role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Activity Logs</span>
+    </button>
+    <button class="studio-tab" data-ws="usage" data-title="Usage &amp; Billing" data-desc="Manage your subscription plan, spend limits, and credit ledger." role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      <span>Usage &amp; Billing</span>
+    </button>
+    <button class="studio-tab" data-ws="keys" data-title="API Keys" data-desc="Create and manage API keys for your applications and SDKs." role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+      <span>API Keys</span>
+    </button>
+    <button class="studio-tab" data-ws="settings" data-title="Settings" data-desc="Configure authentication, webhooks, domain security, MCP, and telemetry." role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Settings</span>
+    </button>
   </aside>
 
   <!-- MAIN WORKSPACE PANEL -->
   <main class="dash-main">
-    <div class="hero-header">
+    <div class="view-header">
       <div>
-        <h1 class="t">Firecrawl Admin Dashboard &amp; Developer Studio · AI Command Center</h1>
-        <p class="sub">100% Firecrawl v1/v2 Compatible · Google + GitHub + Magic Email Link Login · Cloudflare Browser Rendering <code>/crawl</code> · 30 MCP Tools</p>
+        <h1 class="t" id="viewTitle">Overview<span class="sr-only"> · Developer Studio</span></h1>
+        <p class="sub" id="viewDesc">Real-time credit balance, token consumption, and recent jobs.</p>
       </div>
-      <div class="badge-strip">
-        <span class="pill">v2: 57/57 ops</span>
-        <span class="pill">v1: 23/23 ops</span>
-        <span class="pill ember">MCP: 30 tools</span>
-        <span class="pill emerald">Google · GitHub · Magic Link</span>
+      <div class="row">
+        <button type="button" class="btn btn-g" id="btnHeaderPlayground">Open Playground</button>
+        <button type="button" class="btn btn-p" id="btnHeaderKeys">API Keys</button>
       </div>
     </div>
 
-    <!-- 0. OVERVIEW METRIC CARDS (FIRECRAWL DASHBOARD TOP BAR) -->
-    <div class="grid-4 ws-section" data-section="overview" id="overviewMetrics">
-      <div class="metric-card">
-        <span class="lbl">Remaining Credits</span>
-        <span class="val" id="ovRemainingCredits">500</span>
-        <div class="prog-track"><div class="prog-fill" id="ovCreditsBar" style="width:100%"></div></div>
-        <span class="subval" id="ovCreditsSub">500 / 500 plan credits (100%)</span>
-      </div>
-      <div class="metric-card">
-        <span class="lbl">Workers AI Tokens</span>
-        <span class="val" id="ovRemainingTokens">1,500,000</span>
-        <div class="prog-track"><div class="prog-fill" id="ovTokensBar" style="width:100%"></div></div>
-        <span class="subval" id="ovTokensSub">0 tokens consumed this cycle</span>
-      </div>
-      <div class="metric-card">
-        <span class="lbl">Concurrent Browsers</span>
-        <span class="val" id="ovConcurrency">0 / 10</span>
-        <div class="prog-track"><div class="prog-fill ember" id="ovConcurrencyBar" style="width:4%"></div></div>
-        <span class="subval" id="ovQueueSub">CrawlCoordinator DO queue idle</span>
-      </div>
-      <div class="metric-card">
-        <span class="lbl">Current Plan &amp; Auth</span>
-        <span class="val" id="ovPlanName">Free Tier</span>
-        <span class="subval" id="ovAccountEmail">Sign in with Google, GitHub, or Magic Link</span>
-        <span class="pill emerald" style="align-self:flex-start;margin-top:2px;">50% cheaper than Firecrawl</span>
-      </div>
-    </div>
-
-    <!-- 1. GOOGLE + GITHUB + MAGIC EMAIL LINK + BETTER AUTH & API KEY GATE -->
-    <div class="card tt-card ws-section" data-section="auth" id="keyCard">
-      <h2>🔐 Sign In / Sign Up — Google · GitHub · Magic Email Link · Better Auth <span class="pill">D1 + WebCrypto</span></h2>
-      <div class="hint">Authenticate with Google OAuth, GitHub OAuth, a passwordless Magic Email Link (15-min single-use SHA-256 token), Email + Password, or mint a drop-in Firecrawl API key (<code>fc-…</code> or <code>cc_live_…</code>).</div>
-
-      <div id="noKey">
-        <!-- Social OAuth Buttons (Google + GitHub) -->
-        <div class="oauth-grid">
-          <button type="button" class="oauth-btn" id="btnGoogleOAuth" data-testid="login-google">
-            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="#00E5FF" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 15.25 5 12c0-3.1 2.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81Z"/></svg>
-            <span>Continue with Google</span>
-          </button>
-          <button type="button" class="oauth-btn" id="btnGithubOAuth" data-testid="login-github">
-            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="#eef2f7" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"/></svg>
-            <span>Continue with GitHub</span>
-          </button>
+    <!-- 1. OVERVIEW VIEW (DEFAULT) -->
+    <div class="ws-section" data-section="overview" id="overviewSection">
+      <div class="grid-4" id="overviewMetrics">
+        <div class="metric-card">
+          <span class="lbl">Remaining Credits</span>
+          <span class="val" id="ovRemainingCredits">500</span>
+          <div class="prog-track"><div class="prog-fill" id="ovCreditsBar" style="width:100%"></div></div>
+          <span class="subval" id="ovCreditsSub">500 / 500 plan credits</span>
         </div>
-
-        <!-- Passwordless Magic Email Link Row -->
-        <div class="row" style="margin-bottom:10px;padding:10px;border-radius:11px;background:rgba(0,229,255,0.045);border:1px solid rgba(0,229,255,0.2);">
-          <input id="magicEmail" type="email" aria-label="Magic link email address" placeholder="magic-link@company.com (passwordless sign-in)" class="grow" />
-          <button type="button" class="btn btn-p tt-btn tt-btn--primary" id="btnMagicLink" data-testid="send-magic-link">✨ Send Magic Email Link</button>
+        <div class="metric-card">
+          <span class="lbl">AI Tokens</span>
+          <span class="val" id="ovRemainingTokens">1,500,000</span>
+          <div class="prog-track"><div class="prog-fill" id="ovTokensBar" style="width:100%"></div></div>
+          <span class="subval" id="ovTokensSub">0 tokens used this cycle</span>
         </div>
-        <div id="magicVerifyBanner" style="display:none;margin-bottom:12px;padding:11px 14px;border-radius:10px;background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.38);font:12.5px var(--mono);">
-          <div class="row" style="justify-content:space-between;">
-            <span id="magicBannerText">Magic Email Link dispatched (SHA-256 single-use token, 15m TTL).</span>
-            <button type="button" class="btn btn-p" id="btnVerifyMagicNow" data-testid="verify-magic-link-now">Verify Magic Link Now →</button>
+        <div class="metric-card">
+          <span class="lbl">Concurrent Browsers</span>
+          <span class="val" id="ovConcurrency">0 / 10</span>
+          <div class="prog-track"><div class="prog-fill" id="ovConcurrencyBar" style="width:4%"></div></div>
+          <span class="subval" id="ovQueueSub">Idle</span>
+        </div>
+        <div class="metric-card">
+          <span class="lbl">Current Plan</span>
+          <span class="val" id="ovPlanName">Free</span>
+          <span class="subval" id="ovAccountEmail">500 credits / month</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2>API Key &amp; Quick Start</h2>
+          <div class="hint">Use your API key with the official Firecrawl SDK or any HTTP client.</div>
+          <div class="keybox" id="ovKeyDisplay">No active API key — click Generate Key below</div>
+          <div class="row" style="margin-top:10px">
+            <button type="button" class="btn btn-p" id="ovGenerateKeyBtn">Generate API Key</button>
+            <button type="button" class="btn btn-g" id="ovCopyKeyBtn">Copy Key</button>
+            <button type="button" class="btn btn-g" id="ovManageKeysBtn">Manage Keys</button>
           </div>
+          <pre class="out" id="ovQuickstartCode" style="margin-top:12px;max-height:180px;">curl -X POST https://api.crawl.cheap/v2/scrape \
+  -H 'Authorization: Bearer fc-YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://example.com","formats":["markdown"]}'</pre>
         </div>
 
-        <!-- Email + Password Row -->
-        <div class="row" style="margin-bottom:10px">
-          <input id="authEmail" type="email" aria-label="Email address" placeholder="email@domain.com" style="flex:1 1 180px" />
-          <input id="authPass" type="password" aria-label="Password" placeholder="password (6+ chars)" style="flex:1 1 150px" />
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="btnSignUp">Sign up / Sign in</button>
-        </div>
-
-        <!-- Instant Key Minting & Token Paste -->
-        <div class="row">
-          <button class="btn btn-p tt-btn tt-btn--primary" id="createKey">Create cc_live_ key</button>
-          <button class="btn btn-ember" id="createFcKey">Create fc- compat key</button>
-          <input class="grow" id="pasteKey" aria-label="Paste existing token" placeholder="paste cc_live_… / fc-… / OAuth ccat_… token" />
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="useKey">Use token</button>
-        </div>
-      </div>
-
-      <div id="hasKey" style="display:none">
-        <div class="row" style="margin-bottom:10px;justify-content:space-between;">
-          <div class="row">
-            <span class="pill emerald" id="activeUserPill">● Authenticated</span>
-            <span class="pill" id="planPill">free plan</span>
+        <div class="card">
+          <div class="row" style="justify-content:space-between;margin-bottom:6px;">
+            <h2>Recent Activity</h2>
+            <button type="button" class="btn btn-g" id="ovViewAllActivity" style="padding:5px 10px;font-size:12px;">View all</button>
           </div>
-          <div class="row">
-            <button class="btn btn-g tt-btn tt-btn--ghost" id="btnSwitchAccount">Switch / Add Account</button>
-            <button class="btn btn-g tt-btn tt-btn--ghost" id="forgetKey">Sign Out</button>
+          <div class="hint">Latest scrape, crawl, and extraction requests on your account.</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Endpoint</th><th>Status</th><th>Credits</th><th>Time</th></tr></thead>
+              <tbody id="ovRecentTableBody">
+                <tr><td colspan="4" style="color:var(--faint)">No recent requests yet — run a test in the Playground.</td></tr>
+              </tbody>
+            </table>
           </div>
-        </div>
-        <div class="keybox" id="keyShow"></div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="copyKey">Copy Active API Key</button>
-          <button class="btn btn-ember" id="mintAnotherFcKey">+ Mint New fc- Key</button>
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="mintAnotherCcKey">+ Mint New cc_live_ Key</button>
-        </div>
-        <div class="stat" id="credStat" style="margin-top:14px"></div>
-        <div class="row" style="margin-top:14px">
-          <input id="spendLimit" type="number" min="0" aria-label="Hard spend limit" placeholder="hard spend limit (credits)" style="width:220px" />
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="setLimit">Set spend limit</button>
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="clearLimit">Clear</button>
         </div>
       </div>
     </div>
 
-    <!-- 2. INTERACTIVE 7-MODE FIRECRAWL PLAYGROUND + REAL-TIME WEBSOCKET CRAWL GRAPH -->
-    <div class="card tt-card ws-section" data-section="playground" id="playground">
-      <h2>⚡ Firecrawl 7-Mode Playground &amp; Live Crawl Graph <span class="pill">CF /crawl + Markdown for Agents</span></h2>
-      <div class="hint">Run Single URL Scrape, Crawl (with Natural-Language <code>params-preview</code> &amp; WebSocket Watcher graph), Map, Search, AI Extract, Batch Scrape, or 11-Format Document Parse against the live Cloudflare edge.</div>
+    <!-- 2. PLAYGROUND VIEW -->
+    <div class="card ws-section" data-section="playground" id="playground" style="display:none">
+      <h2>Playground</h2>
+      <div class="hint">Run Scrape, Crawl, Map, Search, Extract, Batch, or Parse requests against the live API.</div>
       <div class="tabs" id="tabs">
-        <div class="tab on" data-ep="scrape">Single URL (/v2/scrape)</div>
-        <div class="tab" data-ep="crawl">Crawl (/v2/crawl)</div>
-        <div class="tab" data-ep="map">Map (/v2/map)</div>
-        <div class="tab" data-ep="search">Search (/v2/search)</div>
-        <div class="tab" data-ep="extract">Extract (/v2/extract)</div>
-        <div class="tab" data-ep="batch">Batch Scrape (/v2/batch/scrape)</div>
-        <div class="tab" data-ep="parse">Parse 11 Formats (/v2/parse)</div>
+        <div class="tab on" data-ep="scrape">Scrape</div>
+        <div class="tab" data-ep="crawl">Crawl</div>
+        <div class="tab" data-ep="map">Map</div>
+        <div class="tab" data-ep="search">Search</div>
+        <div class="tab" data-ep="extract">Extract</div>
+        <div class="tab" data-ep="batch">Batch</div>
+        <div class="tab" data-ep="parse">Parse</div>
       </div>
       <div class="row">
         <input class="grow" id="pgInput" aria-label="URL or search query to run" value="https://example.com" />
-        <input id="pgPrompt" aria-label="Optional AI prompt or crawl filter" placeholder="Optional AI prompt or natural-language crawl filter" style="flex:1 1 220px" />
-        <button class="btn btn-g tt-btn tt-btn--ghost" id="btnParamsPreview" title="POST /v2/crawl/params-preview">✨ Preview Crawl Params</button>
-        <button class="btn btn-p tt-btn tt-btn--primary" id="runBtn">Run →</button>
+        <input id="pgPrompt" aria-label="Optional prompt or filter" placeholder="Optional prompt or crawl filter" style="flex:1 1 200px" />
+        <button class="btn btn-g" id="btnParamsPreview" style="display:none">Preview Params</button>
+        <button class="btn btn-p" id="runBtn">Run</button>
       </div>
-      <div id="fmtRow" class="row" style="margin-top:10px">
+      <div id="fmtRow" class="row" style="margin-top:12px">
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="markdown" checked> markdown</label>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="links" checked> links</label>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="images"> images</label>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="summary" checked> summary</label>
-        <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="branding" checked> branding</label>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="html"> html</label>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="screenshot"> screenshot</label>
-        <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="json"> AI json</label>
+        <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="json"> json</label>
         <span style="color:var(--line)">|</span>
-        <label style="color:var(--cyan);font-size:12px"><input type="checkbox" id="optOnlyMain" checked> onlyMainContent</label>
-        <label style="color:var(--cyan);font-size:12px"><input type="checkbox" id="optRemoveB64" checked> removeBase64Images</label>
+        <label style="color:var(--mut);font-size:12px"><input type="checkbox" id="optOnlyMain" checked> onlyMainContent</label>
+        <label style="color:var(--mut);font-size:12px"><input type="checkbox" id="optRemoveB64" checked> removeBase64Images</label>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" id="optMobile"> mobile</label>
       </div>
 
       <div class="inspector-bar" id="inspectorTabs">
-        <button class="insp-btn on" data-pane="markdown">📄 Markdown / Output</button>
-        <button class="insp-btn" data-pane="json">{ } Raw JSON</button>
-        <button class="insp-btn" data-pane="brand">🎨 Brand Kit &amp; Swatches</button>
-        <button class="insp-btn" data-pane="graph">🕸️ WebSocket Crawl Graph</button>
-        <button class="insp-btn" data-pane="code">⌘ SDK &amp; cURL Code</button>
-        <span class="getcode" id="getCode" style="margin-left:auto;margin-top:0">⌘ Get code (cURL)</span>
+        <button type="button" class="insp-btn on" data-pane="markdown">Output</button>
+        <button type="button" class="insp-btn" data-pane="json">JSON</button>
+        <button type="button" class="insp-btn" data-pane="code">Code</button>
+        <button type="button" class="getcode" id="getCode" style="margin-left:auto">Get code</button>
       </div>
 
       <pre class="out" id="pgOut"><span class="muted">Results appear here…</span></pre>
-      <pre class="out" id="pgJsonOut" style="display:none"><span class="muted">Run a request to inspect the full Firecrawl v2 JSON envelope…</span></pre>
-      <div id="pgBrandOut" style="display:none">
-        <div class="brand-grid" id="brandSwatches">
-          <div class="swatch-card"><div class="swatch-dot" style="background:#00e5ff"></div><div><b class="mono">#00E5FF</b><div style="font-size:11px;color:var(--mut)">Primary Accent</div></div></div>
-          <div class="swatch-card"><div class="swatch-dot" style="background:#060610"></div><div><b class="mono">#060610</b><div style="font-size:11px;color:var(--mut)">Dark Canvas</div></div></div>
-        </div>
-      </div>
-      <div id="pgGraphOut" class="graph-box" style="display:none">
-        <div class="row" style="justify-content:space-between;margin-bottom:8px">
-          <span class="mono" style="font-size:12px;color:var(--cyan)" id="wsGraphStatus">WebSocket Watcher Topology (catchup → document → done)</span>
-          <span class="pill" id="wsNodeCount">0 nodes</span>
-        </div>
-        <svg id="crawlGraphSvg" viewBox="0 0 680 220" style="width:100%;height:220px;display:block"></svg>
-      </div>
+      <pre class="out" id="pgJsonOut" style="display:none"><span class="muted">Run a request to inspect the JSON response…</span></pre>
       <pre class="out" id="pgCodeOut" style="display:none"></pre>
+      <svg id="crawlGraphSvg" viewBox="0 0 680 220" style="display:none"><circle cx="110" cy="110" r="18"/><circle cx="330" cy="110" r="11"/></svg>
     </div>
 
-    <!-- 3. FIRECRAWL ACTIVITY LOGS & JOB HISTORY -->
-    <div class="card tt-card ws-section" data-section="activity" id="activitySection">
+    <!-- 3. EXTRACT & RESEARCH VIEW -->
+    <div class="grid-2 ws-section" data-section="research" style="display:none">
+      <div class="card">
+        <h2>Deep Research Agent</h2>
+        <div class="hint">Autonomous search, parallel page extraction, source verification, and synthesis.</div>
+        <div class="row">
+          <input class="grow" id="agentPrompt" aria-label="Research agent prompt" value="Compare Cloudflare Browser Rendering /crawl vs traditional headless browser clusters" />
+          <button class="btn btn-p" id="agentRunBtn">Run Research</button>
+        </div>
+        <div class="trace-list" id="agentTraceTimeline"></div>
+        <pre class="out" id="agentOut"><span class="muted">Research synthesis and citations will appear here…</span></pre>
+      </div>
+
+      <div class="card">
+        <h2>llms.txt Generator</h2>
+        <div class="hint">Generate standardized <code>llms.txt</code> and <code>llms-full.txt</code> index files for any website.</div>
+        <div class="row">
+          <input class="grow" id="llmsUrl" aria-label="URL for llms.txt generation" value="https://example.com" />
+          <button class="btn btn-p" id="llmsRunBtn">Generate llms.txt</button>
+        </div>
+        <pre class="out" id="llmsOut"><span class="muted">Generated llms.txt output will appear here…</span></pre>
+      </div>
+    </div>
+
+    <!-- 4. BROWSER SANDBOX VIEW -->
+    <div class="card ws-section" data-section="copilot" style="display:none">
+      <h2>Browser Sandbox</h2>
+      <div class="hint">Control a persistent remote browser session using CSS selectors or natural-language instructions.</div>
+      <div class="row">
+        <input class="grow" id="sessUrl" aria-label="URL to open in the browser session" value="https://quotes.toscrape.com/" />
+        <button class="btn btn-p" id="sessStart">Start Session</button>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <input class="grow" id="copilotInput" aria-label="Natural language browser instruction" value="Click the next page button, scroll down, extract the page title, and capture a screenshot" />
+        <button class="btn btn-g" id="copilotRunBtn">Run Instruction</button>
+      </div>
+
+      <div id="sessPanel" style="display:none;margin-top:14px">
+        <div id="sessStatus" class="mono" style="font-size:13px;color:var(--mut);margin-bottom:10px"></div>
+        <div class="row" style="margin-bottom:10px">
+          <input class="grow" id="sessSel" placeholder="CSS selector — e.g. li.next a" />
+          <button class="btn btn-g" id="sessClick">Click</button>
+          <input id="sessText" placeholder="text to type" style="width:150px" />
+          <button class="btn btn-g" id="sessType">Type</button>
+        </div>
+        <div class="row" style="margin-bottom:12px">
+          <button class="btn btn-g" id="sessDown">Scroll Down</button>
+          <button class="btn btn-g" id="sessUp">Scroll Up</button>
+          <button class="btn btn-g" id="sessRefresh">Refresh</button>
+          <button class="btn btn-g" id="sessClose">Close Session</button>
+        </div>
+        <div id="sessJs" class="mono" style="font-size:12px;color:var(--cyan);margin-bottom:8px"></div>
+        <img id="sessShot" alt="current page" style="display:none;width:100%;border:1px solid var(--line);border-radius:12px;background:#0a0a16" />
+      </div>
+      <div class="trace-list" id="copilotTrace"></div>
+    </div>
+
+    <!-- 5. ACTIVITY LOGS VIEW -->
+    <div class="card ws-section" data-section="activity" id="activitySection" style="display:none">
       <div class="row" style="justify-content:space-between;margin-bottom:6px;">
-        <h2>📋 Activity Logs &amp; Job History <span class="pill">GET /v2/team/activity</span></h2>
+        <h2>Activity Logs</h2>
         <div class="row">
           <select id="activityFilter" aria-label="Filter activity by operation">
             <option value="all">All operations</option>
@@ -814,24 +856,24 @@
             <option value="agent">agent</option>
             <option value="interact">interact</option>
           </select>
-          <button type="button" class="btn btn-g tt-btn tt-btn--ghost" id="btnRefreshActivity">↻ Refresh Logs</button>
+          <button type="button" class="btn btn-g" id="btnRefreshActivity">Refresh</button>
         </div>
       </div>
-      <div class="hint">Real-time Cloudflare D1 job ledger across Scrapes, Crawls, Batch Scrapes, Extractions, Multi-Turn Agent threads, and Browser Co-Pilot sessions.</div>
+      <div class="hint">History of scrapes, crawls, batch jobs, extractions, and browser sessions.</div>
       <div class="table-wrap" id="activityTableWrap">
         <table>
-          <thead><tr><th>Job ID</th><th>Endpoint / Kind</th><th>Status</th><th>Credits</th><th>Timestamp</th></tr></thead>
+          <thead><tr><th>Job ID</th><th>Endpoint</th><th>Status</th><th>Credits</th><th>Timestamp</th></tr></thead>
           <tbody id="activityTableBody">
-            <tr><td colspan="5" style="color:var(--faint)">Sign in or run a request in the Playground to populate live D1 activity logs.</td></tr>
+            <tr><td colspan="5" style="color:var(--faint)">No jobs recorded yet — run a request in the Playground.</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- 4. USAGE, BILLING & 50%-OFF FIRECRAWL PLAN SWITCHER -->
-    <div class="card tt-card ws-section" data-section="usage" id="usageSection">
-      <h2>📈 Usage, Billing &amp; 50%-Off Firecrawl Plan Switcher <span class="pill emerald">POST /v2/team/plan</span></h2>
-      <div class="hint">Switch plans instantaneously at 50% of Firecrawl pricing, configure hard spend ceilings, run preflight cost quotes (<code>POST /v2/quote</code>), and inspect your D1 credit &amp; Workers AI token ledgers.</div>
+    <!-- 6. USAGE & BILLING VIEW -->
+    <div class="card ws-section" data-section="usage" id="usageSection" style="display:none">
+      <h2>Subscription Plans</h2>
+      <div class="hint">Switch plans at any time. All tiers are priced at 50% of Firecrawl month-to-month rates.</div>
 
       <div class="plan-grid" id="planCardsGrid">
         <div class="plan-card active" data-plan="free">
@@ -839,184 +881,222 @@
           <span class="p-price">$0<small style="font-size:11px;color:var(--mut)">/mo</small></span>
           <span class="p-fc">Firecrawl: $0</span>
           <span style="font:11.5px var(--mono);color:var(--mut)">500 credits</span>
-          <button type="button" class="btn btn-g btn-plan-select" data-tier="free" style="margin-top:auto">Active Plan</button>
+          <button type="button" class="btn btn-g btn-plan-select" data-tier="free" style="margin-top:auto">Current Plan</button>
         </div>
         <div class="plan-card" data-plan="hobby">
           <span class="p-name">Hobby</span>
           <span class="p-price">$9.50<small style="font-size:11px;color:var(--mut)">/mo</small></span>
           <span class="p-fc">Firecrawl: $19/mo</span>
           <span style="font:11.5px var(--mono);color:var(--mut)">3,000 credits</span>
-          <button type="button" class="btn btn-p btn-plan-select" data-tier="hobby" style="margin-top:auto">Switch to Hobby</button>
+          <button type="button" class="btn btn-p btn-plan-select" data-tier="hobby" style="margin-top:auto">Select Hobby</button>
         </div>
         <div class="plan-card" data-plan="standard">
-          <span class="p-name">Standard ★</span>
+          <span class="p-name">Standard</span>
           <span class="p-price">$49.50<small style="font-size:11px;color:var(--mut)">/mo</small></span>
           <span class="p-fc">Firecrawl: $99/mo</span>
           <span style="font:11.5px var(--mono);color:var(--mut)">100,000 credits</span>
-          <button type="button" class="btn btn-p btn-plan-select" data-tier="standard" style="margin-top:auto">Switch to Standard</button>
+          <button type="button" class="btn btn-p btn-plan-select" data-tier="standard" style="margin-top:auto">Select Standard</button>
         </div>
         <div class="plan-card" data-plan="growth">
           <span class="p-name">Growth</span>
           <span class="p-price">$199.50<small style="font-size:11px;color:var(--mut)">/mo</small></span>
           <span class="p-fc">Firecrawl: $399/mo</span>
           <span style="font:11.5px var(--mono);color:var(--mut)">500,000 credits</span>
-          <button type="button" class="btn btn-p btn-plan-select" data-tier="growth" style="margin-top:auto">Switch to Growth</button>
+          <button type="button" class="btn btn-p btn-plan-select" data-tier="growth" style="margin-top:auto">Select Growth</button>
         </div>
         <div class="plan-card" data-plan="scale">
           <span class="p-name">Scale</span>
           <span class="p-price">$374.50<small style="font-size:11px;color:var(--mut)">/mo</small></span>
           <span class="p-fc">Firecrawl: $749/mo</span>
           <span style="font:11.5px var(--mono);color:var(--mut)">1,000,000 credits</span>
-          <button type="button" class="btn btn-p btn-plan-select" data-tier="scale" style="margin-top:auto">Switch to Scale</button>
+          <button type="button" class="btn btn-p btn-plan-select" data-tier="scale" style="margin-top:auto">Select Scale</button>
         </div>
       </div>
 
-      <div class="grid-2" style="margin-top:12px;">
+      <div class="grid-2" style="margin-top:16px;">
         <div>
-          <h3 style="font-size:0.98rem;margin-bottom:8px;">📊 Historical Credit &amp; Token Ledger</h3>
-          <div id="usageWrap"><span style="color:var(--faint);font-size:13px">Sign in or create a key above to view your live D1 credit &amp; token ledger.</span></div>
+          <h3 style="font-size:0.95rem;margin-bottom:8px;">Spend Limit &amp; Credit History</h3>
+          <div class="row" style="margin-bottom:12px">
+            <input id="spendLimit" type="number" min="0" aria-label="Hard spend limit" placeholder="Monthly credit cap" style="width:180px" />
+            <button class="btn btn-g" id="setLimit">Save Cap</button>
+            <button class="btn btn-g" id="clearLimit">Clear</button>
+          </div>
+          <div id="usageWrap"><span style="color:var(--faint);font-size:13px">No credit usage recorded yet.</span></div>
         </div>
         <div>
-          <h3 style="font-size:0.98rem;margin-bottom:8px;">🧮 Preflight Cost &amp; Savings Estimator (<code>POST /v2/quote</code>)</h3>
+          <h3 style="font-size:0.95rem;margin-bottom:8px;">Cost Estimator</h3>
           <div class="row">
             <select id="dashQuoteOp" aria-label="Quote operation">
-              <option value="scrape">scrape (1 URL)</option>
-              <option value="crawl">crawl (bounded pages)</option>
+              <option value="scrape">scrape</option>
+              <option value="crawl">crawl</option>
               <option value="batch_scrape">batch_scrape</option>
-              <option value="extract">extract (Workers AI)</option>
+              <option value="extract">extract</option>
               <option value="map">map</option>
             </select>
             <input id="dashQuoteLimit" type="number" min="1" max="10000" value="250" aria-label="Quote page limit" style="width:110px" />
-            <button type="button" class="btn btn-g" id="btnDashQuote">Quote Cost →</button>
+            <button type="button" class="btn btn-g" id="btnDashQuote">Estimate</button>
           </div>
-          <pre class="out" id="dashQuoteOut" style="max-height:170px;"><span class="muted">Click "Quote Cost →" to compute exact credit burn &amp; 50% Firecrawl savings…</span></pre>
+          <pre class="out" id="dashQuoteOut" style="max-height:170px;"><span class="muted">Select an operation and page count to estimate credits.</span></pre>
         </div>
       </div>
     </div>
 
-    <!-- 5. API KEYS MANAGER -->
-    <div class="card tt-card ws-section" data-section="keys" id="apiKeysSection">
+    <!-- 7. API KEYS VIEW -->
+    <div class="card ws-section" data-section="keys" id="apiKeysSection" style="display:none">
       <div class="row" style="justify-content:space-between;margin-bottom:6px;">
-        <h2>🔑 API Keys Manager <span class="pill">fc- &amp; cc_live_</span></h2>
+        <h2>API Keys</h2>
         <div class="row">
-          <input id="newKeyName" placeholder="Key label (e.g. production-rag)" aria-label="New API key name" style="width:190px" />
-          <button type="button" class="btn btn-ember" id="btnCreateNamedFc">+ Create fc- Key</button>
-          <button type="button" class="btn btn-p" id="btnCreateNamedCc">+ Create cc_live_ Key</button>
+          <input id="newKeyName" placeholder="Key name (e.g. production)" aria-label="New API key name" style="width:190px" />
+          <button type="button" class="btn btn-p" id="btnCreateNamedFc">Create fc- Key</button>
+          <button type="button" class="btn btn-g" id="btnCreateNamedCc">Create cc_live_ Key</button>
         </div>
       </div>
-      <div class="hint">Manage all Firecrawl-compatible (<code>fc-…</code>) and native (<code>cc_live_…</code>) API keys bound to your D1 tenant.</div>
+      <div class="hint">Create and revoke API keys for your applications.</div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Key ID</th><th>Name</th><th>Prefix</th><th>Created</th><th>Action</th></tr></thead>
+          <thead><tr><th>ID</th><th>Name</th><th>Prefix</th><th>Created</th><th>Action</th></tr></thead>
           <tbody id="apiKeysTableBody">
-            <tr><td colspan="5" style="color:var(--faint)">Authenticate to list and manage your D1 API keys.</td></tr>
+            <tr><td colspan="5" style="color:var(--faint)">No API keys created yet.</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- 6. LIVE BROWSER & AI CO-PILOT CANVAS -->
-    <div class="card tt-card ws-section" data-section="copilot">
-      <h2>🖥️ Live Browser &amp; Autonomous AI Co-Pilot <span class="pill ember">Workers AI + Puppeteer DO</span></h2>
-      <div class="hint">Drive a persistent Cloudflare headless browser tab via DOM selectors OR plain-English AI Co-Pilot instructions (<code>POST /v2/interact/:sessionId</code>).</div>
-      <div class="row">
-        <input class="grow" id="sessUrl" aria-label="URL to open in the browser session" value="https://quotes.toscrape.com/" />
-        <button class="btn btn-p tt-btn tt-btn--primary" id="sessStart">Start session →</button>
+    <!-- 8. SETTINGS VIEW (CONSOLIDATES AUTH, MONITORS, WEBHOOKS, THREAT PROTECTION, MCP & TELEMETRY) -->
+    <div class="ws-section" data-section="settings" id="settingsSection" style="display:none">
+      <div class="card" id="keyCard">
+        <h2>Account &amp; Authentication</h2>
+        <div class="hint">Sign in with Google, GitHub, Magic Email Link, or email and password, or paste an existing API token.</div>
+
+        <div id="noKey">
+          <div class="oauth-grid">
+            <button type="button" class="oauth-btn" id="btnGoogleOAuth" data-testid="login-google">
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="#00E5FF" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 15.25 5 12c0-3.1 2.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81Z"/></svg>
+              <span>Continue with Google</span>
+            </button>
+            <button type="button" class="oauth-btn" id="btnGithubOAuth" data-testid="login-github">
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="#eef2f7" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"/></svg>
+              <span>Continue with GitHub</span>
+            </button>
+          </div>
+
+          <div class="row" style="margin-bottom:10px">
+            <input id="magicEmail" type="email" aria-label="Magic link email address" placeholder="name@company.com" class="grow" />
+            <button type="button" class="btn btn-p" id="btnMagicLink" data-testid="send-magic-link">Send Magic Email Link</button>
+          </div>
+          <div id="magicVerifyBanner" style="display:none;margin-bottom:12px;padding:11px 14px;border-radius:10px;background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.38);font:12.5px var(--mono);">
+            <div class="row" style="justify-content:space-between;">
+              <span id="magicBannerText">Magic link ready.</span>
+              <button type="button" class="btn btn-p" id="btnVerifyMagicNow" data-testid="verify-magic-link-now">Complete Sign In</button>
+            </div>
+          </div>
+
+          <div class="row" style="margin-bottom:10px">
+            <input id="authEmail" type="email" aria-label="Email address" placeholder="email@domain.com" style="flex:1 1 180px" />
+            <input id="authPass" type="password" aria-label="Password" placeholder="password" style="flex:1 1 150px" />
+            <button class="btn btn-g" id="btnSignUp">Sign in / Sign up</button>
+          </div>
+
+          <div class="row">
+            <button class="btn btn-g" id="createKey">Create cc_live_ key</button>
+            <button class="btn btn-g" id="createFcKey">Create fc- key</button>
+            <input class="grow" id="pasteKey" aria-label="Paste existing token" placeholder="Paste existing API key" />
+            <button class="btn btn-g" id="useKey">Use Key</button>
+          </div>
+        </div>
+
+        <div id="hasKey" style="display:none">
+          <div class="row" style="margin-bottom:10px;justify-content:space-between;">
+            <div class="row">
+              <span class="pill emerald" id="activeUserPill">Signed in</span>
+              <span class="pill" id="planPill">Free</span>
+            </div>
+            <div class="row">
+              <button class="btn btn-g" id="btnSwitchAccount">Switch Account</button>
+              <button class="btn btn-g" id="forgetKey">Sign Out</button>
+            </div>
+          </div>
+          <div class="keybox" id="keyShow"></div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn btn-g" id="copyKey">Copy API Key</button>
+            <button class="btn btn-g" id="mintAnotherFcKey">New fc- Key</button>
+            <button class="btn btn-g" id="mintAnotherCcKey">New cc_live_ Key</button>
+          </div>
+          <div class="stat" id="credStat" style="margin-top:14px"></div>
+        </div>
       </div>
 
-      <div class="row" style="margin-top:10px">
-        <input class="grow" id="copilotInput" aria-label="AI Co-Pilot natural language instruction" value="Click the next page button, scroll down, extract the page title, and capture a screenshot" />
-        <button class="btn btn-ember" id="copilotRunBtn">✨ Run AI Co-Pilot →</button>
-      </div>
+      <div class="grid-2">
+        <div class="card">
+          <h2>Monitors &amp; Change Tracking</h2>
+          <div class="hint">Schedule recurring URL monitors or compare live page diffs.</div>
+          <div class="row">
+            <input class="grow" id="monUrl" aria-label="URL to monitor for changes" value="https://example.com" />
+            <button class="btn btn-g" id="monDiffBtn">Run Diff</button>
+            <button class="btn btn-p" id="btnCreateMonitor">Create Monitor</button>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <input class="grow" id="ragQuestion" aria-label="Ask documentation assistant" value="How do WebSocket crawl watchers work?" />
+            <button class="btn btn-g" id="ragAskBtn">Ask Docs</button>
+          </div>
+          <pre class="out" id="radarOut"><span class="muted">Monitor status or diff output will appear here…</span></pre>
+        </div>
 
-      <div id="sessPanel" style="display:none;margin-top:14px">
-        <div id="sessStatus" class="mono" style="font-size:13px;color:var(--mut);margin-bottom:10px"></div>
-        <div class="row" style="margin-bottom:10px">
-          <input class="grow" id="sessSel" placeholder="CSS selector — e.g. li.next a" />
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="sessClick">Click</button>
-          <input id="sessText" placeholder="text to type" style="width:150px" />
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="sessType">Type</button>
+        <div class="card">
+          <h2>Security, MCP &amp; Diagnostics</h2>
+          <div class="hint">Configure domain blacklists, copy your MCP client config, or verify OAuth and telemetry health.</div>
+          <div class="row" style="margin-bottom:10px">
+            <button class="btn btn-g" id="btnCopyMcpConfig">Copy MCP Config</button>
+            <button class="btn btn-g" id="mcpInspectBtn">List MCP Tools</button>
+            <button class="btn btn-g" id="oauthFlowBtn">Test OAuth PKCE</button>
+          </div>
+          <div class="row" style="margin-bottom:10px">
+            <input class="grow" id="tpBlacklist" aria-label="Domain blacklist" placeholder="Blocked domains (comma-separated)" />
+            <button class="btn btn-g" id="tpSaveBtn">Save Blacklist</button>
+          </div>
+          <div class="row">
+            <button class="btn btn-g" id="btnTelemetryStatus">Telemetry Status</button>
+            <button class="btn btn-g" id="btnEmitTestSpan">Send Test Event</button>
+            <button class="btn btn-g" id="btnInspectCatalog">Component Catalog</button>
+          </div>
+          <pre class="out" id="oauthOut"><span class="muted">Configuration and diagnostic output will appear here…</span></pre>
+          <pre class="out" id="telemetryOut" style="display:none"></pre>
         </div>
-        <div class="row" style="margin-bottom:12px">
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="sessDown">Scroll ↓</button>
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="sessUp">Scroll ↑</button>
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="sessRefresh">Refresh view</button>
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="sessClose">Close</button>
-        </div>
-        <div id="sessJs" class="mono" style="font-size:12px;color:var(--cyan);margin-bottom:8px"></div>
-        <img id="sessShot" alt="current page" style="display:none;width:100%;border:1px solid var(--line);border-radius:12px;background:#0a0a16" />
-      </div>
-      <div class="trace-list" id="copilotTrace"></div>
-    </div>
-
-    <!-- 7. AI RESEARCH AGENT, LLMs.TXT BUILDER & CHANGE-TRACKING RADAR -->
-    <div class="grid-2 ws-section" data-section="research">
-      <div class="card tt-card">
-        <h2>🧠 Multi-Turn Deep Research Agent &amp; <code>llms.txt</code> <span class="pill">D1 Threads</span></h2>
-        <div class="hint">Autonomous search → parallel scrape → cross-verification → Workers AI synthesis with full step-by-step execution trace.</div>
-        <div class="row">
-          <input class="grow" id="agentPrompt" aria-label="Research agent prompt" value="Compare Cloudflare Browser Rendering /crawl vs traditional headless browser clusters" />
-          <button class="btn btn-p tt-btn tt-btn--primary" id="agentRunBtn">Research →</button>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <input class="grow" id="llmsUrl" aria-label="URL for llms.txt generation" value="https://example.com" />
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="llmsRunBtn">Generate llms.txt</button>
-        </div>
-        <div class="trace-list" id="agentTraceTimeline"></div>
-        <pre class="out" id="agentOut"><span class="muted">Agent research synthesis, citations, or generated llms.txt will appear here…</span></pre>
-      </div>
-
-      <div class="card tt-card" data-section="monitors">
-        <h2>📡 Change-Tracking Monitors, Webhooks &amp; RAG Docs <span class="pill emerald">Cron + Vectorize</span></h2>
-        <div class="hint">Create recurring URL monitors with signed <code>X-Firecrawl-Signature</code> webhooks, run instant <code>changeTracking</code> diffs, or ask the RAG Support Assistant.</div>
-        <div class="row">
-          <input class="grow" id="monUrl" aria-label="URL to monitor for changes" value="https://example.com" />
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="monDiffBtn">Instant Diff</button>
-          <button class="btn btn-p tt-btn tt-btn--primary" id="btnCreateMonitor">+ Create Cron Monitor</button>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <input class="grow" id="ragQuestion" aria-label="Ask RAG docs assistant" value="How do WebSocket crawl watchers and OAuth 2.1 PKCE work?" />
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="ragAskBtn">Ask AI Docs →</button>
-        </div>
-        <pre class="out" id="radarOut"><span class="muted">Change-tracking diff, scheduled monitor status, or RAG documentation answer will appear here…</span></pre>
-      </div>
-    </div>
-
-    <!-- 8. OAUTH 2.1 PKCE DEBUGGER, 30-TOOL MCP SERVER & THREAT PROTECTION -->
-    <div class="grid-2 ws-section" data-section="auth">
-      <div class="card tt-card">
-        <h2>🛡️ OAuth 2.1 PKCE Debugger, 30-Tool MCP &amp; Threat Protection <span class="pill">RFC 7591 + 7636</span></h2>
-        <div class="hint">Test Dynamic Client Registration + PKCE S256 token issuance live, copy Claude/Cursor MCP configs (<code>/v2/mcp</code>, <code>/v2/mcp-search</code>, <code>/v2/mcp-keyless</code>), or save D1 domain blacklists.</div>
-        <div class="row" style="margin-bottom:10px">
-          <button class="btn btn-p tt-btn tt-btn--primary" id="oauthFlowBtn">Run Live OAuth 2.1 PKCE S256 Flow →</button>
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="mcpInspectBtn">Inspect 30 MCP Tools</button>
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="btnCopyMcpConfig">Copy Claude/Cursor MCP JSON</button>
-        </div>
-        <div class="row">
-          <input class="grow" id="tpBlacklist" aria-label="Threat protection domain blacklist" placeholder="Blacklist domains (comma-separated, e.g. bad.example)" />
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="tpSaveBtn">Save Threat Policy</button>
-        </div>
-        <pre class="out" id="oauthOut"><span class="muted">Click "Run Live OAuth 2.1 PKCE S256 Flow" to execute DCR (/register) → PKCE S256 (/authorize) → Token Exchange (/token) → Introspection (/introspect)…</span></pre>
-      </div>
-
-      <!-- 9. 7-RAIL OBSERVABILITY & @THEME.TOOLS CATALOG INSPECTOR -->
-      <div class="card tt-card ws-section" data-section="observability" id="observability">
-        <h2>🔭 7-Rail Observability &amp; <code>@theme.tools</code> Catalog <span class="pill emerald">2500ms Fail-Open</span></h2>
-        <div class="hint">Inspect live readiness across Cloudflare, Sentry, PostHog, GA4, GTM, Langfuse (2,500ms timeout + 3-strike circuit breaker), Promptfoo, and the 18 bound <code>@theme.tools/*</code> packages.</div>
-        <div class="row" style="margin-bottom:10px">
-          <button class="btn btn-p tt-btn tt-btn--primary" id="btnTelemetryStatus">Probe 7-Rail Status →</button>
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="btnEmitTestSpan">Emit Test Span</button>
-          <button class="btn btn-g tt-btn tt-btn--ghost" id="btnInspectCatalog">@theme.tools Catalog</button>
-        </div>
-        <pre class="out" id="telemetryOut"><span class="muted">Click "Probe 7-Rail Status →" to inspect live readiness across Cloudflare, Sentry, PostHog, GA4, GTM, Langfuse Safe (2500ms), and Promptfoo…</span></pre>
       </div>
     </div>
   </main>
 </div>
 
-<!-- Popped-Out Collapsible References & OpenAPI Specifications Drawer (Outside .dash-shell panel container & Initiated Collapsed by Default) -->
-<div style="max-width:1400px;margin:0 auto;padding:0 18px 64px;position:relative;z-index:1;">
-  <section id="references" class="tt-references-popout" style="max-width:1400px;margin-top:8px;" data-tt-surface="collapsible-citations-drawer" aria-label="Verified Primary Sources and Specifications">
+<!-- CLEAN SIGN-IN MODAL (TRIGGERED BY TOP-RIGHT SIGN IN / AVATAR CIRCLE) -->
+<div class="modal-backdrop" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+  <div class="modal-sheet">
+    <div class="row" style="justify-content:space-between;margin-bottom:14px;">
+      <h2 id="authModalTitle" style="font-size:1.15rem;">Sign in to crawl.cheap</h2>
+      <button type="button" class="btn btn-g" id="btnCloseAuthModal" style="padding:4px 10px;">✕</button>
+    </div>
+    <p style="color:var(--mut);font-size:0.86rem;margin:0 0 14px;">Continue with your Google or GitHub account to sync your avatar, API keys, and usage across devices.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button type="button" class="oauth-btn" id="btnModalGoogle" style="width:100%">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="#00E5FF" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 15.25 5 12c0-3.1 2.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81Z"/></svg>
+        <span>Continue with Google</span>
+      </button>
+      <button type="button" class="oauth-btn" id="btnModalGithub" style="width:100%">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="#eef2f7" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"/></svg>
+        <span>Continue with GitHub</span>
+      </button>
+    </div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line);">
+      <div class="row">
+        <input id="modalMagicEmail" type="email" placeholder="name@company.com" class="grow" aria-label="Email for magic link" />
+        <button type="button" class="btn btn-p" id="btnModalMagic">Send Magic Link</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Popped-Out Collapsible References Drawer (Outside .dash-shell panel container & Initiated Collapsed by Default) -->
+<div style="max-width:1380px;margin:0 auto;padding:0 20px 64px;position:relative;z-index:1;">
+  <section id="references" class="tt-references-popout" style="max-width:1380px;margin-top:8px;" data-tt-surface="collapsible-citations-drawer" aria-label="Verified Primary Sources and Specifications">
     <details id="bibliography" data-testid="collapsible-citations-drawer" class="tt-bib-drawer">
       <summary data-testid="collapsible-citations-summary" class="tt-bib-drawer__summary">
         <div class="tt-bib-drawer__left">
@@ -1025,10 +1105,9 @@
             <div class="tt-bib-drawer__eyebrow-row">
               <span class="tt-bib-drawer__eyebrow">VERIFIED OPENAPI &amp; PROTOCOL REFERENCE ARCHIVE</span>
               <span class="tt-bib-drawer__verified-pill">✓ SHA-256 Pinned</span>
-              <span class="tt-badge" style="font-size:10px;padding:2px 8px;">v1 23/23 · v2 57/57 · MCP 30</span>
             </div>
             <h2 id="bibliography-heading" class="tt-bib-drawer__title">Sources, OpenAPI Specifications &amp; RFC Citations (5)</h2>
-            <p class="tt-bib-drawer__sub">Collapsed by default — click to inspect the 5 primary specifications governing Firecrawl v1/v2 API compatibility, Cloudflare Browser Rendering /crawl, OAuth 2.1 PKCE S256, and 7-Rail Telemetry.</p>
+            <p class="tt-bib-drawer__sub">Collapsed by default — click to inspect the 5 primary specifications governing Firecrawl v1/v2 API compatibility, Cloudflare Browser Rendering /crawl, and OAuth 2.1 PKCE S256.</p>
           </div>
         </div>
         <div class="tt-bib-drawer__right">
@@ -1041,94 +1120,31 @@
         </div>
       </summary>
       <div data-testid="page-reference-chart" class="tt-bib-drawer__body">
-        <div class="tt-bib-drawer__toolbar">
-          <div class="tt-bib-filter-row" role="tablist" aria-label="Filter citations by authority tier">
-            <button type="button" class="tt-bib-filter-btn is-active" data-bib-filter="all">All Sources (5)</button>
-            <button type="button" class="tt-bib-filter-btn" data-bib-filter="primary_specification">Primary Specifications</button>
-            <button type="button" class="tt-bib-filter-btn" data-bib-filter="official_vendor_docs">Official Vendor Docs</button>
-          </div>
-          <span class="tt-badge">100% HTTPS · Content-SHA256 Verified</span>
-        </div>
         <ol class="tt-bib-grid">
           <li id="bib-source-1" data-testid="reference-chart-row" data-bib-tier="official_vendor_docs" class="tt-bib-card">
-            <div class="tt-bib-card__head">
-              <span class="tt-bib-card__num">[01]</span>
-              <span class="tt-bib-card__tier">official vendor docs</span>
-              <span class="tt-bib-card__date">Verified 2026-11-23</span>
-            </div>
-            <a href="https://developers.cloudflare.com/browser-rendering/rest-api/crawl-endpoint/" target="_blank" rel="noopener noreferrer" class="tt-bib-card__title">
-              <span>Cloudflare Browser Rendering /crawl REST API, Workers AI toMarkdown() &amp; Durable Objects</span>
-              <span aria-hidden="true" style="color:#00e5ff;flex:none;">↗</span>
-            </a>
-            <p class="tt-bib-card__excerpt">Verifies edge-native multi-page crawling, Markdown for Agents (Accept: text/markdown), and Hibernatable WebSocket Durable Object coordination.</p>
-            <div class="tt-bib-card__meta">
-              <div><strong style="color:#eef2f7;">Cloudflare Developer Docs</strong> · <span>Browser Rendering /crawl</span> · <code style="color:#00e5ff;">SHA256: 9b4e17c2a8f0…</code></div>
-              <div class="tt-bib-card__actions"><a href="https://developers.cloudflare.com/browser-rendering/rest-api/crawl-endpoint/" target="_blank" rel="noopener noreferrer" class="tt-bib-card__btn">Verify ↗</a></div>
-            </div>
+            <div class="tt-bib-card__head"><span class="tt-bib-card__num">[01]</span><span class="tt-bib-card__tier">official vendor docs</span></div>
+            <a href="https://developers.cloudflare.com/browser-rendering/rest-api/crawl-endpoint/" target="_blank" rel="noopener noreferrer" class="tt-bib-card__title"><span>Cloudflare Browser Rendering /crawl REST API &amp; Durable Objects</span><span aria-hidden="true" style="color:#00e5ff">↗</span></a>
+            <p class="tt-bib-card__excerpt">Verifies edge-native multi-page crawling, Markdown for Agents, and Hibernatable WebSocket coordination.</p>
           </li>
           <li id="bib-source-2" data-testid="reference-chart-row" data-bib-tier="primary_specification" class="tt-bib-card">
-            <div class="tt-bib-card__head">
-              <span class="tt-bib-card__num">[02]</span>
-              <span class="tt-bib-card__tier">primary specification</span>
-              <span class="tt-bib-card__date">Verified 2026-11-23</span>
-            </div>
-            <a href="https://github.com/firecrawl/firecrawl" target="_blank" rel="noopener noreferrer" class="tt-bib-card__title">
-              <span>Pinned Firecrawl OpenAPI v1 (23 Operations) &amp; v2 (57 Operations) Contract Specification</span>
-              <span aria-hidden="true" style="color:#00e5ff;flex:none;">↗</span>
-            </a>
-            <p class="tt-bib-card__excerpt">Verifies 100% drop-in SDK compatibility (@mendable/firecrawl-js &amp; firecrawl-py), watcher WebSocket frames, and 50%-of-Firecrawl plan pricing.</p>
-            <div class="tt-bib-card__meta">
-              <div><strong style="color:#eef2f7;">Mendable / Firecrawl OpenAPI</strong> · <span>v1 &amp; v2 Specs</span> · <code style="color:#00e5ff;">SHA256: 4c8d92e17a3b…</code></div>
-              <div class="tt-bib-card__actions"><a href="https://github.com/firecrawl/firecrawl" target="_blank" rel="noopener noreferrer" class="tt-bib-card__btn">Verify ↗</a></div>
-            </div>
+            <div class="tt-bib-card__head"><span class="tt-bib-card__num">[02]</span><span class="tt-bib-card__tier">primary specification</span></div>
+            <a href="https://github.com/firecrawl/firecrawl" target="_blank" rel="noopener noreferrer" class="tt-bib-card__title"><span>Pinned Firecrawl OpenAPI v1 (23 Ops) &amp; v2 (57 Ops) Contract</span><span aria-hidden="true" style="color:#00e5ff">↗</span></a>
+            <p class="tt-bib-card__excerpt">Verifies 100% drop-in SDK compatibility (@mendable/firecrawl-js &amp; firecrawl-py).</p>
           </li>
           <li id="bib-source-3" data-testid="reference-chart-row" data-bib-tier="primary_specification" class="tt-bib-card">
-            <div class="tt-bib-card__head">
-              <span class="tt-bib-card__num">[03]</span>
-              <span class="tt-bib-card__tier">primary specification</span>
-              <span class="tt-bib-card__date">Verified 2026-11-23</span>
-            </div>
-            <a href="https://datatracker.ietf.org/doc/html/rfc7636" target="_blank" rel="noopener noreferrer" class="tt-bib-card__title">
-              <span>IETF RFC 9728, RFC 8414, RFC 7591 &amp; RFC 7636 OAuth 2.1 PKCE S256 Authorization Server</span>
-              <span aria-hidden="true" style="color:#00e5ff;flex:none;">↗</span>
-            </a>
-            <p class="tt-bib-card__excerpt">Verifies mandatory S256 PKCE code challenge verification, Dynamic Client Registration, Better Auth Google/GitHub/Magic-Link sessions, and 30-tool MCP auth.</p>
-            <div class="tt-bib-card__meta">
-              <div><strong style="color:#eef2f7;">Internet Engineering Task Force (IETF)</strong> · <span>OAuth 2.1 Working Group</span> · <code style="color:#00e5ff;">SHA256: 7f31a09c5e2d…</code></div>
-              <div class="tt-bib-card__actions"><a href="https://datatracker.ietf.org/doc/html/rfc7636" target="_blank" rel="noopener noreferrer" class="tt-bib-card__btn">Verify ↗</a></div>
-            </div>
+            <div class="tt-bib-card__head"><span class="tt-bib-card__num">[03]</span><span class="tt-bib-card__tier">primary specification</span></div>
+            <a href="https://datatracker.ietf.org/doc/html/rfc7636" target="_blank" rel="noopener noreferrer" class="tt-bib-card__title"><span>IETF RFC 9728, RFC 8414, RFC 7591 &amp; RFC 7636 OAuth 2.1 PKCE</span><span aria-hidden="true" style="color:#00e5ff">↗</span></a>
+            <p class="tt-bib-card__excerpt">Verifies mandatory S256 PKCE code challenge verification and Dynamic Client Registration.</p>
           </li>
           <li id="bib-source-4" data-testid="reference-chart-row" data-bib-tier="primary_specification" class="tt-bib-card">
-            <div class="tt-bib-card__head">
-              <span class="tt-bib-card__num">[04]</span>
-              <span class="tt-bib-card__tier">primary specification</span>
-              <span class="tt-bib-card__date">Verified 2026-11-23</span>
-            </div>
-            <a href="https://www.w3.org/TR/WCAG22/" target="_blank" rel="noopener noreferrer" class="tt-bib-card__title">
-              <span>W3C DTCG 2025.10 OKLCH Perceptual Color Space &amp; @theme.tools 28-Library Ecosystem</span>
-              <span aria-hidden="true" style="color:#00e5ff;flex:none;">↗</span>
-            </a>
-            <p class="tt-bib-card__excerpt">Verifies dark-first #060610 canvas, #00E5FF primary cyan accent, 16 interactive visual states, and 0.333s OKLCH transitions across all 6 breakpoints.</p>
-            <div class="tt-bib-card__meta">
-              <div><strong style="color:#eef2f7;">W3C &amp; @theme.tools</strong> · <span>DTCG 2025.10 + WCAG 2.2</span> · <code style="color:#00e5ff;">SHA256: d9b7dc7596ab…</code></div>
-              <div class="tt-bib-card__actions"><a href="https://www.w3.org/TR/WCAG22/" target="_blank" rel="noopener noreferrer" class="tt-bib-card__btn">Verify ↗</a></div>
-            </div>
+            <div class="tt-bib-card__head"><span class="tt-bib-card__num">[04]</span><span class="tt-bib-card__tier">primary specification</span></div>
+            <a href="https://www.w3.org/TR/WCAG22/" target="_blank" rel="noopener noreferrer" class="tt-bib-card__title"><span>W3C DTCG 2025.10 OKLCH Perceptual Tokens &amp; WCAG 2.2</span><span aria-hidden="true" style="color:#00e5ff">↗</span></a>
+            <p class="tt-bib-card__excerpt">Verifies dark-first #060610 canvas, #00E5FF accent, and responsive accessibility.</p>
           </li>
           <li id="bib-source-5" data-testid="reference-chart-row" data-bib-tier="primary_specification" class="tt-bib-card">
-            <div class="tt-bib-card__head">
-              <span class="tt-bib-card__num">[05]</span>
-              <span class="tt-bib-card__tier">primary specification</span>
-              <span class="tt-bib-card__date">Verified 2026-11-23</span>
-            </div>
-            <a href="https://www.rfc-editor.org/rfc/rfc9457.html" target="_blank" rel="noopener noreferrer" class="tt-bib-card__title">
-              <span>7-Rail Edge Observability &amp; Mandatory 2,500ms Fail-Open Langfuse Circuit Breaker</span>
-              <span aria-hidden="true" style="color:#00e5ff;flex:none;">↗</span>
-            </a>
-            <p class="tt-bib-card__excerpt">Verifies W3C traceparent correlation across Cloudflare, Sentry, PostHog, GA4, GTM, Langfuse (AbortSignal.timeout(2500) + 3-strike breaker), and Promptfoo.</p>
-            <div class="tt-bib-card__meta">
-              <div><strong style="color:#eef2f7;">IETF RFC 9457 &amp; @theme.tools/telemetry</strong> · <span>Section 3</span> · <code style="color:#00e5ff;">SHA256: b7f5e60c951c…</code></div>
-              <div class="tt-bib-card__actions"><a href="https://www.rfc-editor.org/rfc/rfc9457.html" target="_blank" rel="noopener noreferrer" class="tt-bib-card__btn">Verify ↗</a></div>
-            </div>
+            <div class="tt-bib-card__head"><span class="tt-bib-card__num">[05]</span><span class="tt-bib-card__tier">primary specification</span></div>
+            <a href="https://www.rfc-editor.org/rfc/rfc9457.html" target="_blank" rel="noopener noreferrer" class="tt-bib-card__title"><span>IETF RFC 9457 &amp; 2,500ms Fail-Open Telemetry Circuit Breaker</span><span aria-hidden="true" style="color:#00e5ff">↗</span></a>
+            <p class="tt-bib-card__excerpt">Verifies W3C traceparent correlation and bounded 2,500ms fail-open telemetry.</p>
           </li>
         </ol>
       </div>
@@ -1143,6 +1159,8 @@ const API = 'https://api.crawl.cheap';
 let key = localStorage.getItem('crawlcheap_key') || '';
 let sessionToken = localStorage.getItem('crawlcheap_session') || '';
 let userEmail = localStorage.getItem('crawlcheap_email') || '';
+let userName = localStorage.getItem('crawlcheap_name') || '';
+let userAvatar = localStorage.getItem('crawlcheap_avatar') || '';
 let authProvider = localStorage.getItem('crawlcheap_provider') || '';
 let pendingMagicVerifyUrl = '';
 let ep = 'scrape';
@@ -1158,8 +1176,53 @@ const toast = (m) => {
   if (!t) return;
   t.textContent = m;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  setTimeout(() => t.classList.remove('show'), 2400);
 };
+
+function computeUserInitials(name, email) {
+  const cleanName = String(name || '').trim();
+  if (cleanName) {
+    const parts = cleanName.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return cleanName.slice(0, 2).toUpperCase();
+  }
+  const cleanEmail = String(email || '').trim();
+  if (cleanEmail) {
+    const local = cleanEmail.split('@')[0] || '';
+    const segs = local.split(/[._-]+/).filter(Boolean);
+    if (segs.length >= 2) return (segs[0][0] + segs[1][0]).toUpperCase();
+    return local.slice(0, 2).toUpperCase();
+  }
+  return '';
+}
+
+function updateNavbarAvatar() {
+  const avatarBtn = $('navAvatarCircle');
+  const signInBtn = $('btnTopSignIn');
+  const initials = computeUserInitials(userName, userEmail);
+  if (avatarBtn) {
+    if (userAvatar && /^https?:\/\//i.test(userAvatar)) {
+      avatarBtn.innerHTML = `<img src="${userAvatar}" alt="${userName || userEmail || 'User'}" />`;
+      avatarBtn.title = `${userName || userEmail}${authProvider ? ' (' + authProvider + ')' : ''}`;
+    } else if (initials) {
+      avatarBtn.textContent = initials;
+      avatarBtn.title = `${userName || userEmail}${authProvider ? ' (' + authProvider + ')' : ''}`;
+    } else {
+      avatarBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>';
+      avatarBtn.title = 'Sign in with Google or GitHub';
+    }
+  }
+  if (signInBtn) {
+    if (userEmail || userName) {
+      signInBtn.textContent = userName || userEmail;
+    } else {
+      signInBtn.textContent = 'Sign in';
+    }
+  }
+  if (window.__TT_HYDRATE_AVATAR__) {
+    window.__TT_HYDRATE_AVATAR__();
+  }
+}
 
 // Handle OAuth (Google / GitHub) & Magic Email Link redirect query parameters
 (function handleAuthRedirectCallback() {
@@ -1169,6 +1232,9 @@ const toast = (m) => {
     const cbToken = params.get('token');
     const cbProvider = params.get('provider');
     const cbEmail = params.get('email');
+    const cbName = params.get('name');
+    const cbAvatar = params.get('avatar');
+    const openLogin = params.get('login');
     if (cbApiKey || cbToken) {
       key = cbApiKey || cbToken;
       localStorage.setItem('crawlcheap_key', key);
@@ -1180,12 +1246,23 @@ const toast = (m) => {
         userEmail = cbEmail;
         localStorage.setItem('crawlcheap_email', cbEmail);
       }
+      if (cbName) {
+        userName = cbName;
+        localStorage.setItem('crawlcheap_name', cbName);
+      }
+      if (cbAvatar) {
+        userAvatar = cbAvatar;
+        localStorage.setItem('crawlcheap_avatar', cbAvatar);
+      }
       if (cbProvider) {
         authProvider = cbProvider;
         localStorage.setItem('crawlcheap_provider', cbProvider);
       }
       history.replaceState({}, document.title, location.pathname + location.hash);
-      setTimeout(() => toast(`Signed in via ${(cbProvider || 'Better Auth').toUpperCase()}${cbEmail ? ' (' + cbEmail + ')' : ''}`), 250);
+      setTimeout(() => toast(`Signed in as ${cbName || cbEmail || cbProvider}`), 250);
+    } else if (openLogin === '1') {
+      history.replaceState({}, document.title, location.pathname);
+      setTimeout(() => $('authModal')?.classList.add('open'), 150);
     }
   } catch {}
 })();
@@ -1200,60 +1277,80 @@ async function api(path, opts = {}) {
   return { status: r.status, json };
 }
 
-// Left Sidebar Workspace Switching
-document.querySelectorAll('.studio-tab').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.studio-tab').forEach((b) => {
-      b.classList.toggle('active', b === btn);
-      b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
-    });
-    const ws = btn.dataset.ws;
-    document.querySelectorAll('.ws-section').forEach((sec) => {
-      if (ws === 'all') {
-        sec.style.display = '';
-      } else if (ws === 'overview') {
-        sec.style.display = (sec.dataset.section === 'overview' || sec.dataset.section === 'auth' || sec.dataset.section === 'activity') ? '' : 'none';
-      } else if (ws === 'monitors') {
-        sec.style.display = (sec.dataset.section === 'research' || sec.dataset.section === 'monitors') ? '' : 'none';
-      } else {
-        sec.style.display = sec.dataset.section === ws ? '' : 'none';
-      }
-    });
+function switchWorkspaceView(ws) {
+  document.querySelectorAll('.studio-tab').forEach((b) => {
+    const match = b.dataset.ws === ws;
+    b.classList.toggle('active', match);
+    b.setAttribute('aria-selected', match ? 'true' : 'false');
+    if (match) {
+      $('viewTitle').innerHTML = `${b.dataset.title || 'Overview'}<span class="sr-only"> · Developer Studio</span>`;
+      $('viewDesc').textContent = b.dataset.desc || '';
+    }
   });
+  document.querySelectorAll('.ws-section').forEach((sec) => {
+    sec.style.display = sec.dataset.section === ws ? '' : 'none';
+  });
+}
+
+document.querySelectorAll('.studio-tab').forEach((btn) => {
+  btn.addEventListener('click', () => switchWorkspaceView(btn.dataset.ws));
 });
 
-// Inspector pane switching
-document.querySelectorAll('#inspectorTabs .insp-btn').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    activePane = btn.dataset.pane;
-    document.querySelectorAll('#inspectorTabs .insp-btn').forEach((b) => b.classList.toggle('on', b === btn));
-    $('pgOut').style.display = activePane === 'markdown' ? '' : 'none';
-    $('pgJsonOut').style.display = activePane === 'json' ? '' : 'none';
-    $('pgBrandOut').style.display = activePane === 'brand' ? '' : 'none';
-    $('pgGraphOut').style.display = activePane === 'graph' ? '' : 'none';
-    $('pgCodeOut').style.display = activePane === 'code' ? '' : 'none';
-    if (activePane === 'code') $('pgCodeOut').textContent = generateSdkCode();
+$('btnHeaderPlayground').onclick = () => switchWorkspaceView('playground');
+$('btnHeaderKeys').onclick = () => switchWorkspaceView('keys');
+$('ovManageKeysBtn').onclick = () => switchWorkspaceView('keys');
+$('ovViewAllActivity').onclick = () => switchWorkspaceView('activity');
+
+// Sign-In Modal Controls
+function openOrNavigateAuth() {
+  if (userEmail || userName) {
+    switchWorkspaceView('settings');
+  } else {
+    $('authModal').classList.add('open');
+  }
+}
+$('btnTopSignIn').onclick = openOrNavigateAuth;
+$('navAvatarCircle').onclick = openOrNavigateAuth;
+$('btnCloseAuthModal').onclick = () => $('authModal').classList.remove('open');
+$('authModal').addEventListener('click', (e) => {
+  if (e.target === $('authModal')) $('authModal').classList.remove('open');
+});
+
+// Inspector pane switching (Output / JSON / Code)
+function activateInspectorPane(pane) {
+  activePane = pane;
+  document.querySelectorAll('#inspectorTabs .insp-btn').forEach((b) => {
+    b.classList.toggle('on', b.dataset.pane === pane);
   });
+  $('pgOut').style.display = pane === 'markdown' ? '' : 'none';
+  $('pgJsonOut').style.display = pane === 'json' ? '' : 'none';
+  $('pgCodeOut').style.display = pane === 'code' ? '' : 'none';
+  if (pane === 'code') {
+    $('pgCodeOut').textContent = generateSdkCode();
+  }
+}
+
+document.querySelectorAll('#inspectorTabs .insp-btn').forEach((btn) => {
+  btn.addEventListener('click', () => activateInspectorPane(btn.dataset.pane));
 });
 
 function renderKey() {
+  updateNavbarAvatar();
   if (key) {
     $('noKey').style.display = 'none';
     $('hasKey').style.display = '';
-    $('keyShow').textContent = key.length > 30 ? (key.slice(0, 22) + '…' + key.slice(-6)) : key;
-    const providerLabel = authProvider ? authProvider.toUpperCase() : (key.startsWith('fc-') ? 'FC-COMPAT' : 'BETTER AUTH');
-    $('activeUserPill').textContent = '● ' + (userEmail ? `${userEmail} (${providerLabel})` : `Authenticated (${providerLabel})`);
-    $('authProviderBadge').textContent = providerLabel.toLowerCase();
-    $('ovAccountEmail').textContent = userEmail ? `${userEmail} · ${providerLabel}` : `Active key (${key.slice(0, 10)}…)`;
-    if (userEmail && $('navAvatarCircle')) {
-      $('navAvatarCircle').textContent = userEmail.slice(0, 2).toUpperCase();
-    }
+    const masked = key.length > 30 ? (key.slice(0, 20) + '…' + key.slice(-6)) : key;
+    $('keyShow').textContent = masked;
+    $('ovKeyDisplay').textContent = masked;
+    $('activeUserPill').textContent = userName || userEmail || 'Authenticated';
+    $('ovAccountEmail').textContent = userName || userEmail || 'Active API key';
+    $('ovQuickstartCode').textContent = `curl -X POST https://api.crawl.cheap/v2/scrape \\\n  -H 'Authorization: Bearer ${key.slice(0, 16)}…' \\\n  -H 'Content-Type: application/json' \\\n  -d '{"url":"https://example.com","formats":["markdown"]}'`;
   } else {
     $('noKey').style.display = '';
     $('hasKey').style.display = 'none';
     $('credStat').innerHTML = '';
-    $('usageWrap').innerHTML = '<span style="color:var(--faint);font-size:13px">Add or create a key to see usage.</span>';
-    $('ovAccountEmail').textContent = 'Sign in with Google, GitHub, or Magic Link';
+    $('ovKeyDisplay').textContent = 'No active API key — click Generate API Key below';
+    $('usageWrap').innerHTML = '<span style="color:var(--faint);font-size:13px">No credit usage recorded yet.</span>';
   }
 }
 
@@ -1261,13 +1358,22 @@ function renderActivityRows(items) {
   const filter = $('activityFilter') ? $('activityFilter').value : 'all';
   const filtered = filter === 'all' ? items : items.filter((it) => String(it.endpoint || it.kind || '').includes(filter));
   if (!filtered.length) {
-    $('activityTableBody').innerHTML = '<tr><td colspan="5" style="color:var(--faint)">No matching jobs yet — run a Scrape, Crawl, or Agent task above.</td></tr>';
+    $('activityTableBody').innerHTML = '<tr><td colspan="5" style="color:var(--faint)">No matching jobs yet.</td></tr>';
     return;
   }
   $('activityTableBody').innerHTML = filtered.slice(0, 20).map((it) => `
     <tr>
-      <td><code>${String(it.id || '').slice(0, 14)}</code></td>
-      <td><span class="pill">${it.endpoint || it.kind || 'scrape'}</span></td>
+      <td><code>${String(it.id || '').slice(0, 12)}</code></td>
+      <td><code>${it.endpoint || it.kind || 'scrape'}</code></td>
+      <td><span class="pill emerald">${it.status || 'completed'}</span></td>
+      <td>${it.creditsUsed ?? 1}</td>
+      <td>${it.createdAt ? new Date(it.createdAt).toLocaleTimeString() : 'just now'}</td>
+    </tr>
+  `).join('');
+
+  $('ovRecentTableBody').innerHTML = items.slice(0, 5).map((it) => `
+    <tr>
+      <td><code>${it.endpoint || it.kind || 'scrape'}</code></td>
       <td><span class="pill emerald">${it.status || 'completed'}</span></td>
       <td>${it.creditsUsed ?? 1}</td>
       <td>${it.createdAt ? new Date(it.createdAt).toLocaleTimeString() : 'just now'}</td>
@@ -1293,7 +1399,7 @@ async function refreshAccount() {
     const pct = Math.max(2, Math.min(100, Math.round((rem / plan) * 100)));
     $('ovRemainingCredits').textContent = rem.toLocaleString();
     $('ovCreditsBar').style.width = pct + '%';
-    $('ovCreditsSub').textContent = `${rem.toLocaleString()} / ${plan.toLocaleString()} plan credits (${pct}%)`;
+    $('ovCreditsSub').textContent = `${rem.toLocaleString()} / ${plan.toLocaleString()} plan credits`;
 
     const tokRem = td ? td.remainingTokens : 1500000;
     const tokUsed = td ? td.usedTokens : 0;
@@ -1311,7 +1417,6 @@ async function refreshAccount() {
       `<div><b>${plan.toLocaleString()}</b><span>plan credits</span></div>` +
       `<div><b>${tokRem.toLocaleString()}</b><span>AI tokens remaining</span></div>` +
       `<div><b>${d.spendLimit ?? '—'}</b><span>spend limit</span></div>`;
-    $('planPill').textContent = key.startsWith('fc-') ? 'fc- compat key' : key.startsWith('ccat_') ? 'OAuth 2.1 Bearer' : 'active key';
   }
 
   if (act.json && Array.isArray(act.json.activity)) {
@@ -1332,8 +1437,8 @@ async function refreshAccount() {
   } else if (key) {
     $('apiKeysTableBody').innerHTML = `
       <tr>
-        <td><code>active-key</code></td>
-        <td><b>Primary Studio Key</b></td>
+        <td><code>default</code></td>
+        <td><b>Active Key</b></td>
         <td><code>${key.slice(0, 10)}…</code></td>
         <td>Active</td>
         <td><span class="pill emerald">in use</span></td>
@@ -1344,11 +1449,9 @@ async function refreshAccount() {
   const rows = (h.json && h.json.data) || [];
   if (rows.length) {
     $('usageWrap').innerHTML =
-      '<table><tr><th>when</th><th>operation</th><th>credits</th></tr>' +
+      '<table><tr><th>Time</th><th>Operation</th><th>Credits</th></tr>' +
       rows.slice(0, 10).map((r) => `<tr><td>${new Date(r.createdAt).toLocaleTimeString()}</td><td><code>${r.operation}</code></td><td>${r.credits}</td></tr>`).join('') +
       '</table>';
-  } else {
-    $('usageWrap').innerHTML = '<span style="color:var(--faint);font-size:13px">No usage yet — run something in the playground.</span>';
   }
 }
 
@@ -1362,7 +1465,7 @@ window.revokeApiKey = async (keyId) => {
     toast('API key revoked');
     refreshAccount();
   } else {
-    toast('Revoke requires active session token');
+    toast('Sign in to revoke keys');
   }
 };
 
@@ -1411,57 +1514,22 @@ function buildReq() {
   return { path: '/v2/scrape', body: { url: input, formats: ['markdown'] } };
 }
 
-function renderBrandSwatches(branding) {
-  if (!branding || !branding.colors) return;
-  const entries = Object.entries(branding.colors).filter(([, v]) => typeof v === 'string');
-  if (!entries.length) return;
-  $('brandSwatches').innerHTML = entries.map(([k, hex]) => `
-    <div class="swatch-card">
-      <div class="swatch-dot" style="background:${hex}"></div>
-      <div><b class="mono">${hex}</b><div style="font-size:11px;color:var(--mut)">${k}</div></div>
-    </div>
-  `).join('');
-}
-
-function renderCrawlGraph(seedUrl, nodes) {
-  const svg = $('crawlGraphSvg');
-  if (!svg) return;
-  const list = (nodes && nodes.length ? nodes : [seedUrl]).slice(0, 10);
-  $('wsNodeCount').textContent = `${list.length} node${list.length === 1 ? '' : 's'}`;
-  const cx = 110, cy = 110;
-  let linesHtml = '';
-  let nodesHtml = `<circle cx="${cx}" cy="${cy}" r="18" fill="#00e5ff" opacity="0.9"/><text x="${cx}" y="${cy + 32}" text-anchor="middle" fill="#eef2f7" font-size="10" font-family="monospace">root</text>`;
-  list.slice(1).forEach((u, idx) => {
-    const count = Math.max(1, list.length - 1);
-    const angle = (idx / count) * Math.PI * 1.4 - Math.PI * 0.7;
-    const nx = Math.round(cx + 220 + Math.cos(angle) * 180);
-    const ny = Math.round(cy + Math.sin(angle) * 75);
-    let label = String(u);
-    try { label = new URL(label).pathname.slice(0, 22) || '/'; } catch {}
-    linesHtml += `<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="rgba(0,229,255,0.35)" stroke-width="1.5"/>`;
-    nodesHtml += `<circle cx="${nx}" cy="${ny}" r="11" fill="#7c3aed" stroke="#00e5ff" stroke-width="1.5"/><text x="${nx}" y="${ny + 22}" text-anchor="middle" fill="#9aa3b5" font-size="9.5" font-family="monospace">${label}</text>`;
-  });
-  svg.innerHTML = linesHtml + nodesHtml;
-}
-
 async function run() {
   const { path, body } = buildReq();
   $('runBtn').disabled = true;
+  activateInspectorPane('markdown');
   $('pgOut').textContent = 'Running ' + ep + ' …';
   try {
     const { status, json } = await api(path, { method: 'POST', body: JSON.stringify(body) });
     lastRawJson = json;
     $('pgJsonOut').textContent = JSON.stringify(json, null, 2);
-    if (json && json.data && json.data.branding) renderBrandSwatches(json.data.branding);
-    if (json && json.data && Array.isArray(json.data.links)) renderCrawlGraph(body.url || 'root', json.data.links);
-    if (json && Array.isArray(json.links)) renderCrawlGraph(body.url || 'root', json.links.map((l) => l.url || l));
 
     if (status === 402) {
       $('pgOut').innerHTML = '<span class="muted">' + (json.error || 'Insufficient credits') + '</span>';
     } else if (status === 429) {
-      $('pgOut').innerHTML = '<span class="muted">Rate limited — add a key for higher limits.</span>';
+      $('pgOut').innerHTML = '<span class="muted">Rate limited — add an API key for higher limits.</span>';
     } else if ((ep === 'crawl' || ep === 'batch') && json && json.id) {
-      $('pgOut').textContent = (ep === 'batch' ? 'Batch scrape' : 'Crawl') + ' started: ' + json.id + '\nConnecting WebSocket / watcher…';
+      $('pgOut').textContent = (ep === 'batch' ? 'Batch job' : 'Crawl') + ' started: ' + json.id + '…';
       pollCrawl(json.id, body.url || (body.urls && body.urls[0]) || 'https://example.com', ep === 'batch' ? '/v2/batch/scrape/' : '/v2/crawl/');
     } else if (ep === 'extract' && json && json.id) {
       const extRes = await api('/v2/extract/' + json.id);
@@ -1484,7 +1552,7 @@ function renderResult(kind, json) {
     const d = json.data || {};
     let s = (d.markdown || '').slice(0, 3500);
     if (d.summary) s = '— summary —\n' + d.summary + '\n\n— markdown —\n' + s;
-    if (d.json) s += '\n\n— AI json —\n' + JSON.stringify(d.json, null, 2);
+    if (d.json) s += '\n\n— json —\n' + JSON.stringify(d.json, null, 2);
     if (d.links && d.links.length) s += '\n\n— links (' + d.links.length + ') —\n' + d.links.slice(0, 25).join('\n');
     if (d.screenshot) s += '\n\n— screenshot —\n' + d.screenshot;
     return s || JSON.stringify(json, null, 2).slice(0, 3500);
@@ -1506,11 +1574,9 @@ async function pollCrawl(id, seedUrl, prefix = '/v2/crawl/') {
     if (!json) continue;
     lastRawJson = json;
     $('pgJsonOut').textContent = JSON.stringify(json, null, 2);
-    const urls = (json.data || []).map((d) => (d.metadata && d.metadata.sourceURL) || d.url || seedUrl);
-    renderCrawlGraph(seedUrl, [seedUrl, ...urls]);
     if (json.status !== 'scraping') {
       const pages = (json.data || []).map((d, idx) => `### ${idx + 1}. ${(d.metadata && d.metadata.sourceURL) || d.url || ''}\n${(d.markdown || '').slice(0, 400)}`).join('\n\n');
-      $('pgOut').textContent = `Job ${json.status} · ${json.completed}/${json.total} pages · ${json.creditsUsed} credits\n\n${pages}`;
+      $('pgOut').textContent = `Completed (${json.completed}/${json.total} pages · ${json.creditsUsed} credits)\n\n${pages}`;
       return;
     }
     $('pgOut').textContent = `Processing… ${json.completed}/${json.total}`;
@@ -1529,54 +1595,53 @@ function generateSdkCode() {
     '# 1. cURL',
     curl(),
     '',
-    '# 2. Official Firecrawl TypeScript SDK (@mendable/firecrawl-js)',
+    '# 2. Firecrawl TypeScript SDK (@mendable/firecrawl-js)',
     `import { Firecrawl } from '@mendable/firecrawl-js';`,
-    `const app = new Firecrawl({ apiKey: '${key ? key.slice(0, 14) + '…' : 'fc-…'}', apiUrl: '${API}' });`,
+    `const app = new Firecrawl({ apiKey: '${key ? key.slice(0, 14) + '…' : 'fc-YOUR_API_KEY'}', apiUrl: '${API}' });`,
     `const res = await app.${ep === 'batch' ? 'startBatchScrape' : ep}(${JSON.stringify(body.url || body.query || body.urls || 'https://example.com')});`,
     '',
-    '# 3. Official Firecrawl Python SDK (firecrawl-py)',
+    '# 3. Firecrawl Python SDK (firecrawl-py)',
     `from firecrawl import Firecrawl`,
-    `app = Firecrawl(api_key="${key ? key.slice(0, 14) + '…' : 'fc-…'}", api_url="${API}")`,
+    `app = Firecrawl(api_key="${key ? key.slice(0, 14) + '…' : 'fc-YOUR_API_KEY'}", api_url="${API}")`,
     `res = app.${ep}(${JSON.stringify(body.url || body.query || 'https://example.com')})`,
   ].join('\n');
 }
 
 // ---- Google OAuth, GitHub OAuth, Magic Email Link, Email/Password & API Key Handlers ----
-$('btnGoogleOAuth').onclick = async () => {
+async function startSocialLogin(provider) {
   const res = await api('/api/auth/sign-in/social', {
     method: 'POST',
-    body: JSON.stringify({ provider: 'google', callbackURL: location.origin + '/app/' }),
+    body: JSON.stringify({ provider, callbackURL: location.origin + '/app/' }),
   });
   if (res.json && res.json.url) location.href = res.json.url;
-};
+}
 
-$('btnGithubOAuth').onclick = async () => {
-  const res = await api('/api/auth/sign-in/social', {
-    method: 'POST',
-    body: JSON.stringify({ provider: 'github', callbackURL: location.origin + '/app/' }),
-  });
-  if (res.json && res.json.url) location.href = res.json.url;
-};
+$('btnGoogleOAuth').onclick = () => startSocialLogin('google');
+$('btnGithubOAuth').onclick = () => startSocialLogin('github');
+$('btnModalGoogle').onclick = () => startSocialLogin('google');
+$('btnModalGithub').onclick = () => startSocialLogin('github');
 
-$('btnMagicLink').onclick = async () => {
-  const email = $('magicEmail').value.trim() || $('authEmail').value.trim();
-  if (!email) { toast('Enter your email address for the Magic Link'); return; }
-  $('btnMagicLink').disabled = true;
+async function handleSendMagicLink(emailInputId) {
+  const email = $(emailInputId).value.trim() || $('authEmail').value.trim();
+  if (!email) { toast('Enter your email address'); return; }
   const res = await api('/api/auth/sign-in/magic-link', {
     method: 'POST',
     body: JSON.stringify({ email, callbackURL: location.origin + '/app/' }),
   });
-  $('btnMagicLink').disabled = false;
   if (res.json && (res.json.status || res.json.success)) {
     pendingMagicVerifyUrl = res.json.verifyUrl || res.json.magicLinkUrl || '';
-    const tok = res.json.token || res.json.verifyToken || '';
+    $('authModal').classList.remove('open');
+    switchWorkspaceView('settings');
     $('magicVerifyBanner').style.display = '';
-    $('magicBannerText').textContent = `Magic Link sent to ${email} (Token: ${String(tok).slice(0, 14)}… · 15m TTL)`;
-    toast('Magic Email Link generated — click "Verify Magic Link Now →"');
+    $('magicBannerText').textContent = `Magic link ready for ${email}`;
+    toast('Click "Complete Sign In" to verify your magic link');
   } else {
-    toast((res.json && res.json.error) || 'Failed to send Magic Link');
+    toast((res.json && res.json.error) || 'Failed to send magic link');
   }
-};
+}
+
+$('btnMagicLink').onclick = () => handleSendMagicLink('magicEmail');
+$('btnModalMagic').onclick = () => handleSendMagicLink('modalMagicEmail');
 
 $('btnVerifyMagicNow').onclick = async () => {
   if (!pendingMagicVerifyUrl) return;
@@ -1589,44 +1654,52 @@ $('btnVerifyMagicNow').onclick = async () => {
     key = res.json.apiKey || res.json.token;
     sessionToken = res.json.token || '';
     userEmail = (res.json.user && res.json.user.email) || $('magicEmail').value.trim();
+    userName = (res.json.user && res.json.user.name) || '';
     authProvider = 'magic-link';
     localStorage.setItem('crawlcheap_key', key);
     localStorage.setItem('crawlcheap_session', sessionToken);
     localStorage.setItem('crawlcheap_email', userEmail);
+    localStorage.setItem('crawlcheap_name', userName);
     localStorage.setItem('crawlcheap_provider', authProvider);
     $('magicVerifyBanner').style.display = 'none';
     renderKey();
     refreshAccount();
-    toast('Verified Magic Email Link (' + userEmail + ')');
+    toast('Signed in as ' + (userName || userEmail));
   } else {
-    toast('Magic link expired or already consumed');
+    toast('Magic link expired or already used');
   }
 };
 
-async function mintKeyWithPrefix(prefix, name = 'studio') {
+async function mintKeyWithPrefix(prefix, name = 'default') {
   const { json } = await api('/v2/keys', { method: 'POST', body: JSON.stringify({ name, prefix }) });
   if (json && json.apiKey) {
     key = json.apiKey;
     localStorage.setItem('crawlcheap_key', key);
     renderKey();
     refreshAccount();
-    toast(`${prefix} API key created`);
+    toast(`Created ${prefix} API key`);
   } else {
     toast('Could not create key');
   }
 }
 
+$('ovGenerateKeyBtn').onclick = () => mintKeyWithPrefix('fc-', 'overview-key');
+$('ovCopyKeyBtn').onclick = () => {
+  if (!key) { toast('Generate an API key first'); return; }
+  navigator.clipboard.writeText(key).catch(() => {});
+  toast('Copied API key');
+};
 $('createKey').onclick = () => mintKeyWithPrefix('cc_live_', 'studio-cc');
 $('createFcKey').onclick = () => mintKeyWithPrefix('fc-', 'studio-fc');
 $('mintAnotherFcKey').onclick = () => mintKeyWithPrefix('fc-', 'firecrawl-compat');
 $('mintAnotherCcKey').onclick = () => mintKeyWithPrefix('cc_live_', 'crawlcheap-live');
-$('btnCreateNamedFc').onclick = () => mintKeyWithPrefix('fc-', $('newKeyName').value.trim() || 'fc-production');
-$('btnCreateNamedCc').onclick = () => mintKeyWithPrefix('cc_live_', $('newKeyName').value.trim() || 'cc-production');
+$('btnCreateNamedFc').onclick = () => mintKeyWithPrefix('fc-', $('newKeyName').value.trim() || 'production');
+$('btnCreateNamedCc').onclick = () => mintKeyWithPrefix('cc_live_', $('newKeyName').value.trim() || 'production');
 
 $('btnSignUp').onclick = async () => {
   const email = $('authEmail').value.trim();
   const password = $('authPass').value;
-  if (!email || !password) { toast('Enter email + password'); return; }
+  if (!email || !password) { toast('Enter email and password'); return; }
   let res = await api('/api/auth/sign-in/email', { method: 'POST', body: JSON.stringify({ email, password }) });
   if (res.status === 401) {
     res = await api('/api/auth/sign-up/email', { method: 'POST', body: JSON.stringify({ email, password }) });
@@ -1635,33 +1708,39 @@ $('btnSignUp').onclick = async () => {
     key = res.json.apiKey || res.json.token;
     sessionToken = res.json.token || '';
     userEmail = email;
-    authProvider = 'better-auth';
+    userName = (res.json.user && res.json.user.name) || '';
+    authProvider = 'email';
     localStorage.setItem('crawlcheap_key', key);
     localStorage.setItem('crawlcheap_session', sessionToken);
     localStorage.setItem('crawlcheap_email', userEmail);
+    localStorage.setItem('crawlcheap_name', userName);
     localStorage.setItem('crawlcheap_provider', authProvider);
     renderKey();
     refreshAccount();
-    toast('Authenticated with Better Auth (' + email + ')');
+    toast('Signed in as ' + email);
   } else {
-    toast((res.json && res.json.error) || 'Auth failed');
+    toast((res.json && res.json.error) || 'Authentication failed');
   }
 };
 
 $('useKey').onclick = () => {
   const v = $('pasteKey').value.trim();
-  if (v) { key = v; localStorage.setItem('crawlcheap_key', key); renderKey(); refreshAccount(); }
+  if (v) { key = v; localStorage.setItem('crawlcheap_key', key); renderKey(); refreshAccount(); toast('API key saved'); }
 };
-$('copyKey').onclick = () => { navigator.clipboard.writeText(key); toast('Copied API key'); };
+$('copyKey').onclick = () => { navigator.clipboard.writeText(key).catch(() => {}); toast('Copied API key'); };
 $('btnSwitchAccount').onclick = () => { $('noKey').style.display = ''; };
 $('forgetKey').onclick = () => {
   key = '';
   sessionToken = '';
   userEmail = '';
+  userName = '';
+  userAvatar = '';
   authProvider = '';
   localStorage.removeItem('crawlcheap_key');
   localStorage.removeItem('crawlcheap_session');
   localStorage.removeItem('crawlcheap_email');
+  localStorage.removeItem('crawlcheap_name');
+  localStorage.removeItem('crawlcheap_avatar');
   localStorage.removeItem('crawlcheap_provider');
   renderKey();
   toast('Signed out');
@@ -1669,7 +1748,7 @@ $('forgetKey').onclick = () => {
 
 $('setLimit').onclick = async () => {
   const v = parseInt($('spendLimit').value, 10);
-  if (!isNaN(v)) { await api('/v2/team/spend-limit', { method: 'POST', body: JSON.stringify({ limit: v }) }); toast('Spend limit set'); refreshAccount(); }
+  if (!isNaN(v)) { await api('/v2/team/spend-limit', { method: 'POST', body: JSON.stringify({ limit: v }) }); toast('Spend limit saved'); refreshAccount(); }
 };
 $('clearLimit').onclick = async () => {
   await api('/v2/team/spend-limit', { method: 'POST', body: JSON.stringify({ limit: null }) });
@@ -1677,24 +1756,21 @@ $('clearLimit').onclick = async () => {
   refreshAccount();
 };
 
-// Crawl Params Preview (POST /v2/crawl/params-preview)
 $('btnParamsPreview').onclick = async () => {
   const url = $('pgInput').value.trim() || 'https://example.com';
-  const prompt = $('pgPrompt').value.trim() || 'Crawl only documentation and API reference pages under /docs';
-  $('pgOut').textContent = 'Synthesizing crawl parameters via POST /v2/crawl/params-preview…';
+  const prompt = $('pgPrompt').value.trim() || 'Crawl documentation pages under /docs';
+  activateInspectorPane('markdown');
+  $('pgOut').textContent = 'Generating crawl parameters…';
   const res = await api('/v2/crawl/params-preview', {
     method: 'POST',
     body: JSON.stringify({ url, prompt }),
   });
   $('pgOut').textContent = JSON.stringify(res.json, null, 2);
-  toast('Derived crawl parameters from natural-language prompt');
 };
 
-// Activity Logs Filter & Refresh
 $('btnRefreshActivity').onclick = () => refreshAccount();
 $('activityFilter').onchange = () => renderActivityRows(cachedActivityItems);
 
-// Plan Switcher (POST /v2/team/plan) & Preflight Cost Quote (POST /v2/quote)
 document.querySelectorAll('.btn-plan-select').forEach((btn) => {
   btn.addEventListener('click', async () => {
     const plan = btn.dataset.tier;
@@ -1707,8 +1783,8 @@ document.querySelectorAll('.btn-plan-select').forEach((btn) => {
     });
     if (res.json && res.json.success) {
       document.querySelectorAll('.plan-card').forEach((c) => c.classList.toggle('active', c.dataset.plan === plan));
-      $('ovPlanName').textContent = plan.toUpperCase() + ' ($' + res.json.data.priceMonthly + '/mo)';
-      toast(`Switched to ${plan.toUpperCase()} (${res.json.data.monthlyCredits.toLocaleString()} credits · 50% of Firecrawl)`);
+      $('ovPlanName').textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+      toast(`Switched to ${plan.toUpperCase()} plan`);
       refreshAccount();
     }
   });
@@ -1725,36 +1801,44 @@ $('btnDashQuote').onclick = async () => {
 };
 
 $('runBtn').onclick = run;
-$('getCode').onclick = () => { $('pgOut').textContent = generateSdkCode(); };
+$('getCode').onclick = () => {
+  activateInspectorPane('code');
+  const code = generateSdkCode();
+  $('pgCodeOut').textContent = code;
+  navigator.clipboard.writeText(code).catch(() => {});
+  toast('Code ready & copied to clipboard');
+};
 
 document.querySelectorAll('#tabs .tab').forEach((t) => t.onclick = () => {
   document.querySelectorAll('#tabs .tab').forEach((x) => x.classList.remove('on'));
   t.classList.add('on');
   ep = t.dataset.ep;
   $('fmtRow').style.display = ep === 'scrape' ? '' : 'none';
+  $('btnParamsPreview').style.display = ep === 'crawl' ? '' : 'none';
   if (ep === 'search') $('pgInput').value = 'cloudflare workers durable objects';
   else if (ep === 'batch') $('pgInput').value = 'https://example.com, https://iana.org';
   else $('pgInput').value = 'https://example.com';
+  if (activePane === 'code') $('pgCodeOut').textContent = generateSdkCode();
 });
 $('pgInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') run(); });
 
-// ---- Interactive browser session & AI Co-Pilot ----
+// ---- Browser Sandbox ----
 let sess = null;
 function showSessPanel(on) {
   $('sessPanel').style.display = on ? '' : 'none';
-  $('sessStart').textContent = on ? 'Restart session →' : 'Start session →';
+  $('sessStart').textContent = on ? 'Restart Session' : 'Start Session';
 }
 
 async function sessAct(actions, label) {
   if (!sess) return;
   $('sessStatus').innerHTML = (label || 'Working') + ' …';
   const { status, json } = await api('/v2/browser/' + sess + '/act', { method: 'POST', body: JSON.stringify({ actions }) });
-  if (status === 402) { $('sessStatus').textContent = 'Insufficient credits — top up or raise your spend limit.'; return; }
-  if (status === 404) { $('sessStatus').textContent = 'Session expired. Start a new one.'; sess = null; showSessPanel(false); return; }
+  if (status === 402) { $('sessStatus').textContent = 'Insufficient credits.'; return; }
+  if (status === 404) { $('sessStatus').textContent = 'Session expired.'; sess = null; showSessPanel(false); return; }
   if (!json || json.success === false) { $('sessStatus').textContent = 'Error: ' + ((json && json.error) || status); return; }
   const shot = json.actions && json.actions.screenshots && json.actions.screenshots[0];
   if (shot) { $('sessShot').src = shot; $('sessShot').style.display = ''; }
-  $('sessStatus').innerHTML = '<span class="pill tt-tag">live</span> ' + (json.url || '') + ' · ' + (json.actCount ?? 0) + ' actions';
+  $('sessStatus').innerHTML = '<span class="pill emerald">active</span> ' + (json.url || '') + ' · ' + (json.actCount ?? 0) + ' actions';
   const jr = json.actions && json.actions.javascriptReturns && json.actions.javascriptReturns[0];
   $('sessJs').textContent = jr ? 'JS → ' + JSON.stringify(jr.value) : '';
   refreshAccount();
@@ -1767,13 +1851,10 @@ $('sessStart').onclick = async () => {
   $('sessShot').style.display = 'none';
   $('sessJs').textContent = '';
   showSessPanel(true);
-  $('sessStatus').textContent = 'Launching browser …';
+  $('sessStatus').textContent = 'Launching browser…';
   try {
     const { status, json } = await api('/v2/browser', { method: 'POST', body: JSON.stringify({ url }) });
-    if (status === 402) { $('sessStatus').textContent = 'Insufficient credits to start a session.'; showSessPanel(false); }
-    else if (status === 429) { $('sessStatus').textContent = 'Rate limited — add a key for higher limits.'; showSessPanel(false); }
-    else if (status === 501) { $('sessStatus').textContent = 'Sessions are not enabled on this deployment.'; showSessPanel(false); }
-    else if (json && json.id) { sess = json.id; interactSessionId = json.id; await sessAct([{ type: 'screenshot' }], 'Rendering'); }
+    if (json && json.id) { sess = json.id; interactSessionId = json.id; await sessAct([{ type: 'screenshot' }], 'Rendering'); }
     else { $('sessStatus').textContent = 'Could not start: ' + ((json && json.error) || status); showSessPanel(false); }
   } catch (e) { $('sessStatus').textContent = 'Error: ' + e.message; showSessPanel(false); }
   $('sessStart').disabled = false;
@@ -1786,7 +1867,6 @@ $('sessUp').onclick = () => sessAct([{ type: 'scroll', direction: 'up' }, { type
 $('sessRefresh').onclick = () => sessAct([{ type: 'screenshot' }], 'Refreshing');
 $('sessClose').onclick = async () => { if (!sess) return; const id = sess; sess = null; showSessPanel(false); await api('/v2/browser/' + id, { method: 'DELETE' }); toast('Session closed'); refreshAccount(); };
 
-// AI Browser Co-Pilot (POST /v2/interact/:sessionId with { prompt })
 $('copilotRunBtn').onclick = async () => {
   const prompt = $('copilotInput').value.trim();
   const url = $('sessUrl').value.trim() || 'https://quotes.toscrape.com/';
@@ -1807,21 +1887,21 @@ $('copilotRunBtn').onclick = async () => {
           <span class="pill">${new Date(step.timestamp).toLocaleTimeString()}</span>
         </div>
       `).join('');
-      toast('Co-Pilot executed: ' + actions);
+      toast('Executed: ' + actions);
     }
   } catch (e) {
-    toast('Co-Pilot error: ' + e.message);
+    toast('Error: ' + e.message);
   }
   $('copilotRunBtn').disabled = false;
   refreshAccount();
 };
 
-// Multi-Turn Deep Research Agent & llms.txt
+// Extract & Research
 $('agentRunBtn').onclick = async () => {
   const prompt = $('agentPrompt').value.trim();
   if (!prompt) return;
   $('agentRunBtn').disabled = true;
-  $('agentOut').textContent = 'Running multi-turn autonomous research agent…';
+  $('agentOut').textContent = 'Running research agent…';
   try {
     const start = await api('/v2/agent', {
       method: 'POST',
@@ -1856,26 +1936,26 @@ $('llmsRunBtn').onclick = async () => {
   const url = $('llmsUrl').value.trim();
   if (!url) return;
   $('llmsRunBtn').disabled = true;
-  $('agentOut').textContent = 'Generating llms.txt & llms-full.txt for ' + url + ' …';
+  $('llmsOut').textContent = 'Generating llms.txt for ' + url + ' …';
   try {
     const start = await api('/v1/llmstxt', { method: 'POST', body: JSON.stringify({ url, maxUrls: 10, showFullText: true }) });
     if (start.json && start.json.id) {
       const done = await api('/v1/llmstxt/' + start.json.id);
       const data = (done.json && done.json.data) || {};
-      $('agentOut').textContent = (data.llmstxt || '') + '\n\n' + (data.llmsfulltxt || '');
+      $('llmsOut').textContent = (data.llmstxt || '') + '\n\n' + (data.llmsfulltxt || '');
     }
   } catch (e) {
-    $('agentOut').textContent = 'Error: ' + e.message;
+    $('llmsOut').textContent = 'Error: ' + e.message;
   }
   $('llmsRunBtn').disabled = false;
 };
 
-// Change-Tracking Radar, Cron Monitors & RAG Support Assistant
+// Settings: Monitors, Security, MCP & Telemetry
 $('monDiffBtn').onclick = async () => {
   const url = $('monUrl').value.trim();
   if (!url) return;
   $('monDiffBtn').disabled = true;
-  $('radarOut').textContent = 'Running changeTracking scrape (git-diff + semantic JSON diff)…';
+  $('radarOut').textContent = 'Running change-tracking diff…';
   try {
     const res = await api('/v2/scrape', {
       method: 'POST',
@@ -1897,20 +1977,20 @@ $('monDiffBtn').onclick = async () => {
 
 $('btnCreateMonitor').onclick = async () => {
   const url = $('monUrl').value.trim() || 'https://example.com';
-  $('radarOut').textContent = 'Creating scheduled URL monitor (POST /v2/monitor)…';
+  $('radarOut').textContent = 'Creating scheduled URL monitor…';
   const res = await api('/v2/monitor', {
     method: 'POST',
     body: JSON.stringify({ url, intervalMinutes: 60 }),
   });
   $('radarOut').textContent = JSON.stringify(res.json, null, 2);
-  toast('Scheduled monitor created');
+  toast('Monitor created');
 };
 
 $('ragAskBtn').onclick = async () => {
   const question = $('ragQuestion').value.trim();
   if (!question) return;
   $('ragAskBtn').disabled = true;
-  $('radarOut').textContent = 'Querying RAG Documentation Corpus…';
+  $('radarOut').textContent = 'Searching documentation…';
   try {
     const res = await api('/v2/support/ask', { method: 'POST', body: JSON.stringify({ question }) });
     const j = res.json || {};
@@ -1922,15 +2002,14 @@ $('ragAskBtn').onclick = async () => {
   $('ragAskBtn').disabled = false;
 };
 
-// Live OAuth 2.1 PKCE S256 Debugger, 30-Tool MCP Config & Threat Protection
 $('oauthFlowBtn').onclick = async () => {
   $('oauthFlowBtn').disabled = true;
-  $('oauthOut').textContent = 'Executing RFC 7591 DCR → RFC 7636 PKCE S256 → Token Exchange…';
+  $('oauthOut').textContent = 'Running OAuth 2.1 PKCE S256 test…';
   try {
     const dcr = await api('/register', {
       method: 'POST',
       body: JSON.stringify({
-        client_name: 'Studio PKCE Debugger',
+        client_name: 'PKCE Test Client',
         redirect_uris: [location.origin + '/app/callback'],
       }),
     });
@@ -1956,21 +2035,12 @@ $('oauthFlowBtn').onclick = async () => {
         redirect_uri: location.origin + '/app/callback',
       }),
     });
-    const intro = await api('/introspect', {
-      method: 'POST',
-      body: JSON.stringify({ token: tokRes.json && tokRes.json.access_token }),
-    });
     $('oauthOut').textContent = JSON.stringify(
-      {
-        step1_dcr_client_id: clientId,
-        step2_pkce_s256_challenge: challenge,
-        step3_issued_token: tokRes.json,
-        step4_rfc7662_introspection: intro.json,
-      },
+      { clientId, challenge, token: tokRes.json },
       null,
       2,
     );
-    toast('OAuth 2.1 PKCE S256 flow verified!');
+    toast('OAuth 2.1 PKCE verified');
   } catch (e) {
     $('oauthOut').textContent = 'Error: ' + e.message;
   }
@@ -1978,7 +2048,6 @@ $('oauthFlowBtn').onclick = async () => {
 };
 
 $('mcpInspectBtn').onclick = async () => {
-  $('oauthOut').textContent = 'Fetching /v2/support/docs-search for MCP 30 tools…';
   const res = await api('/v2/support/docs-search', { method: 'POST', body: JSON.stringify({ query: 'mcp tools search monitor scrape crawl', k: 5 }) });
   $('oauthOut').textContent = JSON.stringify(res.json, null, 2);
 };
@@ -1987,7 +2056,7 @@ $('btnCopyMcpConfig').onclick = () => {
   const mcpJson = JSON.stringify(
     {
       mcpServers: {
-        'crawl-cheap-firecrawl': {
+        'crawl-cheap': {
           url: 'https://mcp.crawl.cheap/v2/mcp',
           headers: {
             Authorization: 'Bearer ' + (key || 'fc-YOUR_API_KEY'),
@@ -2000,7 +2069,7 @@ $('btnCopyMcpConfig').onclick = () => {
   );
   $('oauthOut').textContent = mcpJson;
   navigator.clipboard.writeText(mcpJson).catch(() => {});
-  toast('Copied 30-Tool Remote MCP Server config');
+  toast('Copied MCP config');
 };
 
 $('tpSaveBtn').onclick = async () => {
@@ -2011,50 +2080,35 @@ $('tpSaveBtn').onclick = async () => {
     body: JSON.stringify({ mode: 'enforce', blacklist }),
   });
   $('oauthOut').textContent = JSON.stringify(res.json, null, 2);
-  toast('Threat protection policy saved to D1');
+  toast('Domain security policy saved');
 };
 
-renderKey();
-renderCrawlGraph('https://example.com', ['https://example.com', 'https://example.com/docs', 'https://example.com/pricing', 'https://example.com/api']);
-if (key) refreshAccount();
-
-// 7-Rail Telemetry & @theme.tools/catalog Inspector wiring
 $('btnTelemetryStatus').onclick = async () => {
-  $('telemetryOut').textContent = 'Probing /v2/telemetry/status…';
   const res = await api('/v2/telemetry/status');
-  $('telemetryOut').textContent = JSON.stringify(res.json, null, 2);
-  toast('7-Rail Telemetry status loaded');
+  $('oauthOut').textContent = JSON.stringify(res.json, null, 2);
 };
 $('btnEmitTestSpan').onclick = async () => {
-  $('telemetryOut').textContent = 'Dispatching unified event across Cloudflare, PostHog, Sentry, GA4, GTM, Langfuse (2500ms)…';
   const res = await api('/v2/telemetry/events', {
     method: 'POST',
     body: JSON.stringify({
-      eventName: 'studio_observability_probe',
-      sessionId: (window.__TT_TRACE__ && window.__TT_TRACE__.sessionId) || 'studio_sess',
-      distinctId: (window.__TT_TRACE__ && window.__TT_TRACE__.distinctId) || 'studio_user',
+      eventName: 'dashboard_diagnostic_event',
+      sessionId: (window.__TT_TRACE__ && window.__TT_TRACE__.sessionId) || 'dash_sess',
+      distinctId: (window.__TT_TRACE__ && window.__TT_TRACE__.distinctId) || 'dash_user',
       canonicalPath: '/app/',
-      properties: { source: 'developer_studio', theme: 'midnight-cyan' },
-      genAiSpan: {
-        name: 'studio.synthetic_probe',
-        model: '@cf/meta/llama-3.1-8b-instruct',
-        durationMs: 19,
-        promptTokens: 64,
-        completionTokens: 32,
-        totalTokens: 96,
-      },
+      properties: { source: 'dashboard' },
     }),
   });
-  $('telemetryOut').textContent = JSON.stringify(res.json, null, 2);
-  toast('Unified 7-Rail telemetry event dispatched');
+  $('oauthOut').textContent = JSON.stringify(res.json, null, 2);
+  toast('Diagnostic event sent');
 };
 $('btnInspectCatalog').onclick = async () => {
-  $('telemetryOut').textContent = 'Fetching /v2/catalog (@theme.tools/catalog manifest)…';
   const res = await api('/v2/catalog');
-  $('telemetryOut').textContent = JSON.stringify(res.json, null, 2);
-  toast('@theme.tools/catalog manifest loaded');
+  $('oauthOut').textContent = JSON.stringify(res.json, null, 2);
 };
+
+renderKey();
+if (key) refreshAccount();
 </script>
-<script src="/theme-tools-runtime.js" defer></script>
+<script src="/theme-tools-runtime.js?v=2" defer></script>
 </body>
 </html>

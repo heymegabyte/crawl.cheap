@@ -74,8 +74,86 @@ const repoRoot = resolve(__dirname, '../../..');
 const publicDir = resolve(__dirname, '../public');
 
 // ---------------------------------------------------------------------------
-// 1. Canonical crawl.cheap Mega-Menu Definition (@theme.tools/blog/mega-menu)
+// 1. Generate Text-Free Graphic Preview SVGs & Canonical Explore & Guides Mega-Menu
 // ---------------------------------------------------------------------------
+
+const previewsDir = resolve(publicDir, 'assets', 'previews');
+mkdirSync(previewsDir, { recursive: true });
+
+function buildVisualPreviewSvg({ id, accent = '#00e5ff', accent2 = '#7c3aed', variant = 'nodes' }) {
+  const shapes =
+    variant === 'nodes'
+      ? `<circle cx="140" cy="135" r="28" fill="${accent}" fill-opacity="0.16" stroke="${accent}" stroke-width="2.5"/>
+         <circle cx="140" cy="135" r="9" fill="${accent}"/>
+         <line x1="168" y1="135" x2="292" y2="82" stroke="${accent}" stroke-width="2" stroke-dasharray="5 4"/>
+         <line x1="168" y1="135" x2="292" y2="135" stroke="${accent}" stroke-width="2"/>
+         <line x1="168" y1="135" x2="292" y2="188" stroke="${accent2}" stroke-width="2"/>
+         <rect x="292" y="60" width="96" height="44" rx="10" fill="#0d1326" stroke="${accent}" stroke-width="1.8"/>
+         <rect x="308" y="76" width="64" height="12" rx="4" fill="${accent}" fill-opacity="0.35"/>
+         <rect x="292" y="113" width="96" height="44" rx="10" fill="#0d1326" stroke="${accent}" stroke-width="1.8"/>
+         <rect x="308" y="129" width="52" height="12" rx="4" fill="${accent}" fill-opacity="0.55"/>
+         <rect x="292" y="166" width="96" height="44" rx="10" fill="#0d1326" stroke="${accent2}" stroke-width="1.8"/>
+         <rect x="308" y="182" width="60" height="12" rx="4" fill="${accent2}" fill-opacity="0.55"/>`
+      : variant === 'bars'
+        ? `<rect x="88" y="64" width="304" height="142" rx="14" fill="#0b1022" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+           <rect x="114" y="92" width="220" height="18" rx="6" fill="${accent}" fill-opacity="0.85"/>
+           <rect x="114" y="124" width="145" height="18" rx="6" fill="${accent2}" fill-opacity="0.75"/>
+           <rect x="114" y="156" width="96" height="18" rx="6" fill="#2ecc71" fill-opacity="0.85"/>
+           <circle cx="356" cy="101" r="8" fill="${accent}"/>
+           <circle cx="356" cy="165" r="8" fill="#2ecc71"/>`
+        : variant === 'shield'
+          ? `<path d="M240 48 L322 82 L322 146 C322 188 286 218 240 232 C194 218 158 188 158 146 L158 82 Z" fill="#0c1328" stroke="${accent}" stroke-width="2.5"/>
+             <path d="M214 138 L232 156 L270 116" fill="none" stroke="#2ecc71" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+             <circle cx="240" cy="138" r="56" fill="none" stroke="${accent2}" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="6 4"/>`
+          : `<rect x="76" y="52" width="328" height="166" rx="14" fill="#0b0f20" stroke="${accent}" stroke-opacity="0.45" stroke-width="1.8"/>
+             <circle cx="102" cy="76" r="5" fill="#ff5c7c"/>
+             <circle cx="118" cy="76" r="5" fill="#ffb020"/>
+             <circle cx="134" cy="76" r="5" fill="#2ecc71"/>
+             <line x1="76" y1="94" x2="404" y2="94" stroke="rgba(255,255,255,0.1)"/>
+             <rect x="100" y="114" width="120" height="12" rx="4" fill="${accent}" fill-opacity="0.7"/>
+             <rect x="100" y="138" width="240" height="10" rx="4" fill="rgba(255,255,255,0.22)"/>
+             <rect x="100" y="158" width="190" height="10" rx="4" fill="rgba(255,255,255,0.16)"/>
+             <rect x="100" y="178" width="150" height="10" rx="4" fill="${accent2}" fill-opacity="0.65"/>`;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" width="480" height="270" role="img" aria-label="${id}">
+  <defs>
+    <radialGradient id="g1-${id}" cx="85%" cy="15%" r="70%">
+      <stop offset="0%" stop-color="${accent}" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#060610" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g2-${id}" cx="15%" cy="85%" r="70%">
+      <stop offset="0%" stop-color="${accent2}" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#060610" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid-${id}" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="480" height="270" fill="#060610"/>
+  <rect width="480" height="270" fill="url(#grid-${id})"/>
+  <rect width="480" height="270" fill="url(#g1-${id})"/>
+  <rect width="480" height="270" fill="url(#g2-${id})"/>
+  ${shapes}
+</svg>`;
+}
+
+const PREVIEW_SPECS = [
+  { id: 'blog-hub', accent: '#00e5ff', accent2: '#7c3aed', variant: 'terminal' },
+  { id: 'blog-edge-scraping', accent: '#00e5ff', accent2: '#50aae3', variant: 'nodes' },
+  { id: 'blog-cf-crawl', accent: '#ff8a3d', accent2: '#00e5ff', variant: 'nodes' },
+  { id: 'blog-oauth-mcp', accent: '#2ecc71', accent2: '#00e5ff', variant: 'shield' },
+  { id: 'blog-doc-parsing', accent: '#7c3aed', accent2: '#00e5ff', variant: 'bars' },
+  { id: 'section-demo', accent: '#00e5ff', accent2: '#2ecc71', variant: 'terminal' },
+  { id: 'section-features', accent: '#00e5ff', accent2: '#7c3aed', variant: 'nodes' },
+  { id: 'section-migrate', accent: '#50aae3', accent2: '#00e5ff', variant: 'terminal' },
+  { id: 'section-estimator', accent: '#2ecc71', accent2: '#00e5ff', variant: 'bars' },
+  { id: 'section-compat', accent: '#00e5ff', accent2: '#ff8a3d', variant: 'shield' },
+  { id: 'section-studio', accent: '#00e5ff', accent2: '#7c3aed', variant: 'terminal' },
+];
+
+for (const spec of PREVIEW_SPECS) {
+  writeFileSync(resolve(previewsDir, `${spec.id}.svg`), buildVisualPreviewSvg(spec));
+}
 
 export const CRAWL_CHEAP_MEGA_MENU_DATA = {
   ariaLabel: 'Explore & Guides Mega-Menu',
@@ -83,96 +161,123 @@ export const CRAWL_CHEAP_MEGA_MENU_DATA = {
     {
       label: 'Explore & Guides',
       blurb:
-        'Firecrawl v1/v2 compatibility, Cloudflare /crawl architecture, and @theme.tools/blog guides.',
+        'Explore live API capabilities, SDK migration, and in-depth Cloudflare edge engineering guides.',
       featured: {
-        src: '/assets/crawl-cheap-logo.png',
-        alt: 'crawl.cheap Edge Web Scraping for AI Agents',
+        src: '/assets/previews/blog-edge-scraping.svg',
+        alt: 'Edge Web Scraping for AI Agents',
         href: '/blog/edge-web-scraping-for-ai-agents/',
-        title: 'Architecture Guide: Edge Scraping for RAG & AI Agents',
+        title: 'Edge Web Scraping for AI Agents — Sub-45ms Edge TTFB & Markdown Distillation',
       },
       items: [
         {
-          label: 'Engineering Blog & Reference Guides (All 4 Articles)',
+          label: 'Engineering Blog & All Reference Guides',
           href: '/blog/',
           preview: {
-            src: '/blog/edge-web-scraping-for-ai-agents/featured.svg',
-            alt: 'crawl.cheap @theme.tools/blog magazine',
+            src: '/assets/previews/blog-hub.svg',
+            alt: 'crawl.cheap Engineering Blog & Reference Guides',
             href: '/blog/',
-            title: '@theme.tools/blog Magazine & PlateJS Inline Studio',
+            title: 'Engineering Blog — All 4 In-Depth Architecture Guides & Inline Editor',
           },
         },
         {
-          label: '1. Edge Web Scraping for AI Agents (PlateJS Guide)',
+          label: 'Interactive Live Scrape Demo',
+          href: '/#demo',
+          preview: {
+            src: '/assets/previews/section-demo.svg',
+            alt: 'Interactive Live Scrape Demo',
+            href: '/#demo',
+            title: 'Run a Live Edge Scrape in Your Browser — Zero Signup Required',
+          },
+        },
+        {
+          label: 'Guide: Edge Web Scraping for AI Agents',
           href: '/blog/edge-web-scraping-for-ai-agents/',
           preview: {
-            src: '/blog/edge-web-scraping-for-ai-agents/featured.svg',
-            alt: 'Firecrawl-Compatible Edge Scraping Architecture',
+            src: '/assets/previews/blog-edge-scraping.svg',
+            alt: 'Edge Web Scraping for AI Agents',
             href: '/blog/edge-web-scraping-for-ai-agents/',
-            title: 'Sub-45ms Edge TTFB · 16 OKLCH States · 2500ms Langfuse Breaker',
+            title: 'High-Throughput Markdown Extraction for RAG & AI Agents on Cloudflare Workers',
           },
         },
         {
-          label: '2. Cloudflare Browser Rendering /crawl & Durable Objects',
+          label: 'Core Capabilities & API Endpoints',
+          href: '/#features',
+          preview: {
+            src: '/assets/previews/section-features.svg',
+            alt: 'Core Capabilities & API Endpoints',
+            href: '/#features',
+            title: 'Scrape, Crawl, Map, Search, Extract, Batch & 11-Format Document Parse',
+          },
+        },
+        {
+          label: 'Guide: Cloudflare Browser Rendering /crawl & DOs',
           href: '/blog/cloudflare-browser-rendering-crawl-and-durable-objects/',
           preview: {
-            src: '/blog/cloudflare-browser-rendering-crawl-and-durable-objects/featured.svg',
-            alt: 'Cloudflare Browser Rendering /crawl and Hibernatable Durable Objects',
+            src: '/assets/previews/blog-cf-crawl.svg',
+            alt: 'Cloudflare Browser Rendering /crawl and Durable Objects',
             href: '/blog/cloudflare-browser-rendering-crawl-and-durable-objects/',
-            title: 'Hibernatable WebSocket Watchers · Markdown for Agents · Signed Webhooks',
+            title: 'Distributed Web Crawling with Hibernatable WebSockets & Signed Webhooks',
           },
         },
         {
-          label: '3. OAuth 2.1 PKCE, Better Auth & 30-Tool Remote MCP',
+          label: '1-Line Firecrawl SDK Migration',
+          href: '/#migrate',
+          preview: {
+            src: '/assets/previews/section-migrate.svg',
+            alt: '1-Line Firecrawl SDK Migration',
+            href: '/#migrate',
+            title: 'Keep @mendable/firecrawl-js or firecrawl-py — Just Point apiUrl at crawl.cheap',
+          },
+        },
+        {
+          label: 'Guide: OAuth 2.1 PKCE & 30-Tool Remote MCP',
           href: '/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/',
           preview: {
-            src: '/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/featured.svg',
-            alt: 'OAuth 2.1 PKCE and 30-Tool MCP Server on Cloudflare Workers',
+            src: '/assets/previews/blog-oauth-mcp.svg',
+            alt: 'OAuth 2.1 PKCE and 30-Tool MCP Server',
             href: '/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/',
-            title: 'Google + GitHub + Magic Link Auth · RFC 9728/7591/7636 · 30 MCP Tools',
+            title: 'Zero-Trust OAuth 2.1 PKCE S256 & 30-Tool Streamable-HTTP MCP Server',
           },
         },
         {
-          label: '4. 11-Format Document Parsing & AI Browser Co-Pilots',
+          label: 'Preflight Cost & Credit Estimator',
+          href: '/#estimator',
+          preview: {
+            src: '/assets/previews/section-estimator.svg',
+            alt: 'Preflight Cost & Credit Estimator',
+            href: '/#estimator',
+            title: 'Calculate Exact Credit Burn & Hard Caps Before Starting Any Job',
+          },
+        },
+        {
+          label: 'Guide: 11-Format Document Parsing & Co-Pilots',
           href: '/blog/multimodal-document-parsing-and-autonomous-browser-copilots/',
           preview: {
-            src: '/blog/multimodal-document-parsing-and-autonomous-browser-copilots/featured.svg',
+            src: '/assets/previews/blog-doc-parsing.svg',
             alt: '11-Format Document Parsing and Autonomous Browser Co-Pilots',
             href: '/blog/multimodal-document-parsing-and-autonomous-browser-copilots/',
-            title: 'Workers AI toMarkdown() · Presigned R2 · 7-Rail Telemetry',
+            title: 'Workers AI toMarkdown(), Vectorize RAG & Autonomous Browser Co-Pilots',
           },
         },
-      ],
-    },
-    {
-      label: 'Developer Studio',
-      blurb:
-        'Interactive multi-mode playground, AI Browser Co-Pilot, and OAuth 2.1 command center.',
-      featured: {
-        src: '/assets/crawl-cheap-nav-logo.png',
-        alt: 'crawl.cheap Developer Studio & AI Command Center',
-        href: '/app/',
-        title: 'Launch Flagship Developer Studio (/app/)',
-      },
-      items: [
         {
-          label: 'Multi-Mode API Playground (Scrape · Crawl · Map · Parse)',
-          href: '/app/#playground',
+          label: 'v1 & v2 OpenAPI Compatibility Matrix',
+          href: '/#compat',
+          preview: {
+            src: '/assets/previews/section-compat.svg',
+            alt: 'v1 and v2 OpenAPI Compatibility Matrix',
+            href: '/#compat',
+            title: '100% Drop-In Parity Across Firecrawl v1 (23 Ops) & v2 (57 Ops)',
+          },
         },
         {
-          label: 'Live Browser & AI Co-Pilot Canvas',
-          href: '/app/#copilot',
-        },
-        {
-          label: 'Multi-Turn Research Agent & Change Radar',
-          href: '/app/#research',
-        },
-        {
-          label: 'Better Auth · OAuth 2.1 PKCE · API Keys',
-          href: '/app/#auth',
-        },
-        {
-          label: '7-Rail Observability & @theme.tools Catalog',
-          href: '/app/#observability',
+          label: 'Dashboard & API Playground (/app/)',
+          href: '/app/',
+          preview: {
+            src: '/assets/previews/section-studio.svg',
+            alt: 'Dashboard and API Playground',
+            href: '/app/',
+            title: 'Open the Interactive Playground, Activity Logs, API Keys & Billing Dashboard',
+          },
         },
       ],
     },
@@ -335,12 +440,66 @@ const UI_COMPONENT_AND_TACTILE_CSS = `
     font: 700 12px 'JetBrains Mono', monospace;
     text-decoration: none;
     flex: none;
+    overflow: hidden;
+    padding: 0;
+    cursor: pointer;
     transition: transform var(--tt-transition-oklch), box-shadow var(--tt-transition-oklch), border-color var(--tt-transition-oklch);
+  }
+  .tt-avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 999px;
   }
   .tt-avatar-circle:hover {
     transform: translateY(-1px) scale(1.04);
     border-color: #00e5ff;
     box-shadow: 0 0 16px rgba(0, 229, 255, 0.38);
+  }
+
+  /* Expanded 2-Column Explore & Guides Mega-Menu + Non-Overlapping Featured Preview Caption */
+  @media (min-width: 721px) {
+    .tt-mm__panel {
+      min-width: min(820px, 92vw);
+      padding: 1.25rem 1.35rem;
+    }
+    .tt-mm__panel-grid {
+      grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.95fr);
+      gap: 1.35rem;
+      align-items: start;
+    }
+    .tt-mm__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.25rem 0.65rem;
+    }
+    .tt-mm__panel-featured {
+      display: flex !important;
+      flex-direction: column;
+      aspect-ratio: auto !important;
+      background: #070916 !important;
+      border: 1px solid rgba(0, 229, 255, 0.26) !important;
+      border-radius: 12px !important;
+      overflow: hidden;
+    }
+    .tt-mm__panel-featured-img {
+      width: 100%;
+      height: auto !important;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      display: block;
+    }
+    .tt-mm__panel-featured-title {
+      position: static !important;
+      display: block;
+      padding: 0.75rem 0.9rem !important;
+      font-size: 0.82rem !important;
+      font-weight: 600 !important;
+      color: #eef2f7 !important;
+      line-height: 1.38 !important;
+      background: #080b1a !important;
+      border-top: 1px solid rgba(0, 229, 255, 0.18);
+    }
   }
 
   /* Article Panel Container (.tt-article-panel) vs Popped-Out Collapsible References Drawer (.tt-references-popout) */
@@ -970,7 +1129,7 @@ const RUNTIME_JS = `/**
   // 8. Popped-Out Collapsible References Drawer (Collapsed by default, auto-opens on #bib-source-* / #references click, interactive tier filters)
   function syncReferencesDrawerFromHash() {
     var h = location.hash || '';
-    if (h === '#references' || h === '#bibliography' || h === '#bibliography-heading' || /^#bib-source-\d+$/.test(h)) {
+    if (h === '#references' || h === '#bibliography' || h === '#bibliography-heading' || h.indexOf('#bib-source-') === 0) {
       var drawer = document.querySelector('[data-testid="collapsible-citations-drawer"]');
       if (drawer && !drawer.open) {
         drawer.open = true;
@@ -1005,6 +1164,63 @@ const RUNTIME_JS = `/**
       });
     }
   });
+
+  // 9. Universal Google / GitHub Avatar Image & Account Initials Hydration for .tt-avatar-circle
+  function computeAccountInitials(name, email) {
+    var cleanName = String(name || '').trim();
+    if (cleanName) {
+      var parts = cleanName.split(' ').filter(Boolean);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return cleanName.slice(0, 2).toUpperCase();
+    }
+    var cleanEmail = String(email || '').trim();
+    if (cleanEmail) {
+      var local = cleanEmail.split('@')[0] || '';
+      var segs = local.split(/[._-]+/).filter(Boolean);
+      if (segs.length >= 2) {
+        return (segs[0][0] + segs[1][0]).toUpperCase();
+      }
+      return local.slice(0, 2).toUpperCase();
+    }
+    return '';
+  }
+
+  function hydrateUniversalAvatarCircles() {
+    var avatarUrl = '';
+    var name = '';
+    var email = '';
+    var provider = '';
+    try {
+      avatarUrl = localStorage.getItem('crawlcheap_avatar') || '';
+      name = localStorage.getItem('crawlcheap_name') || '';
+      email = localStorage.getItem('crawlcheap_email') || '';
+      provider = localStorage.getItem('crawlcheap_provider') || '';
+    } catch (_) {}
+
+    var initials = computeAccountInitials(name, email);
+    var circles = document.querySelectorAll('.tt-avatar-circle');
+    circles.forEach(function (el) {
+      if (avatarUrl && (avatarUrl.indexOf('https://') === 0 || avatarUrl.indexOf('http://') === 0)) {
+        var img = document.createElement('img');
+        img.src = avatarUrl;
+        img.alt = name || email || 'User avatar';
+        el.innerHTML = '';
+        el.appendChild(img);
+        el.setAttribute('title', (name || email) + (provider ? ' (' + provider + ')' : ''));
+      } else if (initials) {
+        el.textContent = initials;
+        el.setAttribute('title', (name || email) + (provider ? ' (' + provider + ')' : ''));
+      } else {
+        el.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>';
+        el.setAttribute('title', 'Sign in with Google or GitHub');
+      }
+    });
+  }
+
+  window.__TT_HYDRATE_AVATAR__ = hydrateUniversalAvatarCircles;
+  hydrateUniversalAvatarCircles();
 })();
 
 ${MEGA_MENU_JS}
@@ -1026,7 +1242,7 @@ const posts = indexManifest.files.map((relPath) =>
   JSON.parse(readFileSync(resolve(repoRoot, relPath), 'utf8')),
 );
 
-function renderUniversalNavbar(activePath = '/blog/') {
+function renderUniversalNavbar() {
   return `
 <header class="tt-nav" role="banner" style="position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(6,6,16,0.84);border-bottom:1px solid rgba(255,255,255,0.09);">
   <div class="tt-nav__inner" style="max-width:1200px;margin:0 auto;padding:0 20px;min-height:80px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
@@ -1035,9 +1251,10 @@ function renderUniversalNavbar(activePath = '/blog/') {
     </a>
     ${RENDERED_MEGA_MENU_HTML}
     <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-      <a href="/blog/" class="tt-btn tt-btn--ghost" style="${activePath.startsWith('/blog') ? 'border-color:#00e5ff;color:#00e5ff;' : ''}">Blog</a>
-      <a href="/app/" class="tt-btn tt-btn--primary" data-ripple="true" data-spotlight="true">Developer Studio →</a>
-      <a href="/app/#auth" class="tt-avatar-circle" title="Better Auth &amp; OAuth 2.1 Account" aria-label="Developer Account &amp; API Keys">CC</a>
+      <a href="/app/" class="tt-btn tt-btn--primary" data-ripple="true" data-spotlight="true">Studio →</a>
+      <a href="/app/?login=1" class="tt-avatar-circle" title="Sign in with Google or GitHub" aria-label="Account">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+      </a>
     </div>
   </div>
 </header>`.trim();
@@ -1346,7 +1563,7 @@ for (const post of posts) {
       { label: 'GitHub', href: 'https://github.com/heymegabyte/crawl.cheap' },
     ],
   })}
-  <script src="/theme-tools-runtime.js" defer></script>
+  <script src="/theme-tools-runtime.js?v=2" defer></script>
   <script src="/blog/editor.js" defer></script>
 </body>
 </html>`;
@@ -1457,7 +1674,7 @@ const blogIndexHtml = `<!doctype html>
       { label: 'GitHub', href: 'https://github.com/heymegabyte/crawl.cheap' },
     ],
   })}
-  <script src="/theme-tools-runtime.js" defer></script>
+  <script src="/theme-tools-runtime.js?v=2" defer></script>
 </body>
 </html>`;
 

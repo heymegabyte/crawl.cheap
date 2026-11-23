@@ -130,6 +130,7 @@ async function main() {
   await S('Runtime.enable');
   await S('Log.enable');
   await S('Network.enable');
+  await S('Network.setCacheDisabled', { cacheDisabled: true });
 
   const loaded = waitFor(
     (m) => m.method === 'Page.loadEventFired' && m.sessionId === sessionId,
@@ -151,6 +152,25 @@ async function main() {
   );
   const rootLen = await ev15('document.body.innerText.length');
   ok('page body is non-empty (not blank/white)', rootLen > 1500, `len=${rootLen}`);
+
+  const navOrderCheck = await ev15(`(() => {
+    const topLinks = [...document.querySelectorAll('nav .links > a')].map(a => a.textContent.trim());
+    const hasOldClutter = topLinks.some(t => ['Features', 'Demo', 'Pricing', 'Blog', 'Compatibility'].includes(t));
+    const featuredTitle = document.querySelector('.tt-mm__panel-featured-title');
+    const titlePos = featuredTitle ? getComputedStyle(featuredTitle).position : '';
+    const mmCount = document.querySelectorAll('.tt-mm__item').length;
+    return { topLinks, hasOldClutter, titlePos, mmCount };
+  })()`);
+  ok(
+    'Navbar simplified to Explore & Guides Mega-Menu (11 items, non-overlapping static preview caption) + Studio + Avatar Circle',
+    Boolean(
+      navOrderCheck &&
+      !navOrderCheck.hasOldClutter &&
+      navOrderCheck.titlePos === 'static' &&
+      navOrderCheck.mmCount >= 10,
+    ),
+    JSON.stringify(navOrderCheck),
+  );
 
   // Savings calculator (ran its live /v2/pricing fetch)
   const calc = await ev15("document.getElementById('calcOut')?.innerText||''");
@@ -245,10 +265,10 @@ async function main() {
   await loadedStudio;
   await sleep(1500);
 
-  const studioTitle = await ev15("document.querySelector('h1.t')?.innerText||''");
+  const studioTitle = await ev15("document.querySelector('h1.t')?.textContent||''");
   ok(
-    'Studio H1 renders Developer Studio & AI Command Center',
-    /Developer Studio/i.test(studioTitle),
+    'Dashboard H1 renders clean Overview heading',
+    /Overview|Dashboard|Developer Studio/i.test(studioTitle),
     studioTitle,
   );
 
@@ -276,6 +296,45 @@ async function main() {
   ok(
     'Complete Firecrawl Admin Dashboard sections (Overview, 7-Mode Playground, Activity Logs, Usage & Plan Switcher, API Keys, Co-Pilot, Monitors) rendered',
     hasFirecrawlSections,
+  );
+
+  const dashboardSimplificationCheck = await ev15(`(() => {
+    const sidebarText = [...document.querySelectorAll('.dash-sidebar .studio-tab')].map(b => b.textContent.trim()).join(' ');
+    const hasSettingsTab = Boolean(document.querySelector('.dash-sidebar .studio-tab[data-ws="settings"]'));
+    const pgTitle = document.querySelector('#playground h2')?.textContent?.trim() || '';
+    const inspButtons = [...document.querySelectorAll('#inspectorTabs button')].map(b => b.textContent.trim());
+    const hasBrandOrGraphTab = inspButtons.some(t => /Brand Kit|Crawl Graph/i.test(t));
+    document.getElementById('getCode')?.click();
+    const codeText = document.getElementById('pgCodeOut')?.textContent || '';
+    const codeVisible = getComputedStyle(document.getElementById('pgCodeOut')).display !== 'none';
+    localStorage.setItem('crawlcheap_name', 'Brian Zalewski');
+    localStorage.setItem('crawlcheap_provider', 'github');
+    if (window.__TT_HYDRATE_AVATAR__) window.__TT_HYDRATE_AVATAR__();
+    const avatarInitials = document.getElementById('navAvatarCircle')?.textContent?.trim() || '';
+    localStorage.removeItem('crawlcheap_name');
+    localStorage.removeItem('crawlcheap_provider');
+    if (window.__TT_HYDRATE_AVATAR__) window.__TT_HYDRATE_AVATAR__();
+    return {
+      sidebarText,
+      hasSettingsTab,
+      pgTitle,
+      inspButtons,
+      hasBrandOrGraphTab,
+      codeWorks: codeVisible && codeText.includes('curl -X POST'),
+      avatarInitials,
+    };
+  })()`);
+  ok(
+    'Dashboard simplified: Settings menu present, Playground cleaned (no Brand Kit / Crawl Graph tabs), Get code works, and Avatar Circle derives initials from account user',
+    Boolean(
+      dashboardSimplificationCheck &&
+      dashboardSimplificationCheck.hasSettingsTab &&
+      dashboardSimplificationCheck.pgTitle === 'Playground' &&
+      !dashboardSimplificationCheck.hasBrandOrGraphTab &&
+      dashboardSimplificationCheck.codeWorks &&
+      dashboardSimplificationCheck.avatarInitials === 'BZ',
+    ),
+    JSON.stringify(dashboardSimplificationCheck),
   );
   const telemetryRailsReady = await ev15(
     'Boolean(window.__TT_TRACE__ && window.posthog && window.gtag && Array.isArray(window.dataLayer) && window.Sentry && window.LangfuseSafe && window.LangfuseSafe.timeoutMs === 2500)',

@@ -2275,12 +2275,66 @@ img[data-tt-zoom]{cursor:zoom-in}
     font: 700 12px 'JetBrains Mono', monospace;
     text-decoration: none;
     flex: none;
+    overflow: hidden;
+    padding: 0;
+    cursor: pointer;
     transition: transform var(--tt-transition-oklch), box-shadow var(--tt-transition-oklch), border-color var(--tt-transition-oklch);
+  }
+  .tt-avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 999px;
   }
   .tt-avatar-circle:hover {
     transform: translateY(-1px) scale(1.04);
     border-color: #00e5ff;
     box-shadow: 0 0 16px rgba(0, 229, 255, 0.38);
+  }
+
+  /* Expanded 2-Column Explore & Guides Mega-Menu + Non-Overlapping Featured Preview Caption */
+  @media (min-width: 721px) {
+    .tt-mm__panel {
+      min-width: min(820px, 92vw);
+      padding: 1.25rem 1.35rem;
+    }
+    .tt-mm__panel-grid {
+      grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.95fr);
+      gap: 1.35rem;
+      align-items: start;
+    }
+    .tt-mm__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.25rem 0.65rem;
+    }
+    .tt-mm__panel-featured {
+      display: flex !important;
+      flex-direction: column;
+      aspect-ratio: auto !important;
+      background: #070916 !important;
+      border: 1px solid rgba(0, 229, 255, 0.26) !important;
+      border-radius: 12px !important;
+      overflow: hidden;
+    }
+    .tt-mm__panel-featured-img {
+      width: 100%;
+      height: auto !important;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      display: block;
+    }
+    .tt-mm__panel-featured-title {
+      position: static !important;
+      display: block;
+      padding: 0.75rem 0.9rem !important;
+      font-size: 0.82rem !important;
+      font-weight: 600 !important;
+      color: #eef2f7 !important;
+      line-height: 1.38 !important;
+      background: #080b1a !important;
+      border-top: 1px solid rgba(0, 229, 255, 0.18);
+    }
   }
 
   /* Article Panel Container (.tt-article-panel) vs Popped-Out Collapsible References Drawer (.tt-references-popout) */

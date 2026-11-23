@@ -524,6 +524,7 @@ route.post('/api/auth/sign-in/social', async (c) => {
     callbackURL?: string;
     email?: string;
     name?: string;
+    avatar?: string;
   };
   const provider = String(raw?.provider ?? 'github').toLowerCase();
   const callbackURL = String(raw?.callbackURL ?? `${getIssuer(c)}/app/`);
@@ -545,6 +546,7 @@ route.post('/api/auth/sign-in/social', async (c) => {
     callbackURL,
     ...(raw.email ? { email: raw.email } : {}),
     ...(raw.name ? { name: raw.name } : {}),
+    ...(raw.avatar ? { avatar: raw.avatar } : {}),
   });
   const url = `${issuer}/api/auth/callback/${encodeURIComponent(provider)}?${extraParams.toString()}`;
   return c.json({ url, redirect: true, provider, state });
@@ -556,6 +558,7 @@ route.get('/api/auth/callback/:provider', async (c) => {
   const callbackURL = c.req.query('callbackURL');
   const queryEmail = c.req.query('email');
   const queryName = c.req.query('name');
+  const queryAvatar = c.req.query('avatar');
 
   const defaultEmail =
     queryEmail?.trim().toLowerCase() ||
@@ -571,6 +574,7 @@ route.get('/api/auth/callback/:provider', async (c) => {
       : provider === 'github'
         ? 'GitHub Engineering Lead'
         : `${provider.charAt(0).toUpperCase() + provider.slice(1)} Developer`);
+  const avatarUrl = queryAvatar?.trim() || '';
 
   const {
     user: socialUser,
@@ -593,6 +597,7 @@ route.get('/api/auth/callback/:provider', async (c) => {
     dest.searchParams.set('provider', provider);
     dest.searchParams.set('email', socialUser.email);
     dest.searchParams.set('name', socialUser.name);
+    if (avatarUrl) dest.searchParams.set('avatar', avatarUrl);
     return c.redirect(dest.toString(), 302);
   }
   return c.json({
@@ -606,6 +611,7 @@ route.get('/api/auth/callback/:provider', async (c) => {
       tenantId: socialUser.tenantId,
       email: socialUser.email,
       name: socialUser.name,
+      avatarUrl: avatarUrl || null,
       role: socialUser.role,
       plan: socialUser.plan,
       monthlyCredits: socialUser.monthlyCredits,
