@@ -370,6 +370,27 @@ async function main() {
       "Array.from(document.querySelectorAll('p')).some(p => /^\\{\\{(widget|figure):[A-Za-z0-9_-]+\\}\\}$/.test((p.textContent || '').trim()))",
     );
     ok(`/blog/${slug}/ has zero unreplaced {{widget:*}} or {{figure:*}} tokens`, !rawTokensLeft);
+
+    const refsCheck = await ev15(`(() => {
+      const d = document.querySelector('[data-testid="collapsible-citations-drawer"]');
+      if (!d) return { exists: false };
+      const insidePanel = Boolean(d.closest('.tt-article-panel, article.tt-article'));
+      return {
+        exists: true,
+        isCollapsedByDefault: d.open === false,
+        isOutsidePanelContainer: !insidePanel,
+      };
+    })()`);
+    ok(
+      `/blog/${slug}/ collapsible references drawer is outside panel container and collapsed by default`,
+      Boolean(
+        refsCheck &&
+        refsCheck.exists &&
+        refsCheck.isCollapsedByDefault &&
+        refsCheck.isOutsidePanelContainer,
+      ),
+      JSON.stringify(refsCheck),
+    );
   }
 
   await ev15('document.querySelector(\'[data-testid="edit-article-in-plate"]\')?.click()');

@@ -13,6 +13,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@theme.tools/telemetry": "file:../../../theme.tools/packages/telemetry",
     "@cloudflare/puppeteer": "^1.4.0",
     "@crawlcheap/contracts": "workspace:*",
     "node-html-parser": "^6.1.13",

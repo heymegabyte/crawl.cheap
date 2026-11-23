@@ -266,6 +266,45 @@
       spot.style.setProperty('--tt-spot-y', (e.clientY - rect.top) + 'px');
     }
   });
+
+  // 8. Popped-Out Collapsible References Drawer (Collapsed by default, auto-opens on #bib-source-* / #references click, interactive tier filters)
+  function syncReferencesDrawerFromHash() {
+    var h = location.hash || '';
+    if (h === '#references' || h === '#bibliography' || h === '#bibliography-heading' || /^#bib-source-d+$/.test(h)) {
+      var drawer = document.querySelector('[data-testid="collapsible-citations-drawer"]');
+      if (drawer && !drawer.open) {
+        drawer.open = true;
+      }
+      var target = h ? document.querySelector(h) : drawer;
+      if (target && target.scrollIntoView) {
+        setTimeout(function () {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 60);
+      }
+    }
+  }
+  window.addEventListener('hashchange', syncReferencesDrawerFromHash);
+  document.addEventListener('click', function (e) {
+    var link = e.target && e.target.closest && e.target.closest('a[href^="#bib-source-"], a[href="#bibliography"], a[href="#bibliography-heading"], a[href="#references"]');
+    if (link) {
+      var drawer = document.querySelector('[data-testid="collapsible-citations-drawer"]');
+      if (drawer && !drawer.open) {
+        drawer.open = true;
+      }
+    }
+    var filterBtn = e.target && e.target.closest && e.target.closest('[data-bib-filter]');
+    if (filterBtn) {
+      var tier = filterBtn.getAttribute('data-bib-filter') || 'all';
+      var container = filterBtn.closest('[data-testid="collapsible-citations-drawer"]') || document;
+      container.querySelectorAll('[data-bib-filter]').forEach(function (b) {
+        b.classList.toggle('is-active', b === filterBtn);
+      });
+      container.querySelectorAll('[data-bib-tier]').forEach(function (card) {
+        var match = tier === 'all' || card.getAttribute('data-bib-tier') === tier;
+        card.style.display = match ? '' : 'none';
+      });
+    }
+  });
 })();
 
 (function () {

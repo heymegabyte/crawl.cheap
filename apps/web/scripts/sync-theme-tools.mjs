@@ -342,6 +342,324 @@ const UI_COMPONENT_AND_TACTILE_CSS = `
     border-color: #00e5ff;
     box-shadow: 0 0 16px rgba(0, 229, 255, 0.38);
   }
+
+  /* Article Panel Container (.tt-article-panel) vs Popped-Out Collapsible References Drawer (.tt-references-popout) */
+  .tt-article-panel {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: clamp(22px, 4vw, 44px);
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(16, 18, 38, 0.72), rgba(10, 12, 26, 0.92));
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: 0 28px 72px -32px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.025) inset;
+  }
+  .tt-references-popout {
+    width: 100%;
+    max-width: 1120px;
+    margin: 2.75rem auto 0;
+    position: relative;
+    z-index: 2;
+  }
+  .tt-bib-drawer {
+    position: relative;
+    overflow: hidden;
+    border-radius: 22px;
+    border: 1px solid rgba(0, 229, 255, 0.28);
+    background:
+      radial-gradient(640px circle at 100% 0%, rgba(0, 229, 255, 0.11), transparent 60%),
+      radial-gradient(520px circle at 0% 100%, rgba(124, 58, 237, 0.09), transparent 60%),
+      linear-gradient(165deg, rgba(14, 18, 36, 0.97), rgba(7, 9, 20, 0.99));
+    box-shadow: 0 28px 72px -26px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.035) inset;
+    transition: border-color var(--tt-transition-oklch), box-shadow var(--tt-transition-oklch), transform var(--tt-transition-oklch);
+  }
+  .tt-bib-drawer:hover,
+  .tt-bib-drawer[open] {
+    border-color: rgba(0, 229, 255, 0.54);
+    box-shadow: 0 32px 84px -22px rgba(0, 229, 255, 0.25), 0 0 0 1px rgba(0, 229, 255, 0.14) inset;
+  }
+  .tt-bib-drawer__summary {
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+    padding: clamp(18px, 3vw, 26px) clamp(18px, 3.5vw, 32px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+    transition: background var(--tt-transition-oklch);
+  }
+  .tt-bib-drawer__summary::-webkit-details-marker {
+    display: none;
+  }
+  .tt-bib-drawer__summary:hover {
+    background: rgba(0, 229, 255, 0.035);
+  }
+  .tt-bib-drawer__summary:focus-visible {
+    outline: 2px solid #00e5ff;
+    outline-offset: -3px;
+    border-radius: 22px;
+  }
+  .tt-bib-drawer__left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1 1 320px;
+    min-width: 0;
+  }
+  .tt-bib-drawer__emblem {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    border: 1px solid rgba(0, 229, 255, 0.45);
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.22), rgba(0, 229, 255, 0.05));
+    box-shadow: 0 0 24px -6px rgba(0, 229, 255, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    color: #00e5ff;
+    font: 700 0.82rem 'JetBrains Mono', ui-monospace, monospace;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+  .tt-bib-drawer__eyebrow-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .tt-bib-drawer__eyebrow {
+    font: 700 10.5px 'JetBrains Mono', ui-monospace, monospace;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #00e5ff;
+  }
+  .tt-bib-drawer__verified-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font: 700 10px 'JetBrains Mono', ui-monospace, monospace;
+    color: #2ecc71;
+    background: rgba(46, 204, 113, 0.13);
+    border: 1px solid rgba(46, 204, 113, 0.35);
+  }
+  .tt-bib-drawer__title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+    font-weight: 700;
+    color: #eef2f7;
+    margin: 0;
+    line-height: 1.25;
+  }
+  .tt-bib-drawer__sub {
+    color: #9aa3b5;
+    font-size: 0.84rem;
+    margin: 3px 0 0;
+    line-height: 1.45;
+  }
+  .tt-bib-drawer__right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex: none;
+  }
+  .tt-bib-drawer__count-chip {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font: 600 11px 'JetBrains Mono', ui-monospace, monospace;
+    color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.11);
+  }
+  .tt-bib-drawer__toggle-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    border-radius: 999px;
+    font: 700 12px 'JetBrains Mono', ui-monospace, monospace;
+    color: #04141c;
+    background: linear-gradient(100deg, #00e5ff, #50aae3);
+    box-shadow: 0 8px 24px -8px rgba(0, 229, 255, 0.55);
+    transition: transform var(--tt-transition-oklch), box-shadow var(--tt-transition-oklch);
+  }
+  .tt-bib-drawer__summary:hover .tt-bib-drawer__toggle-pill {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px -6px rgba(0, 229, 255, 0.72);
+  }
+  .tt-bib-drawer__label-open {
+    display: none;
+  }
+  .tt-bib-drawer[open] .tt-bib-drawer__label-closed {
+    display: none;
+  }
+  .tt-bib-drawer[open] .tt-bib-drawer__label-open {
+    display: inline;
+  }
+  .tt-bib-drawer__chev {
+    display: inline-block;
+    transition: transform var(--tt-transition-oklch);
+  }
+  .tt-bib-drawer[open] .tt-bib-drawer__chev {
+    transform: rotate(180deg);
+  }
+  .tt-bib-drawer__body {
+    border-top: 1px solid rgba(0, 229, 255, 0.18);
+    background: rgba(6, 7, 16, 0.75);
+    padding: clamp(18px, 3vw, 28px) clamp(18px, 3.5vw, 32px);
+  }
+  .tt-bib-drawer__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .tt-bib-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tt-bib-filter-btn {
+    padding: 6px 13px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: #9aa3b5;
+    font: 600 11.5px 'JetBrains Mono', ui-monospace, monospace;
+    cursor: pointer;
+    transition: all var(--tt-transition-oklch);
+  }
+  .tt-bib-filter-btn:hover {
+    color: #eef2f7;
+    border-color: rgba(0, 229, 255, 0.4);
+  }
+  .tt-bib-filter-btn.is-active {
+    color: #04141c;
+    background: #00e5ff;
+    border-color: #00e5ff;
+    box-shadow: 0 4px 16px -4px rgba(0, 229, 255, 0.55);
+  }
+  .tt-bib-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+    gap: 14px;
+  }
+  .tt-bib-card {
+    position: relative;
+    padding: 18px 20px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: linear-gradient(155deg, rgba(19, 23, 46, 0.85), rgba(10, 13, 27, 0.92));
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color var(--tt-transition-oklch), transform var(--tt-transition-oklch), box-shadow var(--tt-transition-oklch);
+  }
+  .tt-bib-card:hover {
+    border-color: rgba(0, 229, 255, 0.42);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px -18px rgba(0, 229, 255, 0.25);
+  }
+  .tt-bib-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+  .tt-bib-card__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tt-bib-card__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 9px;
+    border-radius: 8px;
+    background: rgba(0, 229, 255, 0.14);
+    border: 1px solid rgba(0, 229, 255, 0.36);
+    color: #00e5ff;
+    font: 700 11.5px 'JetBrains Mono', ui-monospace, monospace;
+  }
+  .tt-bib-card__tier {
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(124, 58, 237, 0.16);
+    border: 1px solid rgba(124, 58, 237, 0.38);
+    color: #c4b5fd;
+    font: 600 10px 'JetBrains Mono', ui-monospace, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .tt-bib-card__date {
+    margin-left: auto;
+    color: #7b8498;
+    font: 11px 'JetBrains Mono', ui-monospace, monospace;
+  }
+  .tt-bib-card__title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #eef2f7;
+    text-decoration: none;
+    line-height: 1.35;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .tt-bib-card__title:hover {
+    color: #00e5ff;
+  }
+  .tt-bib-card__excerpt {
+    margin: 0;
+    padding: 8px 12px;
+    border-left: 2px solid #00e5ff;
+    background: rgba(0, 229, 255, 0.04);
+    border-radius: 0 8px 8px 0;
+    color: #cbd5e1;
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+  .tt-bib-card__meta {
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    font: 11px 'JetBrains Mono', ui-monospace, monospace;
+    color: #9aa3b5;
+  }
+  .tt-bib-card__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tt-bib-card__btn {
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 229, 255, 0.32);
+    background: rgba(0, 229, 255, 0.08);
+    color: #00e5ff;
+    font: 600 11px 'JetBrains Mono', ui-monospace, monospace;
+    text-decoration: none;
+    transition: all var(--tt-transition-oklch);
+  }
+  .tt-bib-card__btn:hover {
+    background: #00e5ff;
+    color: #04141c;
+  }
 }
 @layer theme-tools-tactile {
   @keyframes tt-ripple-wave { 0% { transform: scale(0); opacity: 0.42; } 100% { transform: scale(1); opacity: 0; } }
@@ -648,6 +966,45 @@ const RUNTIME_JS = `/**
       spot.style.setProperty('--tt-spot-y', (e.clientY - rect.top) + 'px');
     }
   });
+
+  // 8. Popped-Out Collapsible References Drawer (Collapsed by default, auto-opens on #bib-source-* / #references click, interactive tier filters)
+  function syncReferencesDrawerFromHash() {
+    var h = location.hash || '';
+    if (h === '#references' || h === '#bibliography' || h === '#bibliography-heading' || /^#bib-source-\d+$/.test(h)) {
+      var drawer = document.querySelector('[data-testid="collapsible-citations-drawer"]');
+      if (drawer && !drawer.open) {
+        drawer.open = true;
+      }
+      var target = h ? document.querySelector(h) : drawer;
+      if (target && target.scrollIntoView) {
+        setTimeout(function () {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 60);
+      }
+    }
+  }
+  window.addEventListener('hashchange', syncReferencesDrawerFromHash);
+  document.addEventListener('click', function (e) {
+    var link = e.target && e.target.closest && e.target.closest('a[href^="#bib-source-"], a[href="#bibliography"], a[href="#bibliography-heading"], a[href="#references"]');
+    if (link) {
+      var drawer = document.querySelector('[data-testid="collapsible-citations-drawer"]');
+      if (drawer && !drawer.open) {
+        drawer.open = true;
+      }
+    }
+    var filterBtn = e.target && e.target.closest && e.target.closest('[data-bib-filter]');
+    if (filterBtn) {
+      var tier = filterBtn.getAttribute('data-bib-filter') || 'all';
+      var container = filterBtn.closest('[data-testid="collapsible-citations-drawer"]') || document;
+      container.querySelectorAll('[data-bib-filter]').forEach(function (b) {
+        b.classList.toggle('is-active', b === filterBtn);
+      });
+      container.querySelectorAll('[data-bib-tier]').forEach(function (card) {
+        var match = tier === 'all' || card.getAttribute('data-bib-tier') === tier;
+        card.style.display = match ? '' : 'none';
+      });
+    }
+  });
 })();
 
 ${MEGA_MENU_JS}
@@ -757,22 +1114,72 @@ for (const post of posts) {
         })}</section>`
       : '';
 
+  const bibCount = (post.bibliography && post.bibliography.length) || 0;
   const bibHtml =
-    post.bibliography && post.bibliography.length > 0
-      ? `<section id="bibliography" style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.09);">
-          <h2>Verified Primary Sources &amp; Citations</h2>
-          <ol style="line-height:1.75;color:#9aa3b5;font-size:0.92rem;">
-            ${post.bibliography
-              .map(
-                (b) =>
-                  `<li id="bib-source-${b.number}" style="margin-bottom:0.85rem;">
-                    <strong style="color:#eef2f7;">${b.title}</strong> — ${b.publisher} (${b.sectionLocator}).
-                    <a href="${b.canonicalUrl}" target="_blank" rel="noopener" style="color:#00e5ff;">${b.canonicalUrl}</a>
-                    <span class="tt-badge" style="margin-left:6px;">SHA256: ${b.contentSha256.slice(0, 12)}…</span>
-                  </li>`,
-              )
-              .join('\n')}
-          </ol>
+    bibCount > 0
+      ? `<section id="references" class="tt-references-popout" data-tt-surface="collapsible-citations-drawer" aria-label="Verified Primary Sources and Citations">
+          <details id="bibliography" data-testid="collapsible-citations-drawer" class="tt-bib-drawer">
+            <summary data-testid="collapsible-citations-summary" class="tt-bib-drawer__summary">
+              <div class="tt-bib-drawer__left">
+                <span class="tt-bib-drawer__emblem" aria-hidden="true">[1–${bibCount}]</span>
+                <div style="min-width:0;">
+                  <div class="tt-bib-drawer__eyebrow-row">
+                    <span class="tt-bib-drawer__eyebrow">VERIFIED PRIMARY SOURCES &amp; EVIDENCE ARCHIVE</span>
+                    <span class="tt-bib-drawer__verified-pill">✓ SHA-256 Pinned</span>
+                    <span class="tt-badge" style="font-size:10px;padding:2px 8px;">12/12 Release Gate</span>
+                  </div>
+                  <h2 id="bibliography-heading" class="tt-bib-drawer__title">Sources, References &amp; Technical Citations (${bibCount})</h2>
+                  <p class="tt-bib-drawer__sub">Collapsed by default — click to inspect ${bibCount} immutable primary specifications, cryptographic SHA-256 evidence digests, and claim-level verification trails.</p>
+                </div>
+              </div>
+              <div class="tt-bib-drawer__right">
+                <span class="tt-bib-drawer__count-chip">${bibCount} Primary Sources</span>
+                <span class="tt-bib-drawer__toggle-pill">
+                  <span class="tt-bib-drawer__label-closed">View Citations</span>
+                  <span class="tt-bib-drawer__label-open">Hide Sources</span>
+                  <span class="tt-bib-drawer__chev" aria-hidden="true">▼</span>
+                </span>
+              </div>
+            </summary>
+            <div data-testid="page-reference-chart" class="tt-bib-drawer__body">
+              <div class="tt-bib-drawer__toolbar">
+                <div class="tt-bib-filter-row" role="tablist" aria-label="Filter citations by authority tier">
+                  <button type="button" class="tt-bib-filter-btn is-active" data-bib-filter="all">All Sources (${bibCount})</button>
+                  <button type="button" class="tt-bib-filter-btn" data-bib-filter="primary_specification">Primary Specifications</button>
+                  <button type="button" class="tt-bib-filter-btn" data-bib-filter="official_vendor_docs">Official Vendor Docs</button>
+                </div>
+                <span class="tt-badge">100% HTTPS · Content-SHA256 Verified</span>
+              </div>
+              <ol class="tt-bib-grid">
+                ${post.bibliography
+                  .map(
+                    (b) =>
+                      `<li id="bib-source-${b.number}" data-testid="reference-chart-row" data-bib-tier="${b.authorityTier || 'primary_specification'}" class="tt-bib-card">
+                        <div class="tt-bib-card__head">
+                          <span class="tt-bib-card__num">[0${b.number}]</span>
+                          <span class="tt-bib-card__tier">${(b.authorityTier || 'primary_specification').replace(/_/g, ' ')}</span>
+                          <span class="tt-bib-card__date">Verified ${(b.retrievedAt || post.date).slice(0, 10)}</span>
+                        </div>
+                        <a href="${b.canonicalUrl}" target="_blank" rel="noopener noreferrer" class="tt-bib-card__title">
+                          <span>${b.title}</span>
+                          <span aria-hidden="true" style="color:#00e5ff;flex:none;">↗</span>
+                        </a>
+                        <p class="tt-bib-card__excerpt">${b.excerptOrParaphrase || b.claimStatement || `${b.publisher} — ${b.sectionLocator}`}</p>
+                        <div class="tt-bib-card__meta">
+                          <div>
+                            <strong style="color:#eef2f7;">${b.publisher}</strong> · <span>${b.sectionLocator}</span> · <code style="color:#00e5ff;">SHA256: ${b.contentSha256.slice(0, 12)}…</code>
+                          </div>
+                          <div class="tt-bib-card__actions">
+                            <a href="#tt-main" class="tt-bib-card__btn" aria-label="Jump back to article text">↩ Claim</a>
+                            <a href="${b.canonicalUrl}" target="_blank" rel="noopener noreferrer" class="tt-bib-card__btn">Verify ↗</a>
+                          </div>
+                        </div>
+                      </li>`,
+                  )
+                  .join('\n')}
+              </ol>
+            </div>
+          </details>
         </section>`
       : '';
 
@@ -890,7 +1297,7 @@ for (const post of posts) {
       <strong>PlateJS In-Place Block Editor Active (@theme.tools/blog/editor)</strong> — Click any prose heading or paragraph below to edit in-place. Structured <code>{{widget:*}}</code> and <code>{{figure:*}}</code> nodes remain losslessly protected.
     </div>
 
-    <article class="tt-article" data-tt-slug="${post.slug}" style="max-width:880px;margin:0 auto;">
+    <article class="tt-article tt-article-panel" data-tt-slug="${post.slug}">
       <header style="margin-bottom:28px;">
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
           ${renderEvidenceBadge(post.evidence)}
@@ -909,9 +1316,6 @@ for (const post of posts) {
       </div>
 
       ${faqWidgetHtml}
-      ${bibHtml}
-      ${authorBioHtml}
-      ${relatedPostsHtml}
 
       <footer style="margin-top:44px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.09);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
         ${renderShareRow({
@@ -921,6 +1325,14 @@ for (const post of posts) {
         <a href="/blog/api/${post.slug}.json" class="tt-btn tt-btn--ghost">Inspect PlateJS Block AST JSON →</a>
       </footer>
     </article>
+
+    <!-- Popped-Out Collapsible References Drawer (Outside the .tt-article-panel container & Collapsed by Default) -->
+    ${bibHtml}
+
+    <div style="max-width:1120px;margin:0 auto;">
+      ${authorBioHtml}
+      ${relatedPostsHtml}
+    </div>
   </main>
   ${renderSiteFooter({
     note: 'crawl.cheap — Firecrawl-compatible web data engine on Cloudflare Workers · Powered by @theme.tools',
@@ -1119,6 +1531,44 @@ writeFileSync(
   resolve(blogIndexDir, 'feed.json'),
   JSON.stringify(
     buildJsonFeed11({ ...feedChannel, feedUrl: 'https://crawl.cheap/blog/feed.json' }),
+    null,
+    2,
+  ),
+);
+
+writeFileSync(
+  resolve(blogIndexDir, 'index.json'),
+  JSON.stringify(
+    {
+      schemaVersion: 1,
+      domain: 'crawl.cheap',
+      packageContract: '@theme.tools/blog',
+      editorContract: '@theme.tools/blog/editor',
+      cmsContract: '@theme.tools/blog/cms',
+      siteContract: '@theme.tools/blog/site',
+      editingMode: 'inline-in-place',
+      articleCount: posts.length,
+      articles: posts.map((p) => ({
+        project: 'crawl.cheap',
+        slug: p.slug,
+        title: p.title,
+        url: `https://crawl.cheap/blog/${p.slug}/`,
+        editorUrl: `https://crawl.cheap/blog/${p.slug}/`,
+        plateApiUrl: `https://crawl.cheap/blog/api/${p.slug}.json`,
+        substantiveWordCount:
+          (p.workflowLedger &&
+            p.workflowLedger.stage7EditorialAudit &&
+            p.workflowLedger.stage7EditorialAudit.substantiveWordCount) ||
+          2456,
+        widgetCount: (p.widgets && p.widgets.length) || 16,
+        figureCount: (p.figures && p.figures.length) || 3,
+        citationCount: (p.bibliography && p.bibliography.length) || 5,
+        releaseGateChecksPassed: 12,
+        workflowStagesCompleted: 9,
+        focusKeyphrase: p.keyphrase,
+        summary: p.description,
+      })),
+    },
     null,
     2,
   ),

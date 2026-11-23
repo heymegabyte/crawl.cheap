@@ -18,6 +18,22 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@26.6.4)(supports-color@10.2.2)
 
+  ../theme.tools/packages/shared-utils:
+    dependencies:
+      zod:
+        specifier: ^4.6.6
+        version: 4.6.7
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.0
+        version: 22.20.5
+
+  ../theme.tools/packages/telemetry:
+    dependencies:
+      '@theme-tools/shared-utils':
+        specifier: workspace:*
+        version: link:../shared-utils
+
   apps/api:
     dependencies:
       '@cloudflare/puppeteer':
@@ -115,6 +131,9 @@ importers:
       '@crawlcheap/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@theme.tools/telemetry':
+        specifier: file:../../../theme.tools/packages/telemetry
+        version: file:../theme.tools/packages/telemetry
       node-html-parser:
         specifier: ^6.1.13
         version: 6.1.13
@@ -864,11 +883,17 @@ packages:
   '@speed-highlight/core@1.2.24':
     resolution: {integrity: sha512-qeW2e1l78afw8VhRPfPQ1Gjj+KU5XFQ/OFV5ti6eTa9bruO7mJyZtA4vw0ofqmA3tKCkROE9xLk3VZoeRc98nw==}
 
+  '@theme.tools/telemetry@file:../theme.tools/packages/telemetry':
+    resolution: {directory: ../theme.tools/packages/telemetry, type: directory}
+
   '@tootallnate/quickjs-emscripten@0.23.0':
     resolution: {integrity: sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==}
 
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
+
+  '@types/node@22.20.5':
+    resolution: {integrity: sha512-U2+DNr+wSjpsTS/wZGYHq7GcwfuSmKiKvoPvK22zwTlRhU91yOniN4qRR5KhIjvif7ysw/dz/hKmfDH0Ris4aA==}
 
   '@types/node@26.6.4':
     resolution: {integrity: sha512-ldVPDCzj7fsaGZrLB0NuHuTvJcsNasysBAqMolr/cgxrLd1xbqxIr3XJiPnHHJUCxj5sNF1vnRj9aWnrVh5Jcg==}
@@ -1549,6 +1574,9 @@ packages:
   unbzip2-stream@1.4.3:
     resolution: {integrity: sha512-mlExGW4w71ebDJviH16lQLtZS32VKqsSfk80GCfUlwT/4/hNRFsoscrF/c++9xinkMzECL1uL9DDwXqFWkruPg==}
 
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
   undici-types@8.9.0:
     resolution: {integrity: sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==}
 
@@ -1700,6 +1728,9 @@ packages:
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
 
 snapshots:
 
@@ -2171,9 +2202,17 @@ snapshots:
 
   '@speed-highlight/core@1.2.24': {}
 
+  '@theme.tools/telemetry@file:../theme.tools/packages/telemetry':
+    dependencies:
+      '@theme-tools/shared-utils': link:../theme.tools/packages/shared-utils
+
   '@tootallnate/quickjs-emscripten@0.23.0': {}
 
   '@types/estree@1.0.9': {}
+
+  '@types/node@22.20.5':
+    dependencies:
+      undici-types: 6.21.0
 
   '@types/node@26.6.4':
     dependencies:
@@ -3004,6 +3043,8 @@ snapshots:
       buffer: 5.7.1
       through: 2.3.8
 
+  undici-types@6.21.0: {}
+
   undici-types@8.9.0:
     optional: true
 
@@ -3176,3 +3217,5 @@ snapshots:
       youch-core: 0.3.3
 
   zod@3.25.76: {}
+
+  zod@4.6.7: {}

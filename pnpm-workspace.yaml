@@ -1,6 +1,9 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+  # Explicit development links for canonical shared packages; production consumes immutable releases.
+  - '../theme.tools/packages/telemetry'
+  - '../theme.tools/packages/shared-utils'
 
 onlyBuiltDependencies:
   - esbuild
@@ -13,3 +16,6 @@ onlyBuiltDependencies:
 # the pnpm 11 ERR_PNPM_IGNORED_BUILDS error without attempting the (failing) build.
 ignoredBuiltDependencies:
   - canvas
+
+allowBuilds:
+  esbuild: set this to true or false
