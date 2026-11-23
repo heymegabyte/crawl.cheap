@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "gen:seo": "node scripts/gen-seo.mjs",
-    "predeploy": "node scripts/gen-seo.mjs",
+    "sync:theme-tools": "node scripts/sync-theme-tools.mjs",
+    "gen:seo": "node scripts/sync-theme-tools.mjs && node scripts/gen-seo.mjs",
+    "predeploy": "node scripts/sync-theme-tools.mjs && node scripts/gen-seo.mjs",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },

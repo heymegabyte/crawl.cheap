@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import type { Context } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { z } from 'zod';
-import { extractAvailable, extractWithAI } from '@crawlcheap/engine';
+import { extractAvailable, extractWithAI, getLangfuseSafeClient } from '@crawlcheap/engine';
 import { engineEnv, type Env } from '../env';
 import { requireAuth, type Vars } from '../lib/auth';
 import { parseBody } from '../lib/respond';
@@ -293,6 +293,20 @@ route.post('/support/ask', async (c) => {
   if (!answer) {
     answer = `Based on crawl.cheap's Firecrawl-compatible documentation for "${q}": ${topDocs[0]?.snippet ?? ''} Point any Firecrawl v1/v2 SDK or MCP client at https://api.crawl.cheap with a cc_live_ or fc- API key or OAuth 2.1 Bearer token.`;
   }
+
+  const lf = getLangfuseSafeClient({
+    publicKey: c.env.LANGFUSE_PUBLIC_KEY,
+    secretKey: c.env.LANGFUSE_SECRET_KEY,
+    baseUrl: c.env.LANGFUSE_HOST ?? c.env.LANGFUSE_BASEURL,
+    serviceName: 'crawl-cheap-api',
+    environment: c.env.SENTRY_ENVIRONMENT ?? 'production',
+  });
+  void lf.traceSafe({
+    name: 'support.rag_ask',
+    model: '@cf/meta/llama-3.1-8b-instruct',
+    input: { question: q, citationIds: topDocs.map((d) => d.id) },
+    output: { answerLength: answer.length },
+  });
 
   return c.json({
     success: true as const,

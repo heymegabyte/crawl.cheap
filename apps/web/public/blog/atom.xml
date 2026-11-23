@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US">
+  <id>https://crawl.cheap/blog/atom.xml</id>
+  <title>crawl.cheap Engineering Blog</title>
+  <subtitle>Firecrawl-compatible edge web scraping, Cloudflare Browser Rendering /crawl, and @theme.tools architecture guides.</subtitle>
+  <updated>2026-11-19T14:00:00Z</updated>
+  <link href="https://crawl.cheap/blog/atom.xml" rel="self" type="application/atom+xml" />
+  <link href="https://crawl.cheap/blog/" rel="alternate" type="text/html" />
+  <entry>
+    <id>https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/</id>
+    <title>Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents</title>
+    <link href="https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/" rel="alternate" type="text/html" />
+    <published>2026-11-19T14:00:00Z</published>
+    <updated>2026-11-19T14:00:00Z</updated>
+    <author>
+      <name>Brian Zalewski</name>
+    </author>
+    <category term="saas-platform" />
+    <category term="architecture" />
+    <category term="cloudflare-workers" />
+    <category term="theme-tools" />
+    <category term="platejs" />
+    <summary type="text">OpenAPI contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic HTML-to-Markdown distillation.</summary>
+  </entry>
+</feed>

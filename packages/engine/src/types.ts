@@ -36,6 +36,19 @@ export interface EngineEnv {
   SEARCH_PROVIDER?: string;
   EXA_API_KEY?: string;
   TAVILY_API_KEY?: string;
+  /** @theme.tools/telemetry 7-Rail Observability & Langfuse Safe (2500ms) credentials. */
+  LANGFUSE_PUBLIC_KEY?: string;
+  LANGFUSE_SECRET_KEY?: string;
+  LANGFUSE_HOST?: string;
+  LANGFUSE_BASEURL?: string;
+  POSTHOG_API_KEY?: string;
+  POSTHOG_HOST?: string;
+  GA_MEASUREMENT_ID?: string;
+  GA_API_SECRET?: string;
+  GTM_CONTAINER_ID?: string;
+  SENTRY_DSN?: string;
+  SENTRY_ENVIRONMENT?: string;
+  SENTRY_RELEASE?: string;
 }
 
 export interface ScrapeContext {

@@ -26,6 +26,9 @@ export const WIDGET_TYPES = [
     "spec-table",
     "scorecard",
     "accordion",
+    "pricing",
+    "cta",
+    "link-card",
 ];
 export function isWidgetType(x) {
     return WIDGET_TYPES.includes(x);
@@ -569,6 +572,83 @@ ${details}
 // ---------------------------------------------------------------------------
 // Dispatcher
 // ---------------------------------------------------------------------------
+/**
+ * A pricing-tier card: a tier name, a headline price with an optional `cadence` (e.g. "/mo"), a
+ * non-empty feature list, and an optional CTA `{ href, label }`. All text is escaped. Reusable for any
+ * pricing/plan surface (marketing pages, AI-chat answers, comparison pages).
+ * @throws {WidgetError} on an invalid shape, an empty `features` array, or a cta missing href/label.
+ */
+export function renderPricing(data) {
+    const ctx = "pricing";
+    const obj = asRoot(data, ctx);
+    const tier = reqStr(obj, "tier", ctx);
+    const price = reqStr(obj, "price", ctx);
+    const cadence = optStr(obj, "cadence");
+    const features = reqStrArray(obj, "features", ctx);
+    const cadenceHtml = cadence ? `<span class="tt-pricing__cadence">${escapeHtml(cadence)}</span>` : "";
+    let ctaHtml = "";
+    if (obj["cta"] !== undefined) {
+        const cta = asRoot(obj["cta"], `${ctx}.cta`);
+        const href = reqStr(cta, "href", `${ctx}.cta`);
+        const label = reqStr(cta, "label", `${ctx}.cta`);
+        ctaHtml = `\n  <a class="tt-pricing__cta tt-btn tt-btn--primary" href="${escapeHtml(href)}">${escapeHtml(label)}</a>`;
+    }
+    const featureHtml = features
+        .map((f) => `    <li class="tt-pricing__feature">${escapeHtml(f)}</li>`)
+        .join("\n");
+    return `
+<section class="tt-widget tt-pricing" data-ripple="true" data-spotlight="true" data-magnetic="true" aria-label="${escapeHtml(tier)} plan">
+  <h3 class="tt-widget__heading tt-pricing__tier">${escapeHtml(tier)}</h3>
+  <p class="tt-pricing__price"><strong>${escapeHtml(price)}</strong>${cadenceHtml}</p>
+  <ul class="tt-pricing__features">
+${featureHtml}
+  </ul>${ctaHtml}
+</section>`.trim();
+}
+/**
+ * A call-to-action card: a title, optional body, a required `primary` action `{ href, label }`, and an
+ * optional `secondary` (ghost) action. All text is escaped. Distinct from `callout` — this carries buttons.
+ * @throws {WidgetError} on an invalid shape or an action missing href/label.
+ */
+export function renderCta(data) {
+    const ctx = "cta";
+    const obj = asRoot(data, ctx);
+    const title = reqStr(obj, "title", ctx);
+    const body = optStr(obj, "body");
+    const action = (raw, name, cls) => {
+        const a = asRoot(raw, `${ctx}.${name}`);
+        const href = reqStr(a, "href", `${ctx}.${name}`);
+        const label = reqStr(a, "label", `${ctx}.${name}`);
+        return `<a class="tt-cta__btn ${cls}" href="${escapeHtml(href)}">${escapeHtml(label)}</a>`;
+    };
+    const primary = action(obj["primary"], "primary", "tt-btn tt-btn--primary");
+    const secondary = obj["secondary"] !== undefined ? action(obj["secondary"], "secondary", "tt-btn tt-btn--ghost") : "";
+    const bodyHtml = body ? `\n  <p class="tt-cta__body">${escapeHtml(body)}</p>` : "";
+    return `
+<section class="tt-widget tt-cta" data-ripple="true" data-spotlight="true" data-magnetic="true" aria-label="${escapeHtml(title)}">
+  <h3 class="tt-widget__heading tt-cta__title">${escapeHtml(title)}</h3>${bodyHtml}
+  <div class="tt-cta__actions">${primary}${secondary}</div>
+</section>`.trim();
+}
+/**
+ * A link card: a WHOLE-card anchor to `href` with a title, an optional `description`, and an optional
+ * `badge` chip. All text + the href are escaped. Reusable for resource lists, related-reading rows, etc.
+ * @throws {WidgetError} on an invalid shape or a missing href/title.
+ */
+export function renderLinkCard(data) {
+    const ctx = "link-card";
+    const obj = asRoot(data, ctx);
+    const href = reqStr(obj, "href", ctx);
+    const title = reqStr(obj, "title", ctx);
+    const description = optStr(obj, "description");
+    const badge = optStr(obj, "badge");
+    const badgeHtml = badge ? `<span class="tt-link-card__badge">${escapeHtml(badge)}</span>\n  ` : "";
+    const descHtml = description ? `\n  <p class="tt-link-card__desc">${escapeHtml(description)}</p>` : "";
+    return `
+<a class="tt-widget tt-link-card" href="${escapeHtml(href)}" data-ripple="true" data-spotlight="true" data-magnetic="true">
+  ${badgeHtml}<span class="tt-widget__heading tt-link-card__title">${escapeHtml(title)}</span>${descHtml}
+</a>`.trim();
+}
 const RENDERERS = {
     callout: renderCallout,
     takeaways: renderTakeaways,
@@ -584,6 +664,9 @@ const RENDERERS = {
     "spec-table": renderSpecTable,
     scorecard: renderScorecard,
     accordion: renderAccordion,
+    pricing: renderPricing,
+    cta: renderCta,
+    "link-card": renderLinkCard,
 };
 /**
  * Render a content widget to an HTML string.
@@ -1153,6 +1236,30 @@ export const WIDGET_CSS = `
 :root[data-theme="light"] .tt-platform-tabs__tab { color: #44566a; }
 :root[data-theme="light"] .tt-platform-tabs__tab:hover { color: #17242e; }
 :root[data-theme="light"] .tt-platform-tabs__tab:has(input:checked) { color: #0a6f8a; border-bottom-color: #0a6f8a; background: rgba(10, 111, 138, 0.08); }
+
+/* Pricing tier card ------------------------------------------------------ */
+.tt-pricing { background: var(--tt-bg-raised); border: 1px solid var(--tt-border); border-radius: 14px; padding: 24px; }
+.tt-pricing__tier { margin: 0 0 4px; }
+.tt-pricing__price { margin: 0 0 16px; color: var(--tt-fg-muted); }
+.tt-pricing__price strong { font-size: 2rem; color: var(--tt-fg); font-weight: 800; letter-spacing: -0.02em; }
+.tt-pricing__cadence { margin-left: 4px; font-size: 0.95rem; color: var(--tt-fg-muted); }
+.tt-pricing__features { margin: 0 0 20px; padding: 0; list-style: none; display: grid; gap: 8px; }
+.tt-pricing__feature { position: relative; padding-left: 24px; color: var(--tt-fg); }
+.tt-pricing__feature::before { content: "✓"; position: absolute; left: 0; color: var(--tt-accent); font-weight: 700; }
+.tt-pricing__cta { display: inline-flex; }
+
+/* Call-to-action card ---------------------------------------------------- */
+.tt-cta { background: var(--tt-bg-raised); border: 1px solid var(--tt-border); border-radius: 14px; padding: 24px; }
+.tt-cta__title { margin: 0 0 8px; }
+.tt-cta__body { margin: 0 0 16px; color: var(--tt-fg-muted); }
+.tt-cta__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* Link card -------------------------------------------------------------- */
+.tt-link-card { display: block; text-decoration: none; background: var(--tt-bg-raised); border: 1px solid var(--tt-border); border-radius: 14px; padding: 20px; color: var(--tt-fg); transition: border-color .2s; }
+.tt-link-card:hover { border-color: var(--tt-accent); }
+.tt-link-card__badge { display: inline-block; margin-bottom: 8px; font-size: 0.72rem; font-weight: 700; color: var(--tt-accent); text-transform: uppercase; letter-spacing: 0.04em; }
+.tt-link-card__title { display: block; }
+.tt-link-card__desc { margin: 6px 0 0; color: var(--tt-fg-muted); }
 
 /* Motion safety ---------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {

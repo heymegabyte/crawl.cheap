@@ -147,7 +147,7 @@ function renderNavOverlay(data, uid) {
           <p class="tt-ov__col-label">${E(latest.title ?? "Latest")}</p>
           <ul class="tt-ov__latest-list" role="menu" aria-label="${E(latest.title ?? "Latest articles")}">
             ${latest.items
-            .map((it) => `<li role="none"><a class="tt-ov__latest-item" role="menuitem" href="${E(it.href)}" tabindex="-1"><span class="tt-ov__latest-title">${E(it.label)}</span>${it.meta ? `<span class="tt-ov__latest-meta">${E(it.meta)}</span>` : ""}</a></li>`)
+            .map((it) => `<li role="none"><a class="tt-ov__latest-item${it.image ? " tt-ov__latest-item--visual" : ""}" role="menuitem" href="${E(it.href)}" tabindex="-1">${it.image ? `<img class="tt-ov__latest-img" src="${E(it.image.src)}" alt="${E(it.image.alt)}" loading="lazy" decoding="async" width="72" height="56">` : ""}<span class="tt-ov__latest-copy"><span class="tt-ov__latest-title">${E(it.label)}</span>${it.meta ? `<span class="tt-ov__latest-meta">${E(it.meta)}</span>` : ""}</span></a></li>`)
             .join("\n            ")}
           </ul>
         </div>`
@@ -192,9 +192,9 @@ function renderNavOverlay(data, uid) {
         <button type="button" class="tt-ov__close" data-tt-ov-close aria-label="Close menu"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
       </div>
       <div class="tt-ov__body">
-        <nav class="tt-ov__desks" aria-label="Desks">
-          <p class="tt-ov__col-label">All 12 desks</p>
-          <div class="tt-ov__grid" role="menu" aria-label="Desks">
+        <nav class="tt-ov__desks" aria-label="Sections">
+          <p class="tt-ov__col-label">All ${groups.length} sections</p>
+          <div class="tt-ov__grid" role="menu" aria-label="Sections">
           ${cards}
           </div>
         </nav>
@@ -218,24 +218,33 @@ function renderNavOverlay(data, uid) {
  */
 export function renderSiteNav(data) {
     const brandHref = data.brandHref ?? "/";
+    const layoutClass = data.layout === "full" ? " tt-nav--full" : "";
+    const brandMark = data.logo
+        ? `<img class="tt-nav__logo" src="${E(data.logo.src)}" alt="${E(data.logo.alt)}" width="${data.logo.width ?? 34}" height="${data.logo.height ?? 34}" decoding="async">`
+        : `<span class="tt-nav__mark" aria-hidden="true"></span>`;
     const links = data.links
         .map((l) => `<a class="tt-nav__link${l.cta ? " tt-nav__cta" : ""}" href="${E(l.href)}">${E(l.label)}</a>`)
         .join("");
     const hasMega = !!(data.mega && data.mega.length > 0);
     const overlayMode = hasMega && data.megaMode === "overlay";
+    const account = data.account
+        ? `<a class="tt-nav__account" href="${E(data.account.href)}" aria-label="${E(data.account.label)}" title="${E(data.account.label)}">${data.account.avatarSrc
+            ? `<img class="tt-nav__avatar" src="${E(data.account.avatarSrc)}" alt="${E(data.account.avatarAlt ?? "")}" width="34" height="34" decoding="async">`
+            : `<span class="tt-nav__avatar tt-nav__avatar--initials" aria-hidden="true">${E(data.account.initials?.trim().slice(0, 2) || data.brand.slice(0, 2))}</span>`}</a>`
+        : "";
     // --- Compact-overlay mode: tiny resting bar + one full-featured overlay. ---------------------
     if (overlayMode) {
         navMegaCounter += 1;
         const uid = `ttnav-${navMegaCounter.toString(36)}`;
         const overlay = renderNavOverlay(data, uid);
-        return `<header class="tt-nav tt-nav--overlay" data-tt-nav-root data-tt-nav-uid="${uid}">
+        return `<header class="tt-nav tt-nav--overlay${layoutClass}" data-tt-nav-root data-tt-nav-uid="${uid}">
   <a class="tt-nav__brand" href="${E(brandHref)}" aria-label="${E(data.brand)} home">
-    <span class="tt-nav__mark" aria-hidden="true"></span>
+    ${brandMark}
     <span class="tt-nav__word">${E(data.brand)}</span>
   </a>
   <div class="tt-nav__actions">
     ${overlay}
-    <nav class="tt-nav__links">${links}${data.themeToggle ? renderThemeToggle() : ""}</nav>
+    <nav class="tt-nav__links">${links}${data.themeToggle ? renderThemeToggle() : ""}${account}</nav>
   </div>
 </header>`;
     }
@@ -258,13 +267,38 @@ export function renderSiteNav(data) {
     </ul>
   </nav>`;
     }
-    return `<header class="tt-nav${hasMega ? " tt-nav--mega" : ""}">
+    return `<header class="tt-nav${hasMega ? " tt-nav--mega" : ""}${layoutClass}">
   <a class="tt-nav__brand" href="${E(brandHref)}" aria-label="${E(data.brand)} home">
-    <span class="tt-nav__mark" aria-hidden="true"></span>
+    ${brandMark}
     <span class="tt-nav__word">${E(data.brand)}</span>
   </a>${mega}
-  <nav class="tt-nav__links">${links}${data.themeToggle ? renderThemeToggle() : ""}</nav>
+  <nav class="tt-nav__links">${links}${data.themeToggle ? renderThemeToggle() : ""}${account}</nav>
 </header>`;
+}
+/** Render a classic navigation bar from a portable JSON string or object. */
+export function renderSiteNavFromJson(input) {
+    const value = typeof input === "string" ? JSON.parse(input) : input;
+    if (!value || typeof value !== "object" || Array.isArray(value))
+        throw new TypeError("Navigation config must be an object");
+    const nav = value;
+    if (typeof nav.brand !== "string" || !nav.brand.trim())
+        throw new TypeError("Navigation config requires brand");
+    if (!Array.isArray(nav.links) || nav.links.some((link) => !link || typeof link !== "object" || typeof link.label !== "string" || typeof link.href !== "string")) {
+        throw new TypeError("Navigation config requires links with label and href");
+    }
+    if (nav.logo !== undefined) {
+        const logo = nav.logo;
+        if (!logo || typeof logo !== "object" || typeof logo.src !== "string" || typeof logo.alt !== "string")
+            throw new TypeError("Navigation logo requires src and alt");
+    }
+    if (nav.account !== undefined) {
+        const account = nav.account;
+        if (!account || typeof account !== "object" || typeof account.href !== "string" || typeof account.label !== "string")
+            throw new TypeError("Navigation account requires href and label");
+        if (account.avatarSrc !== undefined && typeof account.avatarSrc !== "string")
+            throw new TypeError("Navigation account avatarSrc must be a string");
+    }
+    return renderSiteNav(value);
 }
 /**
  * Light/dark reading-mode toggle. The server renders the current theme on `<html data-theme>` (from a
@@ -398,9 +432,79 @@ export function renderPageHeader(data) {
   ${lede}
 </header>`;
 }
+/** A reusable product-site surface for documentation, settings, summaries, and supporting content. */
+export function renderPanel(data) {
+    const kicker = data.kicker ? `<p class="tt-kicker">${E(data.kicker)}</p>` : "";
+    const title = data.title ? `<h2 class="tt-panel__title">${E(data.title)}</h2>` : "";
+    const actions = data.actions ? `<div class="tt-panel__actions">${data.actions}</div>` : "";
+    return `<section class="tt-panel">${kicker}${title}<div class="tt-panel__body">${data.body}</div>${actions}</section>`;
+}
+/** A compact editorial-method or disclosure notice inside the package-owned journal shell. */
+export function renderJournalNotice(data) {
+    return `<aside class="tt-journal__notice" role="note"><strong>${E(data.label)}</strong> ${data.body}</aside>`;
+}
+/**
+ * A visible revision history — the dated-correction notes a publication shows so that a material change
+ * is a published revision, never a silent edit (editorial-integrity furniture). Both fields are escaped;
+ * returns "" for an empty list. `heading` defaults to "Revision history", `id` to "revisions".
+ */
+export function renderRevisions(data) {
+    if (data.revisions.length === 0)
+        return "";
+    const id = data.id ?? "revisions";
+    const heading = data.heading ?? "Revision history";
+    const items = data.revisions
+        .map((r) => `<li><strong>${E(r.date)}</strong> — ${E(r.note)}</li>`)
+        .join("\n");
+    return `<section class="tt-revisions" aria-labelledby="${E(id)}"><h2 class="tt-revisions__heading" id="${E(id)}">${E(heading)}</h2>\n<ul class="tt-revisions__list">${items}</ul></section>`;
+}
 /** Wrap long-form article HTML (markdown → HTML + blog widgets) in the reading shell. */
 export function renderArticle(bodyHtml) {
     return `<article class="tt-article">${bodyHtml}</article>`;
+}
+export function renderDirectoryCard(data) {
+    const tags = (data.tags ?? []).map((t) => `<span class="tt-tag">${E(t)}</span>`).join("");
+    const tagRow = tags ? `<div class="tt-tags">${tags}</div>` : "";
+    return `<article class="tt-feature">
+  <span class="tt-feature__ic" aria-hidden="true">${E(data.icon ?? "◆")}</span>
+  <h3 class="tt-feature__title"><a href="${E(data.href)}">${E(data.title)}</a></h3>
+  <p class="tt-feature__body">${E(data.summary)}</p>
+  ${tagRow}
+  <a class="tt-cover__cta" href="${E(data.ctaHref ?? data.href)}">${E(data.ctaLabel ?? "Read more →")}</a>
+</article>`;
+}
+/** A responsive grid of {@link renderDirectoryCard} cards (software directories, resource libraries). */
+export function renderDirectoryGrid(data) {
+    return `<div class="tt-features">
+${data.cards.map(renderDirectoryCard).join("\n")}
+</div>`;
+}
+/**
+ * A publication-grade bibliography / source archive. Citation bodies are trusted composed HTML so
+ * consumers can retain semantic links and source annotations; headings, metadata, and controls are
+ * escaped. Numbering is visual-only because the ordered list already communicates sequence.
+ */
+export function renderSourceLibrary(data) {
+    const headingId = data.headingId ?? "sources";
+    const eyebrow = data.eyebrow ?? "Documentation // verified trails";
+    const introduction = data.introduction ?? "Primary records and reference material behind this article.";
+    const returnHref = data.returnHref ?? "#tt-main";
+    const returnLabel = data.returnLabel ?? "Return to the article";
+    const cards = data.items.map((item) => `<li class="tt-source-card">
+  <div class="tt-source-card__content">${item.html}</div>
+  <span class="tt-source-card__domain">${E(item.domain)}</span>
+  <span class="tt-source-card__arrow" aria-hidden="true">↗</span>
+</li>`).join("\n");
+    return `<section class="tt-sources" aria-labelledby="${E(headingId)}">
+  <h2 id="${E(headingId)}">${E(data.heading)}</h2>
+  <div class="tt-sources__masthead">
+    <p class="tt-sources__eyebrow">${E(eyebrow)}</p>
+    <p class="tt-sources__intro">${E(introduction)}</p>
+    <span class="tt-sources__count" aria-label="${data.items.length} references"><strong>${String(data.items.length).padStart(2, "0")}</strong> references</span>
+  </div>
+  <ol class="tt-source-list">${cards}</ol>
+  <a class="tt-sources__return" href="${E(returnHref)}">${E(returnLabel)} <span aria-hidden="true">↑</span></a>
+</section>`;
 }
 /**
  * The magazine nameplate / flag — a centred publication wordmark between two hairline rules, a
@@ -489,12 +593,25 @@ export function renderShareRow(data) {
   ${items}
 </nav>`;
 }
-/** A row of tag chips (non-linked by default — there is no tag archive yet, so they add context). */
+/**
+ * A row of tag chips. A `string` entry renders a static `<span class="tt-tag">` (unchanged); a
+ * {@link TagChip} object renders a navigable `<a class="tt-tag">` when `href` is set and may carry an
+ * optional leading `icon` glyph. All text + the href are escaped. Powers taxonomy/desk/letter nav rows
+ * so consumers stop hand-rolling `<a class="tt-tag" href>` chips.
+ */
 export function renderTagList(data) {
     if (data.tags.length === 0)
         return "";
     const label = data.label ? `<span class="tt-tags__label">${E(data.label)}</span>` : "";
-    const chips = data.tags.map((t) => `<span class="tt-tag">${E(t)}</span>`).join("");
+    const chips = data.tags
+        .map((t) => {
+        const chip = typeof t === "string" ? { label: t } : t;
+        const inner = `${chip.icon ? `${E(chip.icon)} ` : ""}${E(chip.label)}`;
+        return chip.href
+            ? `<a class="tt-tag" href="${E(chip.href)}">${inner}</a>`
+            : `<span class="tt-tag">${inner}</span>`;
+    })
+        .join("");
     return `<div class="tt-tags">${label}${chips}</div>`;
 }
 /** A breadcrumb trail (the visible counterpart of BreadcrumbList JSON-LD). Last item = current page. */
@@ -650,17 +767,26 @@ main{min-height:58vh}
 .tt-btn:focus-visible{outline:2px solid var(--tt-cyan);outline-offset:3px}
 
 /* Nav ------------------------------------------------------------------- */
-.tt-nav{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;
+.tt-nav{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:16px;line-height:1.65;
   flex-wrap:wrap;row-gap:10px;
   max-width:var(--tt-maxw);margin:0 auto;padding:15px 24px;backdrop-filter:blur(14px);
   background:linear-gradient(180deg,rgba(6,6,16,.82),rgba(6,6,16,.5));border-bottom:1px solid var(--tt-line)}
+.tt-nav--full{max-width:none;width:100%;padding-inline:max(24px,env(safe-area-inset-left),calc((100vw - var(--tt-maxw))/2 + 24px)) max(24px,env(safe-area-inset-right),calc((100vw - var(--tt-maxw))/2 + 24px))}
+.tt-nav__logo{display:block;flex:0 0 auto;object-fit:contain}
+.tt-nav__account{display:inline-grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border:1px solid var(--tt-line);border-radius:999px;
+  background:linear-gradient(145deg,rgba(0,229,255,.13),rgba(0,229,255,.025));box-shadow:inset 0 0 0 1px rgba(255,255,255,.025),0 0 24px -12px rgba(0,229,255,.65);
+  transition:border-color .2s var(--tt-ease),box-shadow .2s var(--tt-ease),transform .2s var(--tt-ease)}
+.tt-nav__account:hover{border-color:var(--tt-cyan);box-shadow:inset 0 0 0 1px rgba(0,229,255,.12),0 0 28px -8px rgba(0,229,255,.7);transform:translateY(-1px)}
+.tt-nav__account:focus-visible{outline:2px solid var(--tt-cyan);outline-offset:3px}
+.tt-nav__avatar{display:block;width:30px;height:30px;border-radius:999px;object-fit:cover}
+.tt-nav__avatar--initials{display:grid;place-items:center;font:700 11px/1 var(--tt-mono);letter-spacing:.05em;color:var(--tt-cyan);background:var(--tt-ink-2)}
 .tt-nav__brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:-.02em;font-size:18px;min-width:0}
 .tt-nav__mark{width:24px;height:24px;flex:0 0 auto;border-radius:8px;
   background:radial-gradient(120% 120% at 30% 20%,var(--tt-cyan-soft),var(--tt-cyan) 45%,var(--tt-cyan-deep));
   box-shadow:0 0 20px rgba(0,229,255,.6),0 0 0 1px rgba(0,229,255,.3) inset}
 .tt-nav__word{white-space:nowrap}
 .tt-nav__links{display:flex;align-items:center;gap:22px;font-size:14px;color:var(--tt-muted)}
-.tt-nav__link{transition:color .15s var(--tt-ease)}
+.tt-nav__link{display:inline-flex;align-items:center;min-height:44px;transition:color .15s var(--tt-ease)}
 .tt-nav__link:hover{color:var(--tt-text)}
 .tt-nav__cta{padding:8px 15px;border:1px solid var(--tt-cyan);border-radius:10px;color:#02121a!important;
   font-weight:600;background:linear-gradient(100deg,var(--tt-cyan),var(--tt-cyan-deep));box-shadow:0 0 22px rgba(0,229,255,.4)}
@@ -678,6 +804,7 @@ main{min-height:58vh}
 /* On mobile the nav wraps to a second row so every link stays reachable (never a CTA-only nav). */
 @media(max-width:640px){
   .tt-nav{padding:12px 18px}
+  .tt-nav--full{padding-inline:max(18px,env(safe-area-inset-left)) max(18px,env(safe-area-inset-right))}
   .tt-nav__links{width:100%;justify-content:flex-start;gap:14px 18px;font-size:13.5px;flex-wrap:wrap}
 }
 
@@ -802,11 +929,12 @@ main{min-height:58vh}
 /* The overlay (dialog) */
 .tt-ov{position:fixed;inset:0;z-index:90}
 .tt-ov[hidden]{display:none}
-.tt-ov__scrim{position:absolute;inset:0;background:rgba(2,3,9,.72);backdrop-filter:blur(7px);
+.tt-nav:has(.tt-ov[data-tt-ov-open]){backdrop-filter:none;-webkit-backdrop-filter:none}
+.tt-ov__scrim{position:absolute;inset:0;background:#000;backdrop-filter:none;
   opacity:0;transition:opacity .333s var(--tt-ease)}
 .tt-ov[data-tt-ov-open] .tt-ov__scrim{opacity:1}
 .tt-ov__sheet{position:absolute;left:50%;top:0;transform:translateX(-50%);width:min(1120px,96vw);
-  max-height:92vh;overflow-y:auto;overscroll-behavior:contain;margin-top:70px;padding:20px;
+  max-height:92vh;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;margin-top:70px;padding:20px;isolation:isolate;
   background:radial-gradient(130% 90% at 0% 0%,rgba(0,229,255,.09),transparent 52%),radial-gradient(120% 120% at 100% 0%,rgba(124,58,237,.11),transparent 54%),linear-gradient(180deg,var(--tt-panel),var(--tt-ink-2));
   border:1px solid var(--tt-line);border-radius:20px;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 50px 120px -40px rgba(0,0,0,.95),0 0 80px -30px rgba(0,229,255,.4);
@@ -845,6 +973,7 @@ main{min-height:58vh}
   transition:border-color .2s var(--tt-ease),background .2s var(--tt-ease),transform .2s var(--tt-ease),box-shadow .2s var(--tt-ease)}
 .tt-ov__card:hover,.tt-ov__card:focus-visible,.tt-ov__card[data-tt-ov-active]{border-color:var(--tt-line-2);transform:translateY(-2px);
   background:linear-gradient(180deg,rgba(0,229,255,.1),rgba(0,229,255,.02));box-shadow:0 16px 40px -22px rgba(0,229,255,.55);outline:none}
+.tt-ov__card[aria-current="page"],.tt-ov a[data-tt-ov-current]{border-color:var(--tt-cyan);box-shadow:inset 3px 0 0 var(--tt-cyan),0 16px 40px -24px rgba(0,229,255,.5)}
 .tt-ov__card:focus-visible{box-shadow:inset 0 0 0 1px var(--tt-cyan),0 16px 40px -22px rgba(0,229,255,.55)}
 .tt-ov__card-head{display:flex;align-items:center;gap:8px;min-width:0}
 .tt-ov__card-ic{flex:0 0 auto;display:inline-grid;place-items:center;min-width:26px;height:26px;padding:0 6px;border-radius:8px;
@@ -878,6 +1007,10 @@ main{min-height:58vh}
 .tt-ov__latest-item{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:10px;text-decoration:none;
   transition:background .2s var(--tt-ease),padding-left .2s var(--tt-ease)}
 .tt-ov__latest-item:hover,.tt-ov__latest-item:focus-visible{background:linear-gradient(90deg,rgba(0,229,255,.1),transparent);padding-left:13px;outline:none}
+.tt-ov__latest-item--visual{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:12px}
+.tt-ov__latest-img{width:72px;height:56px;object-fit:cover;border-radius:8px;filter:saturate(.9);transition:transform .3s ease,filter .3s ease}
+.tt-ov__latest-copy{display:grid;gap:4px;min-width:0}
+.tt-ov__latest-item--visual:hover .tt-ov__latest-img,.tt-ov__latest-item--visual:focus-visible .tt-ov__latest-img{transform:scale(1.04);filter:saturate(1.1)}
 .tt-ov__latest-item:focus-visible{box-shadow:inset 0 0 0 1px var(--tt-cyan)}
 .tt-ov__latest-title{font-size:13px;font-weight:600;color:var(--tt-body);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tt-ov__latest-item:hover .tt-ov__latest-title,.tt-ov__latest-item:focus-visible .tt-ov__latest-title{color:var(--tt-heading)}
@@ -973,6 +1106,9 @@ main{min-height:58vh}
   box-shadow:0 0 18px rgba(0,229,255,.25)}
 .tt-feature__title{margin:16px 0 8px;font-size:1.18rem;font-weight:700;color:var(--tt-heading)}
 .tt-feature__body{color:var(--tt-muted);font-size:.97rem;margin:0}
+.tt-feature__title a{color:inherit;text-decoration:none}
+.tt-feature__title a:hover{color:var(--tt-cyan-soft)}
+.tt-feature .tt-tags{margin-top:14px}
 .tt-feature__body code{font-family:var(--tt-mono);font-size:.88em;background:rgba(0,229,255,.1);color:var(--tt-cyan-soft);
   padding:2px 6px;border-radius:6px}
 
@@ -1002,9 +1138,44 @@ main{min-height:58vh}
 /* Page header (blog index / 404) ---------------------------------------- */
 .tt-pagehead{max-width:var(--tt-maxw);margin:0 auto;padding:64px 24px 8px}
 .tt-pagehead__title{font-size:clamp(2rem,5vw,3rem);letter-spacing:-.03em;margin:12px 0 0;font-weight:800;color:var(--tt-heading)}
+.tt-panel{padding:clamp(22px,3vw,34px);border:1px solid var(--tt-line);border-radius:var(--tt-radius);
+  background:linear-gradient(145deg,rgba(0,229,255,.045),var(--tt-panel) 58%,rgba(255,255,255,.012));
+  box-shadow:0 28px 80px -64px rgba(0,229,255,.7)}
+.tt-panel+.tt-panel{margin-top:20px}
+.tt-panel__title{margin:8px 0 0;color:var(--tt-heading);font-size:clamp(1.35rem,3vw,2rem);letter-spacing:-.025em}
+.tt-panel__body{margin-top:14px;color:var(--tt-body);line-height:1.7}
+.tt-panel__body>:first-child{margin-top:0}.tt-panel__body>:last-child{margin-bottom:0}
+.tt-panel__actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+
+/* Cohesive publication skin for journals embedded in a product site. The journal keeps its
+   editorial hierarchy while inheriting the same dense cyan panel language as dashboards/docs. */
+.tt-journal{max-width:var(--tt-maxw);margin:0 auto;padding:clamp(36px,6vw,72px) 24px 88px;
+  background:radial-gradient(circle at 8% 8%,rgba(0,229,255,.07),transparent 28%),
+             radial-gradient(circle at 92% 30%,rgba(0,229,255,.04),transparent 24%)}
+.tt-journal .tt-masthead{padding:30px 24px 22px;margin-bottom:24px;border:1px solid var(--tt-line-2);
+  border-radius:var(--tt-radius);background:linear-gradient(145deg,rgba(0,229,255,.08),var(--tt-panel) 55%,rgba(255,255,255,.015));
+  box-shadow:0 24px 80px -54px rgba(0,229,255,.65)}
+.tt-journal .tt-masthead__title{font-size:clamp(2.4rem,6.5vw,4.9rem)}
+.tt-journal .tt-cover{padding:clamp(22px,3vw,34px);margin-bottom:28px;border:1px solid var(--tt-line-2);
+  border-radius:var(--tt-radius);background:linear-gradient(145deg,rgba(0,229,255,.075),var(--tt-panel) 52%,rgba(255,255,255,.015))}
+.tt-journal .tt-ednote{margin:0 0 28px;padding:clamp(26px,4vw,44px);border:1px solid var(--tt-line);
+  border-left:3px solid var(--tt-cyan);border-radius:var(--tt-radius);background:var(--tt-panel)}
+.tt-journal .tt-pagehead{max-width:none;margin:0 0 24px;padding:clamp(28px,4vw,48px);border:1px solid var(--tt-line-2);
+  border-radius:var(--tt-radius);background:linear-gradient(145deg,rgba(0,229,255,.08),var(--tt-panel) 64%)}
+.tt-journal .tt-pagehead__title{font-size:clamp(2.5rem,7vw,5.8rem);line-height:.94;text-wrap:balance}
+.tt-journal .tt-posts{gap:18px}
+.tt-journal .tt-post{min-height:16rem;background:linear-gradient(160deg,rgba(0,229,255,.045),var(--tt-panel) 45%)}
+.tt-journal__notice{max-width:760px;margin:0 0 28px;padding:16px 18px;border:1px solid var(--tt-line);
+  border-left:3px solid var(--tt-cyan);border-radius:0 var(--tt-radius-sm) var(--tt-radius-sm) 0;
+  background:linear-gradient(90deg,rgba(0,229,255,.075),var(--tt-panel));color:var(--tt-muted);line-height:1.65}
+.tt-journal__notice strong{color:var(--tt-text)}
+.tt-journal__article>.tt-article{margin-top:20px;padding:clamp(28px,5vw,56px);border:1px solid var(--tt-line);
+  border-radius:var(--tt-radius);background:linear-gradient(160deg,rgba(0,229,255,.035),var(--tt-panel) 20%)}
+@media(max-width:760px){.tt-journal{padding-inline:14px}.tt-journal .tt-cover{padding:18px}
+  .tt-journal .tt-pagehead{padding:26px 20px}.tt-journal__article>.tt-article{padding:24px 18px}}
 
 /* Article shell --------------------------------------------------------- */
-.tt-article{max-width:720px;margin:0 auto;padding:56px 24px}
+.tt-article{box-sizing:border-box;width:min(100%,720px);max-width:720px;margin-inline:auto;padding:56px 24px;text-align:left}
 .tt-article h1{font-size:clamp(2rem,5vw,3rem);letter-spacing:-.03em;color:var(--tt-heading);font-weight:800}
 .tt-article .back,.tt-back{font-family:var(--tt-mono);font-size:13px;color:var(--tt-muted)}
 .tt-article .back:hover,.tt-back:hover{color:var(--tt-cyan)}
@@ -1033,6 +1204,8 @@ main{min-height:58vh}
   font-size:1.12rem;color:var(--tt-heading);box-shadow:0 0 30px -14px rgba(0,229,255,.4)}
 .tt-article .body .fig{margin:30px 0;border:1px solid var(--tt-line);border-radius:14px;overflow:hidden;background:var(--tt-panel-2)}
 .tt-article .body .fig svg{display:block;width:100%;height:auto}
+.tt-article .body>figure{box-sizing:border-box;width:100%;max-width:100%;margin:clamp(28px,6vw,48px) auto;overflow:hidden}
+.tt-article .body>figure :where(img,picture,video,iframe,svg){display:block;max-width:100%;height:auto;margin-inline:auto}
 .tt-article .body figcaption{padding:12px 16px;color:var(--tt-faint);font-size:.85rem;font-family:var(--tt-mono);border-top:1px solid var(--tt-line)}
 .tt-article .body #faq{margin-top:48px;padding-top:4px;border-top:1px solid var(--tt-line)}
 
@@ -1129,6 +1302,43 @@ main{min-height:58vh}
 .tt-toc__item--h3 a{font-size:.9rem;color:var(--tt-faint)}
 .tt-toc__item--h3 a::before{content:"– ";color:var(--tt-faint)}
 
+/* Source library -------------------------------------------------------- */
+.tt-sources{position:relative;width:min(100vw - 2rem,980px);margin:clamp(5rem,10vw,8rem) 50% 0;
+  padding:clamp(2rem,5vw,4.5rem);transform:translateX(-50%);overflow:hidden;border:1px solid var(--tt-line);
+  border-radius:2px 28px 2px 28px;background:linear-gradient(135deg,rgba(0,229,255,.08),transparent 32%),
+  radial-gradient(circle at 100% 0,rgba(42,167,199,.12),transparent 23rem),var(--tt-panel);box-shadow:0 34px 90px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.04);isolation:isolate}
+.tt-sources::before{content:"";position:absolute;inset:0;z-index:-1;opacity:.25;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:34px 34px;mask-image:linear-gradient(to bottom,#000,transparent 70%)}
+.tt-sources::after{content:"REFERENCE ARCHIVE";position:absolute;top:1.1rem;right:-2.5rem;color:rgba(255,255,255,.045);
+  font:800 clamp(2.2rem,7vw,5.5rem)/1 var(--tt-display);letter-spacing:-.045em;white-space:nowrap;pointer-events:none}
+.tt-article .tt-sources>h2{position:relative;z-index:1;max-width:12ch;margin:0;color:var(--tt-text);
+  font-size:clamp(2.4rem,7vw,5.5rem);line-height:.92;letter-spacing:-.055em;text-wrap:balance}
+.tt-sources__masthead{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem 2rem;
+  align-items:end;margin:1.75rem 0 2.5rem;padding-bottom:1.75rem;border-bottom:1px solid rgba(255,255,255,.12)}
+.tt-article .tt-sources__eyebrow{grid-column:1/-1;margin:0;color:var(--tt-cyan);font:700 .68rem/1.2 var(--tt-mono);letter-spacing:.16em;text-transform:uppercase}
+.tt-article .tt-sources__intro{max-width:52ch;margin:0;color:var(--tt-body);font-size:1rem;line-height:1.65}
+.tt-sources__count{display:flex;align-items:baseline;gap:.5rem;color:var(--tt-muted);font:600 .68rem/1 var(--tt-mono);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.tt-sources__count strong{color:var(--tt-text);font:400 2.2rem/1 var(--tt-display);letter-spacing:-.05em}
+.tt-source-list{position:relative;z-index:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;margin:0;padding:0;list-style:none;counter-reset:tt-source}
+.tt-source-card{counter-increment:tt-source;position:relative;min-height:9rem;padding:1.2rem 3.1rem 2.7rem 3.6rem;overflow:hidden;
+  border:1px solid rgba(255,255,255,.1);border-radius:12px;background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+  box-shadow:inset 0 1px rgba(255,255,255,.035);transition:transform .22s ease,border-color .22s ease,background-color .22s ease,box-shadow .22s ease}
+.tt-source-card::before{content:counter(tt-source,decimal-leading-zero);position:absolute;top:1.1rem;left:1rem;color:var(--tt-cyan);font:700 .68rem/1 var(--tt-mono);letter-spacing:.08em}
+.tt-source-card:hover,.tt-source-card:focus-within{transform:translateY(-3px);border-color:var(--tt-line-2);background:linear-gradient(145deg,rgba(0,229,255,.08),rgba(255,255,255,.025));box-shadow:0 18px 38px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.06)}
+.tt-source-card:last-child:nth-child(odd){grid-column:1/-1;min-height:7.25rem;padding-right:min(24rem,34vw)}
+.tt-source-card__content{display:contents}.tt-source-card__content strong{display:none}
+.tt-article .tt-source-card__content a{display:block;color:var(--tt-text);font:600 1rem/1.48 var(--tt-body);text-decoration:none;text-wrap:pretty}
+.tt-source-card__content a::after{content:"";position:absolute;inset:0}.tt-source-card__content a:focus-visible{outline:none}
+.tt-source-card:has(a:focus-visible){outline:2px solid var(--tt-cyan);outline-offset:3px}
+.tt-source-card__domain{position:absolute;left:3.6rem;right:3rem;bottom:1.1rem;overflow:hidden;color:var(--tt-faint);font:600 .66rem/1 var(--tt-mono);letter-spacing:.055em;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
+.tt-source-card__arrow{position:absolute;top:1rem;right:1rem;display:grid;width:1.75rem;height:1.75rem;place-items:center;border:1px solid rgba(255,255,255,.12);border-radius:50%;color:var(--tt-muted);transition:color .2s ease,border-color .2s ease,transform .2s ease}
+.tt-source-card:hover .tt-source-card__arrow,.tt-source-card:focus-within .tt-source-card__arrow{color:var(--tt-cyan);border-color:var(--tt-line-2);transform:rotate(8deg)}
+.tt-sources__return{display:inline-flex;gap:.65rem;align-items:center;margin-top:2rem;color:var(--tt-muted)!important;font:700 .7rem/1 var(--tt-mono);letter-spacing:.1em;text-decoration:none;text-transform:uppercase}
+.tt-sources__return:hover{color:var(--tt-text)!important}
+@media(max-width:760px){.tt-sources{width:calc(100vw - 1.25rem);padding:1.5rem;border-radius:2px 20px 2px 20px}.tt-sources__masthead{grid-template-columns:1fr;align-items:start}.tt-sources__count{grid-row:3}.tt-source-list{grid-template-columns:1fr}.tt-source-card{min-height:8.25rem}.tt-source-card:last-child:nth-child(odd){grid-column:auto;min-height:8.25rem;padding-right:3.1rem}}
+@media(prefers-reduced-motion:reduce){.tt-source-card,.tt-source-card__arrow{transition:none}}
+
 /* Auto-linked first mention of a software name / glossary term (markdown.ts autolinkTerms). Inherits
    the body-link colour inside .tt-article; a dotted underline distinguishes it as a cross-reference. */
 .tt-autolink{color:var(--tt-cyan);text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
@@ -1178,6 +1388,8 @@ main{min-height:58vh}
    visual padding — these border+background chips read as tappable, so give them a real hit-box. */
 .tt-tag{display:inline-flex;align-items:center;min-height:24px;font-family:var(--tt-mono);font-size:11.5px;letter-spacing:.02em;padding:4px 11px;border-radius:999px;
   border:1px solid var(--tt-line);color:var(--tt-cyan);background:rgba(0,229,255,.06)}
+a.tt-tag{text-decoration:none;transition:border-color .2s,background .2s}
+a.tt-tag:hover{border-color:var(--tt-cyan);background:rgba(0,229,255,.12)}
 
 /* Code block + copy button ---------------------------------------------- */
 .tt-article .body .tt-code{position:relative;margin:24px 0}
@@ -1219,6 +1431,15 @@ img[data-tt-zoom]{cursor:zoom-in}
   transition:color .15s var(--tt-ease),background .15s var(--tt-ease),transform .15s var(--tt-ease)}
 .tt-lightbox__close:hover{color:#02121a;background:var(--tt-cyan);border-color:transparent;transform:scale(1.05)}
 .tt-lightbox__close:focus-visible{outline:2px solid var(--tt-cyan);outline-offset:3px}
+.tt-lightbox__nav{position:fixed;top:50%;width:48px;height:48px;display:grid;place-items:center;transform:translateY(-50%);
+  font-size:28px;line-height:1;cursor:pointer;color:var(--tt-text);background:rgba(10,14,23,.78);
+  border:1px solid var(--tt-line-2);border-radius:50%;backdrop-filter:blur(8px)}
+.tt-lightbox__nav--prev{left:clamp(10px,2vw,28px)}
+.tt-lightbox__nav--next{right:clamp(10px,2vw,28px)}
+.tt-lightbox__nav:hover{color:#02121a;background:var(--tt-cyan);border-color:transparent}
+.tt-lightbox__nav:focus-visible{outline:2px solid var(--tt-cyan);outline-offset:3px}
+.tt-lightbox__count{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);font-family:var(--tt-mono);
+  font-size:12px;letter-spacing:.12em;color:var(--tt-muted);background:rgba(10,14,23,.78);padding:6px 10px;border-radius:999px}
 
 /* Bookmark toggle + reading list ---------------------------------------- */
 .tt-bookmark{display:inline-flex;align-items:center;gap:8px;font-family:var(--tt-mono);font-size:12.5px;
@@ -1346,9 +1567,20 @@ img[data-tt-zoom]{cursor:zoom-in}
 }
 `.trim();
 /**
- * Companion script for the code blocks that `@theme.tools/blog/markdown` emits (`.tt-code` figures).
- * Served same-origin (CSP `script-src 'self'`); idempotent; clipboard-API with an execCommand
- * fallback. On copy it flips the button to a "Copied" confirmation for ~1.6s.
+ * A single copyable code block: an optional `[data-lang]` label chip + a copy button (driven by
+ * {@link CODE_COPY_JS}) + the verbatim `<pre><code>`. The markup contract and its JS driver live
+ * together in the catalog, so a site can render a standalone copyable snippet without hand-rolling the
+ * `.tt-code__copy` markup `CODE_COPY_JS` reads. `code` and `lang` are escaped.
+ */
+export function renderCodeBlock(data) {
+    const lang = data.lang ?? "";
+    const label = lang ? `<span class="tt-code__lang" aria-hidden="true">${E(lang)}</span>` : "";
+    return `<figure class="tt-code" data-lang="${E(lang)}">${label}<button class="tt-code__copy" type="button" aria-label="Copy to clipboard"><span class="tt-code__copy-label">Copy</span></button><pre><code>${E(data.code)}</code></pre></figure>`;
+}
+/**
+ * Companion script for the code blocks that `@theme.tools/blog/markdown` emits + {@link renderCodeBlock}
+ * (`.tt-code` figures). Served same-origin (CSP `script-src 'self'`); idempotent; clipboard-API with an
+ * execCommand fallback. On copy it flips the button to a "Copied" confirmation for ~1.6s.
  */
 export const CODE_COPY_JS = `(function(){
   if(window.__ttCodeCopy)return;window.__ttCodeCopy=true;
@@ -1405,6 +1637,109 @@ export const LIGHTBOX_JS = `(function(){
     e.preventDefault();open(img);
   },false);
 })();`;
+/**
+ * Install the interactive, keyboard-operable gallery lightbox in browser applications.
+ * Images opt in with `data-tt-zoom`; all matching images form one navigable gallery.
+ * Returns a cleanup function suitable for React effects and client-side route transitions.
+ */
+export function installImageLightbox(root = document) {
+    const images = Array.from(root.querySelectorAll("img[data-tt-zoom]"));
+    if (!images.length)
+        return () => { };
+    let overlay = null;
+    let index = 0;
+    let lastFocus = null;
+    const render = () => {
+        if (!overlay)
+            return;
+        const source = images[index];
+        const image = overlay.querySelector(".tt-lightbox__img");
+        const caption = overlay.querySelector(".tt-lightbox__cap");
+        const count = overlay.querySelector(".tt-lightbox__count");
+        if (!source || !image || !caption || !count)
+            return;
+        image.src = source.currentSrc || source.src;
+        image.alt = source.alt;
+        caption.textContent = source.alt;
+        caption.hidden = !source.alt;
+        count.textContent = `${index + 1} / ${images.length}`;
+    };
+    const close = () => {
+        if (!overlay)
+            return;
+        overlay.remove();
+        overlay = null;
+        lastFocus?.focus();
+    };
+    const step = (delta) => {
+        index = (index + delta + images.length) % images.length;
+        render();
+    };
+    const open = (nextIndex, source) => {
+        index = nextIndex;
+        lastFocus = source;
+        overlay = root.createElement("div");
+        overlay.className = "tt-lightbox tt-lightbox--open";
+        overlay.setAttribute("role", "dialog");
+        overlay.setAttribute("aria-modal", "true");
+        overlay.setAttribute("aria-label", "Image gallery");
+        overlay.innerHTML = `<button class="tt-lightbox__close" type="button" aria-label="Close image gallery">&times;</button>
+      <button class="tt-lightbox__nav tt-lightbox__nav--prev" type="button" aria-label="Previous image">&#8249;</button>
+      <figure class="tt-lightbox__fig"><img class="tt-lightbox__img" alt=""><figcaption class="tt-lightbox__cap"></figcaption></figure>
+      <button class="tt-lightbox__nav tt-lightbox__nav--next" type="button" aria-label="Next image">&#8250;</button>
+      <span class="tt-lightbox__count" aria-live="polite"></span>`;
+        root.body.appendChild(overlay);
+        render();
+        overlay.querySelector(".tt-lightbox__close")?.focus();
+    };
+    const onClick = (event) => {
+        const target = event.target;
+        if (overlay) {
+            if (target === overlay || target?.closest(".tt-lightbox__close"))
+                close();
+            else if (target?.closest(".tt-lightbox__nav--prev"))
+                step(-1);
+            else if (target?.closest(".tt-lightbox__nav--next"))
+                step(1);
+            return;
+        }
+        const image = target?.closest("img[data-tt-zoom]");
+        if (!image)
+            return;
+        event.preventDefault();
+        open(images.indexOf(image), image);
+    };
+    const onKey = (event) => {
+        if (overlay) {
+            if (event.key === "Escape")
+                close();
+            else if (event.key === "ArrowLeft")
+                step(-1);
+            else if (event.key === "ArrowRight")
+                step(1);
+            return;
+        }
+        if (event.key !== "Enter" && event.key !== " ")
+            return;
+        const image = event.target instanceof HTMLImageElement && event.target.matches("img[data-tt-zoom]") ? event.target : null;
+        if (!image)
+            return;
+        event.preventDefault();
+        open(images.indexOf(image), image);
+    };
+    images.forEach((image) => {
+        image.tabIndex = image.tabIndex < 0 ? 0 : image.tabIndex;
+        image.setAttribute("role", "button");
+        image.setAttribute("aria-label", `Open image: ${image.alt || "gallery image"}`);
+    });
+    root.addEventListener("click", onClick);
+    root.addEventListener("keydown", onKey);
+    return () => {
+        root.removeEventListener("click", onClick);
+        root.removeEventListener("keydown", onKey);
+        overlay?.remove();
+    };
+}
 /**
  * Companion script for {@link renderBookmarkButton} + {@link renderReadingList}. Served same-origin
  * (CSP `script-src 'self'`); idempotent. Stores a device-local list in `localStorage` under
@@ -1580,9 +1915,11 @@ export const NAV_MENU_JS = `(function(){
   /* Compact-overlay mega-menu driver: open/close + focus trap + Esc + roving-arrow desk grid +
      live featured swap + global "/" and Cmd/Ctrl+K to open & focus search. CSP-safe (no innerHTML
      on untrusted data — only element attributes the server set), idempotent, reduced-motion agnostic. */
-  if(window.__ttNavOverlay)return;window.__ttNavOverlay=true;
   var FOCUSABLE='a[href],button:not([disabled]),input,[tabindex]:not([tabindex="-1"])';
-  document.querySelectorAll('[data-tt-ov-trigger]').forEach(function(trigger){
+  function boot(scope){
+  (scope||document).querySelectorAll('[data-tt-ov-trigger]').forEach(function(trigger){
+    if(trigger.hasAttribute('data-tt-ov-ready'))return;
+    trigger.setAttribute('data-tt-ov-ready','true');
     var id=trigger.getAttribute('aria-controls');
     var panel=id?document.getElementById(id):null;if(!panel)return;
     var scrim=panel.querySelector('[data-tt-ov-scrim]');
@@ -1595,6 +1932,15 @@ export const NAV_MENU_JS = `(function(){
     var fKicker=featuredLink?featuredLink.querySelector('[data-tt-ov-fkicker]'):null;
     var fTitle=featuredLink?featuredLink.querySelector('[data-tt-ov-ftitle]'):null;
     var lastFocus=null,swapT=null;
+    function markCurrentRoute(){
+      var here=location.pathname.replace(/\\/+$/,'')||'/';
+      Array.prototype.forEach.call(panel.querySelectorAll('a[href]'),function(link){
+        var current=false;
+        try{var url=new URL(link.getAttribute('href'),location.href);var path=url.pathname.replace(/\\/+$/,'')||'/';current=url.origin===location.origin&&path===here;}catch(e){}
+        if(current){link.setAttribute('aria-current','page');link.setAttribute('data-tt-ov-current','1');}
+        else{link.removeAttribute('aria-current');link.removeAttribute('data-tt-ov-current');}
+      });
+    }
     function cols(){ // how many cards per row (for up/down arrows) — read the computed grid
       try{var s=getComputedStyle(panel.querySelector('.tt-ov__grid'));var n=s.gridTemplateColumns.split(' ').length;return n>0?n:3;}catch(e){return 3;}}
     function setFeatured(card){
@@ -1620,6 +1966,7 @@ export const NAV_MENU_JS = `(function(){
     function isOpen(){return trigger.getAttribute('aria-expanded')==='true';}
     function open(focusSearch){
       if(isOpen())return;lastFocus=document.activeElement;
+      markCurrentRoute();
       panel.hidden=false;
       // next frame so the transition runs from the hidden→shown state
       requestAnimationFrame(function(){panel.setAttribute('data-tt-ov-open','1');});
@@ -1637,7 +1984,7 @@ export const NAV_MENU_JS = `(function(){
       var done=function(){panel.hidden=true;};
       // allow the close transition to play unless reduced-motion
       var rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if(rm){done();}else{setTimeout(done,300);}
+      if(rm){done();}else{setTimeout(done,360);}
       if(restore!==false){var t=lastFocus&&lastFocus.focus?lastFocus:trigger;setTimeout(function(){t.focus();},0);}
     }
     trigger.addEventListener('click',function(e){e.preventDefault();if(isOpen())close();else open(false);});
@@ -1669,8 +2016,17 @@ export const NAV_MENU_JS = `(function(){
       else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
     });
   });
+  }
+  boot(document);
+  if(!window.__ttNavOverlayObserver&&window.MutationObserver){
+    window.__ttNavOverlayObserver=new MutationObserver(function(records){records.forEach(function(record){
+      Array.prototype.forEach.call(record.addedNodes||[],function(node){if(node&&node.querySelectorAll)boot(node);});
+    });});
+    window.__ttNavOverlayObserver.observe(document.documentElement,{childList:true,subtree:true});
+  }
   // Global shortcuts: "/" or Cmd/Ctrl+K opens the FIRST overlay + focuses its search (not while typing).
   // Prefer the resting search affordance's own click (runs the canonical open(true) path); else the trigger.
+  if(window.__ttNavOverlayShortcuts)return;window.__ttNavOverlayShortcuts=true;
   document.addEventListener('keydown',function(e){
     var slash=e.key==='/'&&!e.metaKey&&!e.ctrlKey&&!e.altKey;
     var cmdk=(e.key==='k'||e.key==='K')&&(e.metaKey||e.ctrlKey);
@@ -1685,6 +2041,48 @@ export const NAV_MENU_JS = `(function(){
     if(searchBtn){searchBtn.click();}else{trigger.click();}
   });
 })();`;
+/**
+ * A server-rendered self-assessment worksheet form: a config-attribute carrier + per-criterion
+ * radiogroups + a live-summary slot + export/reset actions. Fully usable before JS; {@link WORKSHEET_JS}
+ * enhances it by reading the `data-tt-worksheet*` / `data-tt-criterion` / `data-tt-flag` attributes this
+ * emits — so the markup contract and its driver live together in the catalog. All text + attribute
+ * values are escaped. Powers calculator / assessment / buyer-guide lead-magnets across sites.
+ */
+export function renderWorksheetForm(data) {
+    const cfgAttrs = Object.entries(data.config)
+        .map(([k, v]) => `${k}="${E(v)}"`)
+        .join(" ");
+    const subject = data.subject
+        ? `<div class="tt-worksheet__subject">
+        <label for="ws-subject">${E(data.subject.label)}</label>
+        <input id="ws-subject" data-tt-worksheet-subject type="text" placeholder="${E(data.subject.placeholder)}">
+      </div>`
+        : "";
+    const fields = data.items
+        .map((it, i) => {
+        const opts = data.levels
+            .map((l) => `<label class="tt-criterion__opt"><input type="radio" name="ws-${i}" value="${E(l.value)}"${l.flag ? ` data-tt-flag="${l.flag}"` : ""}> ${E(l.label)}</label>`)
+            .join("");
+        return `<fieldset class="tt-criterion" data-tt-criterion="${E(it.name)}">
+        <legend>${E(it.name)}</legend>
+        <p class="tt-criterion__hint">${E(it.hint)}</p>
+        <div class="tt-criterion__opts" role="radiogroup" aria-label="${E(it.name)} assessment">${opts}</div>
+        <textarea rows="1" aria-label="${E(it.name)} notes" placeholder="${E(data.notePlaceholder)}"></textarea>
+      </fieldset>`;
+    })
+        .join("");
+    return `<form class="tt-worksheet" data-tt-worksheet="${E(data.id)}" autocomplete="off" ${cfgAttrs}>
+    ${subject}
+    ${fields}
+    <div class="tt-worksheet__summary" data-tt-worksheet-summary role="status" aria-live="polite" aria-label="Summary">
+      <p>${E(data.initialSummary)}</p>
+    </div>
+    <div class="tt-worksheet__actions">
+      <button type="button" class="tt-btn tt-btn--primary" data-tt-worksheet-export>Export worksheet</button>
+      <button type="button" class="tt-btn tt-btn--ghost" data-tt-worksheet-reset>Clear</button>
+    </div>
+  </form>`;
+}
 /**
  * Self-assessment worksheet driver. Enhances a server-rendered `[data-tt-worksheet]` form: it tallies
  * the reader's OWN radio selections into a live summary + exports the completed sheet as a text file,

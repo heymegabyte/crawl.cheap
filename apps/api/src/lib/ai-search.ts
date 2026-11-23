@@ -1,6 +1,7 @@
 /** AI Search — semantic search over indexed content. Vectorize (768-dim, cosine) stores
  *  Workers-AI embeddings of scraped chunks; per-API-key tenant isolation via Vectorize
  *  namespaces. Index → query → optional RAG answer. Needs the AI + VECTORIZE bindings. */
+import { getLangfuseSafeClient } from '@crawlcheap/engine';
 import type { Env } from '../env';
 
 const EMBED_MODEL = '@cf/baai/bge-base-en-v1.5'; // 768-dim — matches the crawl-cheap-rag index
@@ -46,7 +47,23 @@ export function chunkText(text: string): string[] {
 }
 
 async function embed(env: Env, texts: string[]): Promise<number[][]> {
+  const t0 = Date.now();
   const out = (await env.AI!.run(EMBED_MODEL, { text: texts })) as { data?: number[][] };
+  const lf = getLangfuseSafeClient({
+    publicKey: env.LANGFUSE_PUBLIC_KEY,
+    secretKey: env.LANGFUSE_SECRET_KEY,
+    baseUrl: env.LANGFUSE_HOST ?? env.LANGFUSE_BASEURL,
+    serviceName: 'crawl-cheap-api',
+    environment: env.SENTRY_ENVIRONMENT ?? 'production',
+  });
+  void lf.traceSafe({
+    name: 'workers_ai.embed',
+    model: EMBED_MODEL,
+    input: { batchSize: texts.length },
+    output: { vectorCount: out.data?.length ?? 0 },
+    durationMs: Math.max(1, Date.now() - t0),
+    promptTokens: texts.reduce((acc, s) => acc + Math.ceil(s.length / 4), 0),
+  });
   return out.data ?? [];
 }
 
@@ -116,6 +133,7 @@ export async function queryContent(
 
 /** Synthesize a grounded answer from retrieved chunks (RAG). */
 export async function ragAnswer(env: Env, query: string, chunks: SearchMatch[]): Promise<string> {
+  const t0 = Date.now();
   const context = chunks.map((c, i) => `[${i + 1}] (${c.url})\n${c.text}`).join('\n\n');
   const out = (await env.AI!.run(ANSWER_MODEL, {
     messages: [
@@ -128,5 +146,22 @@ export async function ragAnswer(env: Env, query: string, chunks: SearchMatch[]):
     ],
     max_tokens: 600,
   })) as { response?: string };
-  return out.response ?? '';
+  const resp = out.response ?? '';
+  const lf = getLangfuseSafeClient({
+    publicKey: env.LANGFUSE_PUBLIC_KEY,
+    secretKey: env.LANGFUSE_SECRET_KEY,
+    baseUrl: env.LANGFUSE_HOST ?? env.LANGFUSE_BASEURL,
+    serviceName: 'crawl-cheap-api',
+    environment: env.SENTRY_ENVIRONMENT ?? 'production',
+  });
+  void lf.traceSafe({
+    name: 'workers_ai.rag_answer',
+    model: ANSWER_MODEL,
+    input: { query, chunkCount: chunks.length },
+    output: { answer: resp },
+    durationMs: Math.max(1, Date.now() - t0),
+    promptTokens: Math.ceil((context.length + query.length) / 4),
+    completionTokens: Math.ceil(resp.length / 4),
+  });
+  return resp;
 }

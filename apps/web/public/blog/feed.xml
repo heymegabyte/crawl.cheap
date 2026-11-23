@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>crawl.cheap Engineering Blog</title>
+    <link>https://crawl.cheap/blog/</link>
+    <description>Firecrawl-compatible edge web scraping, Cloudflare Browser Rendering /crawl, and @theme.tools architecture guides.</description>
+    <atom:link href="https://crawl.cheap/blog/feed.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 19 Nov 2026 14:00:00 GMT</lastBuildDate>
+    <language>en-US</language>
+    <item>
+      <title>Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents</title>
+      <link>https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/</link>
+      <guid isPermaLink="true">https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/</guid>
+      <pubDate>Thu, 19 Nov 2026 14:00:00 GMT</pubDate>
+      <description>OpenAPI contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic HTML-to-Markdown distillation.</description>
+      <category>saas-platform</category>
+      <category>architecture</category>
+      <category>cloudflare-workers</category>
+      <category>theme-tools</category>
+      <category>platejs</category>
+    </item>
+  </channel>
+</rss>

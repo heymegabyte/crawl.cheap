@@ -1,6 +1,11 @@
 import * as Sentry from '@sentry/cloudflare';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import {
+  getLangfuseSafeClient,
+  resolveCorrelationContext,
+  SevenSystemTelemetryRouter,
+} from '@crawlcheap/engine';
 import type { Env } from './env';
 import { listTools, TOOLS, toolError, type McpContent, type ToolProfile } from './tools';
 
@@ -73,11 +78,54 @@ async function handleOne(
       const args = (req.params?.arguments as Record<string, unknown>) ?? {};
       const tool = TOOLS.find((t) => t.name === name && t.profiles.includes(profile));
       if (!tool) return rpcError(req.id, -32602, `Unknown tool: ${name ?? '(none)'}`);
+      const t0 = Date.now();
+      const lf = getLangfuseSafeClient({
+        publicKey: env.LANGFUSE_PUBLIC_KEY,
+        secretKey: env.LANGFUSE_SECRET_KEY,
+        baseUrl: env.LANGFUSE_HOST ?? env.LANGFUSE_BASEURL,
+        serviceName: 'crawl-cheap-mcp',
+        environment: env.SENTRY_ENVIRONMENT ?? 'production',
+      });
       try {
         const content: McpContent = await tool.handler(args, env, auth);
+        const durationMs = Math.max(1, Date.now() - t0);
+        void lf.traceSafe({
+          name: `mcp.tool.${tool.name}`,
+          model: 'mcp.jsonrpc',
+          input: args,
+          output: { items: content.length },
+          durationMs,
+        });
+        if (env.POSTHOG_API_KEY || (env.GA_MEASUREMENT_ID && env.GA_API_SECRET)) {
+          const router = new SevenSystemTelemetryRouter({
+            serviceName: 'crawl-cheap-mcp',
+            environment: env.SENTRY_ENVIRONMENT ?? 'production',
+            posthogHost: env.POSTHOG_HOST,
+            posthogApiKey: env.POSTHOG_API_KEY,
+            sentryDsn: env.SENTRY_DSN,
+            ga4MeasurementId: env.GA_MEASUREMENT_ID,
+            ga4ApiSecret: env.GA_API_SECRET,
+            gtmContainerId: env.GTM_CONTAINER_ID,
+          });
+          void router.dispatchUnifiedEvent({
+            eventName: 'mcp_tool_call',
+            sessionId: 'mcp_session',
+            distinctId: 'mcp_caller',
+            properties: { tool: tool.name, profile, durationMs, isError: false },
+          });
+        }
         return result(req.id, { content, isError: false });
       } catch (err) {
         const { text } = toolError(err);
+        void lf.traceSafe({
+          name: `mcp.tool.${tool.name}`,
+          model: 'mcp.jsonrpc',
+          input: args,
+          output: { error: text },
+          durationMs: Math.max(1, Date.now() - t0),
+          level: 'ERROR',
+          statusMessage: text,
+        });
         return result(req.id, { content: [{ type: 'text', text }], isError: true });
       }
     }
@@ -107,10 +155,17 @@ app.use(
   '*',
   cors({
     origin: '*',
-    allowHeaders: ['content-type', 'authorization', 'mcp-protocol-version'],
+    allowHeaders: ['content-type', 'authorization', 'mcp-protocol-version', 'traceparent'],
     allowMethods: ['GET', 'POST', 'OPTIONS'],
+    exposeHeaders: ['traceparent', 'x-trace-id'],
   }),
 );
+app.use('*', async (c, next) => {
+  const corr = resolveCorrelationContext(c.req.header('traceparent'));
+  c.header('traceparent', corr.traceparent);
+  c.header('x-trace-id', corr.traceId);
+  await next();
+});
 
 const INFO = {
   service: 'crawl.cheap MCP',

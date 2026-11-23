@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Engineering Blog &amp; Architecture Guides · crawl.cheap</title>
+  <meta name="description" content="Reference architecture guides on Firecrawl v1/v2 compatibility, Cloudflare Browser Rendering /crawl, @theme.tools/blog SSR, PlateJS block serialization, and 7-rail observability." />
+  <link rel="canonical" href="https://crawl.cheap/blog/" />
+  <meta name="theme-color" content="#060610" />
+  <link rel="icon" type="image/png" href="/assets/crawl-cheap-icon-64.png" />
+  <link rel="alternate" type="application/rss+xml" title="crawl.cheap RSS Feed" href="/blog/feed.xml" />
+  <link rel="alternate" type="application/atom+xml" title="crawl.cheap Atom Feed" href="/blog/atom.xml" />
+  <link rel="alternate" type="application/feed+json" title="crawl.cheap JSON Feed" href="/blog/feed.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/theme-tools.css" />
+</head>
+<body style="background:#060610;color:#eef2f7;margin:0;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;">
+  <a class="tt-skip" href="#tt-main">Skip to content</a>
+  <header class="tt-nav" role="banner" style="position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(6,6,16,0.84);border-bottom:1px solid rgba(255,255,255,0.09);">
+  <div class="tt-nav__inner" style="max-width:1200px;margin:0 auto;padding:0 20px;min-height:80px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+    <a class="tt-nav__brand" href="/" aria-label="crawl.cheap home" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+      <img src="/assets/crawl-cheap-nav-logo.png" width="248" height="47" alt="crawl.cheap" style="height:46px;width:auto;max-width:248px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(0,229,255,0.28));" />
+    </a>
+    <nav class="tt-mm" aria-label="Explore &amp; Guides Mega-Menu" data-tt-mm-root data-tt-mm-uid="ttmm-1">
+  <button type="button" class="tt-mm__burger" aria-expanded="false" aria-controls="ttmm-1-bar" data-tt-mm-burger>
+    <span class="tt-mm__burger-box" aria-hidden="true"><span class="tt-mm__burger-line"></span></span>
+    <span class="tt-mm__sr">Menu</span>
+  </button>
+  <ul class="tt-mm__bar" id="ttmm-1-bar" role="menubar">
+    <li class="tt-mm__group" role="none">
+        <button
+          type="button"
+          id="ttmm-1-trigger-0"
+          class="tt-mm__trigger"
+          role="menuitem"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="ttmm-1-panel-0"
+          data-tt-mm-trigger="0"
+          tabindex="0"
+        ><span class="tt-mm__trigger-text">Explore &amp; Guides</span><svg class="tt-mm__chev" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        
+        <div
+          class="tt-mm__panel"
+          id="ttmm-1-panel-0"
+          role="region"
+          aria-labelledby="ttmm-1-trigger-0"
+          data-tt-mm-panel="0"
+        >
+          <div class="tt-mm__panel-grid">
+            <div class="tt-mm__panel-col">
+              <p class="tt-mm__blurb">Firecrawl v1/v2 compatibility, Cloudflare /crawl architecture, and @theme.tools/blog guides.</p>
+              <ul class="tt-mm__list" role="menu" aria-label="Architecture Guide: Edge Scraping for RAG &amp; AI Agents">
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/" tabindex="-1" data-tt-mm-preview-src="/blog/edge-web-scraping-for-ai-agents/featured.svg" data-tt-mm-preview-alt="crawl.cheap @theme.tools/blog magazine" data-tt-mm-preview-href="/blog/" data-tt-mm-preview-title="@theme.tools/blog Magazine &amp; PlateJS Inline Studio">Engineering Blog &amp; Reference Guides</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/edge-web-scraping-for-ai-agents/" tabindex="-1" data-tt-mm-preview-src="/blog/edge-web-scraping-for-ai-agents/featured.svg" data-tt-mm-preview-alt="Firecrawl-Compatible Edge Scraping Architecture" data-tt-mm-preview-href="/blog/edge-web-scraping-for-ai-agents/" data-tt-mm-preview-title="Sub-45ms Edge TTFB · 16 OKLCH States · 2500ms Langfuse Breaker">Edge Web Scraping for AI Agents (PlateJS Guide)</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/#migrate" tabindex="-1" data-tt-mm-preview-src="/assets/crawl-cheap-logo.png" data-tt-mm-preview-alt="Drop-in Firecrawl v1 and v2 SDK replacement" data-tt-mm-preview-href="/#migrate" data-tt-mm-preview-title="Keep @mendable/firecrawl-js — Just Point apiUrl at crawl.cheap">1-Line Firecrawl SDK Migration</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/#pricing" tabindex="-1" data-tt-mm-preview-src="/assets/crawl-cheap-logo.png" data-tt-mm-preview-alt="50% of Firecrawl pricing across every plan" data-tt-mm-preview-href="/#pricing" data-tt-mm-preview-title="Half the Price of Firecrawl ($9.50 Hobby · $49.50 Standard)">50% Cost &amp; Unit Economics Calculator</a></li>
+              </ul>
+            </div>
+            <a class="tt-mm__panel-featured" href="/blog/edge-web-scraping-for-ai-agents/" tabindex="-1">
+              <img class="tt-mm__panel-featured-img" src="/assets/crawl-cheap-logo.png" alt="crawl.cheap Edge Web Scraping for AI Agents" loading="lazy" decoding="async" width="480" height="270" />
+              <span class="tt-mm__panel-featured-title">Architecture Guide: Edge Scraping for RAG &amp; AI Agents</span>
+            </a>
+          </div>
+        </div>
+      </li>
+    <li class="tt-mm__group" role="none">
+        <button
+          type="button"
+          id="ttmm-1-trigger-1"
+          class="tt-mm__trigger"
+          role="menuitem"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="ttmm-1-panel-1"
+          data-tt-mm-trigger="1"
+          tabindex="-1"
+        ><span class="tt-mm__trigger-text">Developer Studio</span><svg class="tt-mm__chev" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        
+        <div
+          class="tt-mm__panel"
+          id="ttmm-1-panel-1"
+          role="region"
+          aria-labelledby="ttmm-1-trigger-1"
+          data-tt-mm-panel="1"
+        >
+          <div class="tt-mm__panel-grid">
+            <div class="tt-mm__panel-col">
+              <p class="tt-mm__blurb">Interactive multi-mode playground, AI Browser Co-Pilot, and OAuth 2.1 command center.</p>
+              <ul class="tt-mm__list" role="menu" aria-label="Launch Flagship Developer Studio (/app/)">
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/app/#playground" tabindex="-1">Multi-Mode API Playground (Scrape · Crawl · Map · Parse)</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/app/#copilot" tabindex="-1">Live Browser &amp; AI Co-Pilot Canvas</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/app/#research" tabindex="-1">Multi-Turn Research Agent &amp; Change Radar</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/app/#auth" tabindex="-1">Better Auth · OAuth 2.1 PKCE · API Keys</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/app/#observability" tabindex="-1">7-Rail Observability &amp; @theme.tools Catalog</a></li>
+              </ul>
+            </div>
+            <a class="tt-mm__panel-featured" href="/app/" tabindex="-1">
+              <img class="tt-mm__panel-featured-img" src="/assets/crawl-cheap-nav-logo.png" alt="crawl.cheap Developer Studio &amp; AI Command Center" loading="lazy" decoding="async" width="480" height="270" />
+              <span class="tt-mm__panel-featured-title">Launch Flagship Developer Studio (/app/)</span>
+            </a>
+          </div>
+        </div>
+      </li>
+  </ul>
+</nav>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <a href="/blog/" class="tt-btn tt-btn--ghost" style="border-color:#00e5ff;color:#00e5ff;">Blog</a>
+      <a href="/app/" class="tt-btn tt-btn--primary" data-ripple="true" data-spotlight="true">Developer Studio →</a>
+      <a href="/app/#auth" class="tt-avatar-circle" title="Better Auth &amp; OAuth 2.1 Account" aria-label="Developer Account &amp; API Keys">CC</a>
+    </div>
+  </div>
+</header>
+  <main id="tt-main" style="max-width:1160px;margin:0 auto;padding:44px 20px 80px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-bottom:32px;">
+      <div>
+        <span class="tt-badge">@THEME.TOOLS/BLOG · PLATEJS INLINE CMS</span>
+        <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(2rem,4.5vw,3.1rem);margin:12px 0 8px;">crawl.cheap Engineering &amp; Architecture</h1>
+        <p style="color:#9aa3b5;max-width:64ch;margin:0;">Deep-dive engineering guides on Firecrawl v1/v2 API parity, Cloudflare Workers Browser Rendering <code>/crawl</code>, lossless PlateJS block authoring, and 7-rail edge observability.</p>
+      </div>
+      <div class="tt-cms-bar"><a class="tt-cms-btn" href="/blog/edge-web-scraping-for-ai-agents/#plate-inline-editor" data-tt-cms="add" data-testid="new-article-button" data-ripple="true" data-spotlight="true" data-magnetic="true"><span class="tt-cms-btn__icon" aria-hidden="true">+</span>+ Add Blog Post</a></div>
+    </div>
+
+    <section class="tt-widget tt-stat-cards" data-ripple="true" data-spotlight="true" data-magnetic="true" aria-label="@theme.tools/blog &amp; @theme.tools/telemetry Production Guarantees">
+  <h3 class="tt-widget__heading tt-stat-cards__heading">@theme.tools/blog &amp; @theme.tools/telemetry Production Guarantees</h3>
+  <ul class="tt-stat-cards__grid">
+    <li class="tt-stat-cards__card" data-ripple="true" data-spotlight="true" data-magnetic="true">
+      <p class="tt-stat-cards__value">32</p>
+      <p class="tt-stat-cards__label">Registered @theme.tools/blog components (widgets, media, multimedia, custom elements)</p>
+    </li>
+    <li class="tt-stat-cards__card" data-ripple="true" data-spotlight="true" data-magnetic="true">
+      <p class="tt-stat-cards__value">2,500ms</p>
+      <p class="tt-stat-cards__label">Mandatory Langfuse fail-open timeout with 3-strike circuit breaker &amp; local spool</p>
+    </li>
+    <li class="tt-stat-cards__card" data-ripple="true" data-spotlight="true" data-magnetic="true">
+      <p class="tt-stat-cards__value">7 Rails</p>
+      <p class="tt-stat-cards__label">Cloudflare · Sentry · PostHog · GA4 · GTM · Langfuse · Promptfoo correlated via traceparent</p>
+    </li>
+  </ul>
+</section>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-top:32px;">
+      
+        <article class="tt-card tt-card--interactive" style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+          <a href="/blog/edge-web-scraping-for-ai-agents/" style="display:block;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);aspect-ratio:1200/630;background:#0a0e17;">
+            <img src="/blog/edge-web-scraping-for-ai-agents/featured.svg" alt="Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents — canonical @theme.tools/blog reference architecture for crawl.cheap." width="1200" height="630" style="width:100%;height:100%;object-fit:cover;display:block;" />
+          </a>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <span class="tt-badge">2026-11-19</span>
+            <span class="tt-badge">architecture-and-engineering</span>
+            <span class="tt-badge">14 min read</span>
+          </div>
+          <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.35rem;margin:0;">
+            <a href="/blog/edge-web-scraping-for-ai-agents/" style="color:#eef2f7;text-decoration:none;">Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents</a>
+          </h2>
+          <p style="color:#9aa3b5;margin:0;font-size:0.95rem;">OpenAPI contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic HTML-to-Markdown distillation.</p>
+          <div style="margin-top:auto;padding-top:12px;display:flex;gap:12px;align-items:center;">
+            <a href="/blog/edge-web-scraping-for-ai-agents/" class="tt-btn tt-btn--primary">Read &amp; Edit Inline →</a>
+            <a href="/blog/api/edge-web-scraping-for-ai-agents.json" class="tt-btn tt-btn--ghost">PlateJS AST</a>
+          </div>
+        </article>
+    </div>
+  </main>
+  <footer class="tt-footer">
+  <div class="tt-footer__row">
+    <div class="tt-footer__note">crawl.cheap — Firecrawl-compatible web data engine on Cloudflare Workers · Powered by @theme.tools</div>
+    <nav class="tt-footer__links"><a href="/">Home</a><a href="/blog/">Blog</a><a href="/app/">Studio</a><a href="/blog/feed.xml">RSS</a><a href="/blog/atom.xml">Atom</a><a href="/blog/feed.json">JSON Feed</a><a href="https://github.com/heymegabyte/crawl.cheap">GitHub</a></nav>
+  </div>
+</footer>
+  <script src="/theme-tools-runtime.js" defer></script>
+</body>
+</html>

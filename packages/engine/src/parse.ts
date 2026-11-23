@@ -1,6 +1,7 @@
 import { extractText, getDocumentProxy } from 'unpdf';
 import { parseHtml, selectContent } from './extract-content';
 import { htmlToMarkdown } from './html-to-markdown';
+import { getLangfuseSafeClient } from './telemetry';
 import type { EngineEnv } from './types';
 
 /**
@@ -241,12 +242,28 @@ export async function parseDocument(
 
     if (env?.AI?.toMarkdown) {
       try {
+        const t0 = Date.now();
         const converted = await env.AI.toMarkdown([
           {
             name: baseUrl || `document.${fmt}`,
             blob: new Blob([bytes], { type: ct || 'application/octet-stream' }),
           },
         ]);
+        const lf = getLangfuseSafeClient({
+          publicKey: env.LANGFUSE_PUBLIC_KEY,
+          secretKey: env.LANGFUSE_SECRET_KEY,
+          baseUrl: env.LANGFUSE_HOST ?? env.LANGFUSE_BASEURL,
+          serviceName: 'crawl-cheap-engine',
+          environment: env.SENTRY_ENVIRONMENT ?? 'production',
+        });
+        void lf.traceSafe({
+          name: 'workers_ai.to_markdown',
+          model: 'cloudflare.toMarkdown',
+          input: { format: fmt, byteLength: bytes.byteLength, baseUrl },
+          output: { chars: converted?.[0]?.data?.length ?? 0 },
+          durationMs: Math.max(1, Date.now() - t0),
+          totalTokens: converted?.[0]?.tokens ?? 0,
+        });
         if (converted?.[0]?.data) {
           return {
             markdown: converted[0].data.trim(),

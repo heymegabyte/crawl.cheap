@@ -440,10 +440,42 @@
       <img class="brand-logo" src="/assets/crawl-cheap-nav-logo.png" width="266" height="50" alt="crawl.cheap" />
       <span class="wm sr-only">crawl<span class="a">.cheap</span></span>
     </a>
+    <nav class="tt-mm" aria-label="Explore &amp; Guides Mega-Menu" data-tt-mm-root data-tt-mm-uid="ttmm-studio">
+      <button type="button" class="tt-mm__burger" aria-expanded="false" aria-controls="ttmm-studio-bar" data-tt-mm-burger>
+        <span class="tt-mm__burger-box" aria-hidden="true"><span class="tt-mm__burger-line"></span></span>
+        <span class="tt-mm__sr">Menu</span>
+      </button>
+      <ul class="tt-mm__bar" id="ttmm-studio-bar" role="menubar">
+        <li class="tt-mm__group" role="none">
+          <button type="button" id="ttmm-studio-trigger-0" class="tt-mm__trigger" role="menuitem" aria-haspopup="true" aria-expanded="false" aria-controls="ttmm-studio-panel-0" data-tt-mm-trigger="0" tabindex="0">
+            <span class="tt-mm__trigger-text">Explore &amp; Guides</span>
+            <svg class="tt-mm__chev" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="tt-mm__panel" id="ttmm-studio-panel-0" role="region" aria-labelledby="ttmm-studio-trigger-0" data-tt-mm-panel="0">
+            <div class="tt-mm__panel-grid">
+              <div class="tt-mm__panel-col">
+                <p class="tt-mm__blurb">Sourced from @theme.tools/blog, @theme.tools/ui, @theme.tools/catalog, and @theme.tools/telemetry.</p>
+                <ul class="tt-mm__list" role="menu" aria-label="Explore &amp; Guides">
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog" tabindex="-1" data-tt-mm-preview-src="/blog/edge-web-scraping-for-ai-agents/featured.svg" data-tt-mm-preview-alt="crawl.cheap Engineering Blog" data-tt-mm-preview-href="/blog" data-tt-mm-preview-title="@theme.tools/blog Magazine &amp; PlateJS Inline Studio">Engineering Blog &amp; Architecture Guides</a></li>
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/edge-web-scraping-for-ai-agents" tabindex="-1" data-tt-mm-preview-src="/blog/edge-web-scraping-for-ai-agents/featured.svg" data-tt-mm-preview-alt="Edge Web Scraping for AI Agents" data-tt-mm-preview-href="/blog/edge-web-scraping-for-ai-agents" data-tt-mm-preview-title="Firecrawl-Compatible Edge Scraping (PlateJS Inline Edit)">Edge Web Scraping for AI Agents (PlateJS)</a></li>
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="#observability" tabindex="-1" data-tt-mm-preview-src="/assets/crawl-cheap-logo.png" data-tt-mm-preview-alt="7-Rail Observability" data-tt-mm-preview-href="#observability" data-tt-mm-preview-title="Sentry · PostHog · GA4 · GTM · Langfuse 2500ms">7-Rail Telemetry &amp; @theme.tools Catalog</a></li>
+                </ul>
+              </div>
+              <a class="tt-mm__panel-featured" href="/blog/edge-web-scraping-for-ai-agents" tabindex="-1">
+                <img class="tt-mm__panel-featured-img" src="/blog/edge-web-scraping-for-ai-agents/featured.svg" alt="Edge Web Scraping for AI Agents" loading="lazy" decoding="async" width="480" height="270" />
+                <span class="tt-mm__panel-featured-title">@theme.tools/blog + PlateJS Reference Architecture</span>
+              </a>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </nav>
     <span class="pill">studio v2</span>
     <span class="pill emerald" id="liveEdgePill">● edge online</span>
     <span class="sp"></span>
-    <a class="home" href="/">← home</a>
+    <a class="home" href="/blog" style="margin-right:10px">blog</a>
+    <a class="home" href="/" style="margin-right:10px">← home</a>
+    <a class="tt-avatar-circle" href="#keyCard" title="Better Auth &amp; OAuth 2.1 Account" aria-label="Developer Account &amp; API Keys">CC</a>
   </div>
 </nav>
 
@@ -468,6 +500,7 @@
     <button class="studio-tab" data-ws="copilot" role="tab" aria-selected="false">🖥️ Browser &amp; AI Co-Pilot</button>
     <button class="studio-tab" data-ws="research" role="tab" aria-selected="false">🧠 AI Research &amp; Radar</button>
     <button class="studio-tab" data-ws="auth" role="tab" aria-selected="false">🔐 Auth · OAuth 2.1 &amp; Cost</button>
+    <button class="studio-tab" data-ws="observability" role="tab" aria-selected="false">🔭 7-Rail Telemetry &amp; @theme.tools</button>
   </div>
 
   <!-- 1. BETTER AUTH & OAUTH 2.1 + API KEY COMMAND CENTER -->
@@ -647,6 +680,19 @@
       <div class="hint">Live D1 credit ledger and Workers AI token consumption for your authenticated principal.</div>
       <div id="usageWrap"><span style="color:var(--faint);font-size:13px">Add or create a key above to view your live D1 credit &amp; token ledger.</span></div>
     </div>
+  </div>
+
+  <!-- 6. 7-RAIL OBSERVABILITY & @THEME.TOOLS CATALOG INSPECTOR -->
+  <div class="card tt-card ws-section" data-section="observability" id="observability">
+    <h2>🔭 7-Rail Observability &amp; <code>@theme.tools</code> Catalog Inspector <span class="pill emerald">traceparent · 2500ms Fail-Open</span></h2>
+    <div class="hint">Inspect live configuration, circuit-breaker health, and W3C <code>traceparent</code> correlation across Cloudflare, Sentry, PostHog, GA4, GTM, Langfuse (2,500ms timeout + 3-strike breaker), Promptfoo, and the 18 bound <code>@theme.tools/*</code> packages.</div>
+    <div class="row" style="margin-bottom:12px">
+      <button class="btn btn-p tt-btn tt-btn--primary" id="btnTelemetryStatus">Probe 7-Rail Telemetry Status →</button>
+      <button class="btn btn-g tt-btn tt-btn--ghost" id="btnEmitTestSpan">Emit Test Langfuse + PostHog + GA4 Span</button>
+      <button class="btn btn-g tt-btn tt-btn--ghost" id="btnInspectCatalog">Inspect @theme.tools/catalog Manifest</button>
+      <a class="btn btn-g tt-btn tt-btn--ghost" href="/blog/edge-web-scraping-for-ai-agents/">Open @theme.tools/blog + PlateJS Guide →</a>
+    </div>
+    <pre class="out" id="telemetryOut"><span class="muted">Click "Probe 7-Rail Telemetry Status" to inspect live readiness across Cloudflare, Sentry, PostHog, GA4, GTM, Langfuse Safe (2500ms), and Promptfoo…</span></pre>
   </div>
 </div>
 
@@ -1203,6 +1249,44 @@ $('tpSaveBtn').onclick = async () => {
 renderKey();
 renderCrawlGraph('https://example.com', ['https://example.com', 'https://example.com/docs', 'https://example.com/pricing', 'https://example.com/api']);
 if (key) refreshAccount();
+
+// 7-Rail Telemetry & @theme.tools/catalog Inspector wiring
+$('btnTelemetryStatus').onclick = async () => {
+  $('telemetryOut').textContent = 'Probing /v2/telemetry/status…';
+  const res = await api('/v2/telemetry/status');
+  $('telemetryOut').textContent = JSON.stringify(res.json, null, 2);
+  toast('7-Rail Telemetry status loaded');
+};
+$('btnEmitTestSpan').onclick = async () => {
+  $('telemetryOut').textContent = 'Dispatching unified event across Cloudflare, PostHog, Sentry, GA4, GTM, Langfuse (2500ms)…';
+  const res = await api('/v2/telemetry/events', {
+    method: 'POST',
+    body: JSON.stringify({
+      eventName: 'studio_observability_probe',
+      sessionId: (window.__TT_TRACE__ && window.__TT_TRACE__.sessionId) || 'studio_sess',
+      distinctId: (window.__TT_TRACE__ && window.__TT_TRACE__.distinctId) || 'studio_user',
+      canonicalPath: '/app/',
+      properties: { source: 'developer_studio', theme: 'midnight-cyan' },
+      genAiSpan: {
+        name: 'studio.synthetic_probe',
+        model: '@cf/meta/llama-3.1-8b-instruct',
+        durationMs: 19,
+        promptTokens: 64,
+        completionTokens: 32,
+        totalTokens: 96,
+      },
+    }),
+  });
+  $('telemetryOut').textContent = JSON.stringify(res.json, null, 2);
+  toast('Unified 7-Rail telemetry event dispatched');
+};
+$('btnInspectCatalog').onclick = async () => {
+  $('telemetryOut').textContent = 'Fetching /v2/catalog (@theme.tools/catalog manifest)…';
+  const res = await api('/v2/catalog');
+  $('telemetryOut').textContent = JSON.stringify(res.json, null, 2);
+  toast('@theme.tools/catalog manifest loaded');
+};
 </script>
+<script src="/theme-tools-runtime.js" defer></script>
 </body>
 </html>

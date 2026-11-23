@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/cloudflare';
 import { Hono, type Context, type Next } from 'hono';
 import { cors } from 'hono/cors';
 import { FIRECRAWL_COMPAT, CORE_CREDIT_COSTS } from '@crawlcheap/contracts';
+import { resolveCorrelationContext } from '@crawlcheap/engine';
 import type { Env } from './env';
 import { principal, type Vars } from './lib/auth';
 import authRoute from './routes/auth';
@@ -20,6 +21,7 @@ import agentRoute from './routes/agent';
 import accountRoute from './routes/account';
 import pricingRoute from './routes/pricing';
 import stubsRoute from './routes/stubs';
+import telemetryRoute, { createTelemetryRouter } from './routes/telemetry';
 import v1Route from './routes/v1';
 import { recordUsage, creditsUsedThisPeriod, effectiveCap } from './lib/ledger';
 import { runDueMonitors } from './lib/monitor';
@@ -83,12 +85,23 @@ app.use(
   '*',
   cors({
     origin: '*',
-    allowHeaders: ['authorization', 'content-type', 'x-idempotency-key'],
+    allowHeaders: ['authorization', 'content-type', 'x-idempotency-key', 'traceparent'],
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    exposeHeaders: ['x-crawlcheap-strategy', 'x-crawlcheap-search-provider'],
+    exposeHeaders: [
+      'x-crawlcheap-strategy',
+      'x-crawlcheap-search-provider',
+      'traceparent',
+      'x-trace-id',
+    ],
     maxAge: 86400,
   }),
 );
+app.use('*', async (c, next) => {
+  const corr = resolveCorrelationContext(c.req.header('traceparent'));
+  c.header('traceparent', corr.traceparent);
+  c.header('x-trace-id', corr.traceId);
+  await next();
+});
 app.use('*', principal);
 
 // Credit enforcement + ledger recording for authenticated (D1-key / OAuth / Better Auth) principals.
@@ -121,6 +134,30 @@ const creditMiddleware = async (c: Context<{ Bindings: Env; Variables: Vars }>, 
     try {
       c.executionCtx.waitUntil(
         recordUsage(c.env.DB, { keyId: p.keyId, operation: op.name, credits: op.credits }),
+      );
+    } catch {
+      /* executionCtx may be absent in unit tests */
+    }
+  }
+
+  // Asynchronous 7-Rail product analytics dispatch (PostHog + GA4) via waitUntil (fail-open 2500ms)
+  if (op && (c.env.POSTHOG_API_KEY || (c.env.GA_MEASUREMENT_ID && c.env.GA_API_SECRET))) {
+    try {
+      const router = createTelemetryRouter(c.env);
+      c.executionCtx.waitUntil(
+        router.dispatchUnifiedEvent({
+          eventName: `api_${op.name}`,
+          sessionId: p.teamId ?? p.keyId ?? 'anon_session',
+          distinctId: p.keyId ?? 'anon_api_caller',
+          canonicalPath: new URL(c.req.url).pathname,
+          consent: { analytics: true, marketing: false, errorReporting: true },
+          properties: {
+            operation: op.name,
+            credits: op.credits,
+            status: c.res.status,
+            authed: p.authed,
+          },
+        }),
       );
     } catch {
       /* executionCtx may be absent in unit tests */
@@ -251,8 +288,11 @@ v2.route('/', agentRoute);
 v2.route('/', accountRoute);
 v2.route('/', pricingRoute);
 v2.route('/', stubsRoute);
+v2.route('/', telemetryRoute);
 app.route('/v2', v2);
 app.route('/v1', v1Route);
+app.route('/v1', telemetryRoute);
+app.route('/api', telemetryRoute);
 
 app.notFound((c) =>
   c.json(

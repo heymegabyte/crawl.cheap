@@ -110,11 +110,11 @@ const GALLERY_HEIGHT = 630;
 // YouTube `hqdefault.jpg` is 480×360 (4:3).
 const POSTER_WIDTH = 480;
 const POSTER_HEIGHT = 360;
-/** Stable-ish unique id for the radio-group `name` so multiple browsers on a page don't collide. */
+/** Deterministic per-render id for radio groups; unique within a document and stable across builds. */
 let vbCounter = 0;
 function nextUid() {
     vbCounter += 1;
-    return `${Date.now().toString(36)}-${vbCounter.toString(36)}`;
+    return vbCounter.toString(36);
 }
 // ---------------------------------------------------------------------------
 // Per-type render functions (each validates, escapes, and rejects empties)

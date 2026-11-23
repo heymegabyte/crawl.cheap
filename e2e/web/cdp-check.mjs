@@ -258,6 +258,19 @@ async function main() {
   const graphNodes = await ev15("document.querySelectorAll('#crawlGraphSvg circle').length");
   ok('WebSocket Crawl Graph SVG topology rendered', graphNodes >= 2, `nodes=${graphNodes}`);
 
+  // Verify @theme.tools/blog Mega-Menu, Avatar Circle, & 7-Rail Telemetry Runtime on /app/
+  const hasMegaMenu = await ev15("Boolean(document.querySelector('[data-tt-mm-root]'))");
+  ok('@theme.tools/blog Universal Mega-Menu rendered in navbar', hasMegaMenu);
+  const hasAvatarCircle = await ev15("Boolean(document.querySelector('.tt-avatar-circle'))");
+  ok('@theme.tools/ui Avatar Circle rendered in navbar', hasAvatarCircle);
+  const telemetryRailsReady = await ev15(
+    'Boolean(window.__TT_TRACE__ && window.posthog && window.gtag && Array.isArray(window.dataLayer) && window.Sentry && window.LangfuseSafe && window.LangfuseSafe.timeoutMs === 2500)',
+  );
+  ok(
+    '@theme.tools/telemetry 7-Rail Browser Runtime active (traceparent + Sentry + PostHog + GA4 + GTM + Langfuse 2500ms)',
+    telemetryRailsReady,
+  );
+
   // Test all 6 required responsive breakpoints (320px, 375px, 768px, 1024px, 1280px, 1440px)
   for (const width of [320, 375, 768, 1024, 1280, 1440]) {
     await S('Emulation.setDeviceMetricsOverride', {
@@ -277,6 +290,7 @@ async function main() {
     );
   }
 
+  // Filter out any non-blocking cross-origin telemetry beacon noise during local tests, require 0 CSP/page errors
   const studioErrors = consoleErrors.slice(studioErrStart);
   ok(
     '0 console errors / CSP violations on /app/ across all 6 breakpoints',
@@ -291,6 +305,48 @@ async function main() {
     writeFileSync('e2e/web/screenshots/studio.png', Buffer.from(data, 'base64'));
     console.log('  📸 e2e/web/screenshots/studio.png');
   } catch {}
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // @theme.tools/blog + PlateJS Inline Editor Audit (/blog/edge-web-scraping-for-ai-agents)
+  // ───────────────────────────────────────────────────────────────────────────
+  console.log(
+    `\n@theme.tools/blog + PlateJS Inline Editor Audit → ${URL_}/blog/edge-web-scraping-for-ai-agents\n`,
+  );
+  const blogErrStart = consoleErrors.length;
+  const loadedBlog = waitFor(
+    (m) => m.method === 'Page.loadEventFired' && m.sessionId === sessionId,
+    20000,
+  );
+  await S('Page.navigate', { url: `${URL_}/blog/edge-web-scraping-for-ai-agents` });
+  await loadedBlog;
+  await sleep(1500);
+
+  const blogWidgetCount = await ev15(
+    "document.querySelectorAll('.tt-widget, [data-tt-widget]').length",
+  );
+  ok(
+    '@theme.tools/blog article rendered all 10+ structured catalog widgets',
+    blogWidgetCount >= 10,
+    `widgets=${blogWidgetCount}`,
+  );
+  const rawTokensLeft = await ev15(
+    "Array.from(document.querySelectorAll('p')).some(p => /^\\{\\{(widget|figure):[A-Za-z0-9_-]+\\}\\}$/.test((p.textContent || '').trim()))",
+  );
+  ok('Zero unreplaced standalone {{widget:*}} or {{figure:*}} token paragraphs', !rawTokensLeft);
+
+  await ev15('document.querySelector(\'[data-testid="edit-article-in-plate"]\')?.click()');
+  await sleep(600);
+  const isInlineEditable = await ev15(
+    'Boolean(document.querySelector(\'[data-testid="edit-article-in-plate"][aria-pressed="true"]\') || document.querySelector(\'[contenteditable="true"]\'))',
+  );
+  ok('Clicking ✎ Edit Inline activates in-place PlateJS block editing', isInlineEditable);
+
+  const blogErrors = consoleErrors.slice(blogErrStart);
+  ok(
+    '0 console errors / CSP violations on /blog/edge-web-scraping-for-ai-agents',
+    blogErrors.length === 0,
+    '\n   - ' + blogErrors.join('\n   - '),
+  );
 
   console.log(`\n${pass} passed, ${fail} failed\n`);
   cleanup();

@@ -949,6 +949,54 @@ describe('Official Firecrawl E2E Suite — idmux + v1 + v2 + OpenAPI 100% Contra
       });
       expect(fbSearch.status).toBe(200);
       expect(fbSearch.body.feedback.length).toBeGreaterThan(0);
+
+      // 7. 7-Rail Observability (/v2/telemetry/status, /v2/telemetry/events) & @theme.tools/catalog (/v2/catalog)
+      const telStatus = await apiCall('/v2/telemetry/status', { method: 'GET', apiKey });
+      expect(telStatus.status).toBe(200);
+      expect(telStatus.body.success).toBe(true);
+      expect(telStatus.body.readiness.langfuseMandatoryTimeoutMs).toBe(2500);
+      expect(telStatus.body.readiness.sinks.cloudflare).toBe('configured');
+      expect(telStatus.body.catalog.boundPackagesCount).toBeGreaterThanOrEqual(18);
+
+      const telEvent = await apiCall('/v2/telemetry/events', {
+        body: {
+          eventName: 'e2e_observability_check',
+          sessionId: 'e2e_sess',
+          distinctId: 'e2e_user',
+          canonicalPath: '/app/',
+          properties: { feature: 'seven-rail-telemetry' },
+          genAiSpan: {
+            name: 'e2e.langfuse_safe_span',
+            model: '@cf/meta/llama-3.1-8b-instruct',
+            durationMs: 28,
+            promptTokens: 40,
+            completionTokens: 20,
+            totalTokens: 60,
+          },
+        },
+        apiKey,
+      });
+      expect(telEvent.status).toBe(200);
+      expect(telEvent.body.success).toBe(true);
+      expect(telEvent.body.report.correlation.traceparent).toMatch(
+        /^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/,
+      );
+      expect(telEvent.body.report.sinks.cloudflare.status).toBe('recorded-local');
+      expect(telEvent.body.report.sinks.gtm.status).toBe('queued-datalayer');
+
+      const catRes = await apiCall('/v2/catalog', { method: 'GET', apiKey });
+      expect(catRes.status).toBe(200);
+      expect(catRes.body.success).toBe(true);
+      expect(catRes.body.catalog.boundPackages).toEqual(
+        expect.arrayContaining([
+          '@theme.tools/themes',
+          '@theme.tools/ui',
+          '@theme.tools/blog',
+          '@theme.tools/catalog',
+          '@theme.tools/telemetry',
+          '@theme.tools/crawl-research',
+        ]),
+      );
     });
   });
 });

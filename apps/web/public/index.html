@@ -217,14 +217,45 @@
     <img class="brand-logo" src="/assets/crawl-cheap-nav-logo.png" width="308" height="58" alt="crawl.cheap" />
     <span class="wm sr-only">crawl<span class="accent">.cheap</span></span>
   </a>
+  <nav class="tt-mm" aria-label="Explore &amp; Guides Mega-Menu" data-tt-mm-root data-tt-mm-uid="ttmm-nav">
+    <button type="button" class="tt-mm__burger" aria-expanded="false" aria-controls="ttmm-nav-bar" data-tt-mm-burger>
+      <span class="tt-mm__burger-box" aria-hidden="true"><span class="tt-mm__burger-line"></span></span>
+      <span class="tt-mm__sr">Menu</span>
+    </button>
+    <ul class="tt-mm__bar" id="ttmm-nav-bar" role="menubar">
+      <li class="tt-mm__group" role="none">
+        <button type="button" id="ttmm-nav-trigger-0" class="tt-mm__trigger" role="menuitem" aria-haspopup="true" aria-expanded="false" aria-controls="ttmm-nav-panel-0" data-tt-mm-trigger="0" tabindex="0">
+          <span class="tt-mm__trigger-text">Explore &amp; Guides</span>
+          <svg class="tt-mm__chev" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="tt-mm__panel" id="ttmm-nav-panel-0" role="region" aria-labelledby="ttmm-nav-trigger-0" data-tt-mm-panel="0">
+          <div class="tt-mm__panel-grid">
+            <div class="tt-mm__panel-col">
+              <p class="tt-mm__blurb">Firecrawl v1/v2 parity, Cloudflare Browser Rendering /crawl, and @theme.tools/blog architecture guides.</p>
+              <ul class="tt-mm__list" role="menu" aria-label="Explore &amp; Guides">
+                <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog" tabindex="-1" data-tt-mm-preview-src="/blog/edge-web-scraping-for-ai-agents/featured.svg" data-tt-mm-preview-alt="crawl.cheap Engineering Blog" data-tt-mm-preview-href="/blog" data-tt-mm-preview-title="@theme.tools/blog Magazine &amp; PlateJS Inline Studio">Engineering Blog &amp; Reference Guides</a></li>
+                <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/edge-web-scraping-for-ai-agents" tabindex="-1" data-tt-mm-preview-src="/blog/edge-web-scraping-for-ai-agents/featured.svg" data-tt-mm-preview-alt="Edge Web Scraping for AI Agents" data-tt-mm-preview-href="/blog/edge-web-scraping-for-ai-agents" data-tt-mm-preview-title="Sub-45ms Edge TTFB · 16 OKLCH States · 2500ms Langfuse Breaker">Edge Web Scraping for AI Agents (PlateJS Guide)</a></li>
+                <li role="none"><a class="tt-mm__item" role="menuitem" href="#migrate" tabindex="-1" data-tt-mm-preview-src="/assets/crawl-cheap-logo.png" data-tt-mm-preview-alt="1-Line Firecrawl SDK Migration" data-tt-mm-preview-href="#migrate" data-tt-mm-preview-title="Keep @mendable/firecrawl-js — Point apiUrl at crawl.cheap">1-Line Firecrawl SDK Migration</a></li>
+                <li role="none"><a class="tt-mm__item" role="menuitem" href="#observability" tabindex="-1" data-tt-mm-preview-src="/assets/crawl-cheap-logo.png" data-tt-mm-preview-alt="7-Rail Observability &amp; @theme.tools Catalog" data-tt-mm-preview-href="#observability" data-tt-mm-preview-title="Sentry · PostHog · GA4 · GTM · Langfuse 2500ms · @theme.tools">7-Rail Observability &amp; @theme.tools Catalog</a></li>
+              </ul>
+            </div>
+            <a class="tt-mm__panel-featured" href="/blog/edge-web-scraping-for-ai-agents" tabindex="-1">
+              <img class="tt-mm__panel-featured-img" src="/blog/edge-web-scraping-for-ai-agents/featured.svg" alt="crawl.cheap Edge Web Scraping for AI Agents" loading="lazy" decoding="async" width="480" height="270" />
+              <span class="tt-mm__panel-featured-title">Architecture Guide: Edge Scraping for RAG &amp; AI Agents</span>
+            </a>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </nav>
   <div class="links">
     <a class="hide-sm" href="#features">Features</a>
     <a class="hide-sm" href="#demo">Demo</a>
     <a href="#pricing">Pricing</a>
-    <a href="#estimate">Estimate</a>
+    <a class="hide-sm" href="/blog">Blog</a>
     <a class="hide-sm" href="#compat">Compatibility</a>
-    <a class="hide-sm" href="https://github.com/heymegabyte/crawl.cheap">GitHub</a>
-    <a class="btn btn-primary tt-btn tt-btn--primary" href="#start">Get a key</a>
+    <a class="btn btn-primary tt-btn tt-btn--primary tt-nav__cta" href="/app/">Studio →</a>
+    <a class="tt-avatar-circle" href="/app/#auth" title="Better Auth &amp; OAuth 2.1 Account" aria-label="Developer Account &amp; API Keys">CC</a>
   </div>
 </div></nav>
 
@@ -388,7 +419,20 @@
     <tr><td><code>POST /v2/ai-search/*</code> · <code>/v2/support/*</code> (RAG)</td><td><span class="ok">● live</span></td><td>Vectorize + Workers AI semantic search &amp; docs assistant</td></tr>
     <tr><td><code>GET /v2/pricing</code> · <code>POST /v2/quote</code></td><td><span class="ok">● live</span></td><td>price book + preflight estimate + D1 credit &amp; token ledgers</td></tr>
     <tr><td>Remote MCP (<code>/v2/mcp</code>, <code>/v2/mcp-search</code>, <code>/v2/mcp-keyless</code>)</td><td><span class="ok">● live</span></td><td>Streamable-HTTP JSON-RPC · all 30 pinned firecrawl_* tools</td></tr>
+    <tr><td>7-Rail Observability &amp; Catalog (<code>/v2/telemetry/status</code>, <code>/v2/catalog</code>)</td><td><span class="ok">● live</span></td><td>@theme.tools/telemetry · Sentry · PostHog · GA4 · GTM · Langfuse Safe (2500ms) · Promptfoo</td></tr>
   </table>
+</div></section>
+
+<section id="observability"><div class="wrap reveal">
+  <span class="eyebrow">@theme.tools Ecosystem &amp; 7-Rail Telemetry</span>
+  <h2 class="sec">Built on @theme.tools. Observed across 7 rails.</h2>
+  <p class="lead">Every UI primitive, OKLCH token, mega-menu, and PlateJS-editable blog widget is sourced from the canonical <code>@theme.tools/*</code> catalog — paired with W3C <code>traceparent</code> correlation across Cloudflare, Sentry, PostHog, GA4, GTM, Langfuse (2,500ms fail-open circuit breaker), and Promptfoo.</p>
+  <div class="bento">
+    <div class="tile card tt-card tt-card--interactive" data-spotlight="true"><h3><span class="ic">🎨</span> @theme.tools/ui &amp; themes</h3><p>W3C DTCG 2025.10 <code>midnight-cyan</code> OKLCH tokens (#060610 bg, #00E5FF accent), 16 visual states, 0.333s transitions, and 30 tactile micro-interactions.</p></div>
+    <div class="tile card tt-card tt-card--interactive" data-spotlight="true"><h3><span class="ic">📰</span> @theme.tools/blog + PlateJS</h3><p>33 registered editorial components (<a href="/blog/edge-web-scraping-for-ai-agents/" style="color:var(--cyan)">read &amp; edit inline on /blog →</a>) with lossless <code>toPlateValue</code> / <code>fromPlateValue</code> AST serialization.</p></div>
+    <div class="tile card tt-card tt-card--interactive" data-spotlight="true"><h3><span class="ic">🔭</span> Langfuse Safe (2,500ms)</h3><p>Every Workers AI extraction, RAG query, and Co-Pilot action traces to Langfuse v4 OTLP with <code>AbortSignal.timeout(2500)</code>, 3-strike circuit breaker, and fail-open spooling.</p></div>
+    <div class="tile card tt-card tt-card--interactive" data-spotlight="true"><h3><span class="ic">📡</span> Sentry · PostHog · GA4 · GTM</h3><p>Server &amp; edge exception envelopes, product analytics, feature-flag exposure, single-pageview deduplicated GA4, and GTM Consent Mode v2.</p></div>
+  </div>
 </div></section>
 
 <section id="start"><div class="wrap reveal">
@@ -523,5 +567,6 @@
   }
   if(eOp){ syncFields(); eOp.addEventListener('change',syncFields); document.getElementById('eBtn').addEventListener('click',estimate); }
 </script>
+<script src="/theme-tools-runtime.js" defer></script>
 </body>
 </html>

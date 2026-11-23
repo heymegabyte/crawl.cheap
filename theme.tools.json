@@ -1,32 +1,136 @@
 {
-  "schemaVersion": 1,
-  "project": "crawl.cheap",
-  "consumerMode": "thin-shell",
-  "canonicalUpstream": "https://github.com/heymegabyte/theme.tools",
-  "themeTokens": {
+  "schemaVersion": "1.0.0",
+  "siteId": "crawl.cheap",
+  "domain": "crawl.cheap",
+  "theme": {
+    "id": "midnight-cyan",
+    "tokenStandard": "W3C DTCG 2025.10 OKLCH",
     "background": "#060610",
-    "accent": "#00E5FF",
-    "colorSpace": "oklch",
-    "transitionDuration": "0.333s",
-    "interactionStates": 16
+    "backgroundOklch": "oklch(11% 0.02 275)",
+    "primary": "#00E5FF",
+    "primaryOklch": "oklch(84% 0.17 198)",
+    "secondary": "#FF8A3D",
+    "secondaryOklch": "oklch(72% 0.19 42)",
+    "transition": "0.333s cubic-bezier(0.22, 1, 0.36, 1)",
+    "interactionStates": 16,
+    "tactileMicroInteractions": 30
   },
-  "boundPackages": [
-    "@theme.tools/themes",
-    "@theme.tools/ui",
-    "@theme.tools/blog",
-    "@theme.tools/telemetry",
-    "@theme.tools/seo-geo",
-    "@theme.tools/i18n-a11y",
-    "@theme.tools/testing",
-    "@theme.tools/crawl-research",
-    "@theme.tools/links",
-    "@theme.tools/catalog"
-  ],
-  "blogSystem": {
-    "package": "@theme.tools/blog",
-    "editor": "platejs/react",
-    "postIndex": "content/posts/index.json",
-    "routes": ["/blog", "/blog/:slug", "/blog/:slug/edit", "/blog/api/:slug"]
+  "observability": {
+    "package": "@theme.tools/telemetry",
+    "correlationHeader": "traceparent",
+    "langfuseTimeoutMs": 2500,
+    "langfuseCircuitBreakerStrikes": 3,
+    "langfuseCooldownMs": 60000,
+    "rails": ["cloudflare", "sentry", "posthog", "ga4", "gtm", "langfuse", "promptfoo"]
   },
-  "contributedSharedModules": []
+  "bindings": [
+    {
+      "package": "@theme.tools/themes",
+      "version": "workspace:*",
+      "tier": 1,
+      "surface": "oklch-tokens-42-themes-16-states"
+    },
+    {
+      "package": "@theme.tools/ui",
+      "version": "workspace:*",
+      "tier": 1,
+      "surface": "primitives-tactile-30-custom-elements"
+    },
+    {
+      "package": "@theme.tools/blog",
+      "version": "workspace:*",
+      "tier": 1,
+      "surface": "site-widgets-media-multimedia-mega-menu-cms-platejs-editor"
+    },
+    {
+      "package": "@theme.tools/catalog",
+      "version": "workspace:*",
+      "tier": 1,
+      "surface": "content-addressed-component-manifest-sbom"
+    },
+    {
+      "package": "@theme.tools/testing",
+      "version": "workspace:*",
+      "tier": 1,
+      "surface": "playwright-6-breakpoint-visual-a11y-verification"
+    },
+    {
+      "package": "@theme.tools/telemetry",
+      "version": "workspace:*",
+      "tier": 3,
+      "surface": "seven-system-observability-sentry-posthog-ga4-gtm-langfuse-2500ms"
+    },
+    {
+      "package": "@theme.tools/auth",
+      "version": "workspace:*",
+      "tier": 3,
+      "surface": "better-auth-oauth21-pkce-s256-dcr"
+    },
+    {
+      "package": "@theme.tools/keys",
+      "version": "workspace:*",
+      "tier": 2,
+      "surface": "api-key-lifecycle-fc-and-cc-live"
+    },
+    {
+      "package": "@theme.tools/billing",
+      "version": "workspace:*",
+      "tier": 2,
+      "surface": "credit-ledger-token-ledger-spend-limit-50pct-firecrawl-parity"
+    },
+    {
+      "package": "@theme.tools/crawl-research",
+      "version": "workspace:*",
+      "tier": 3,
+      "surface": "shared-firecrawl-v1-v2-ssrf-robots-markdown-for-agents"
+    },
+    {
+      "package": "@theme.tools/seo-geo",
+      "version": "workspace:*",
+      "tier": 3,
+      "surface": "sitemap-robots-llms-txt-indexnow-jsonld"
+    },
+    {
+      "package": "@theme.tools/agent-ui",
+      "version": "workspace:*",
+      "tier": 3,
+      "surface": "multi-turn-research-agent-browser-copilot-studio"
+    },
+    {
+      "package": "@theme.tools/i18n-a11y",
+      "version": "workspace:*",
+      "tier": 3,
+      "surface": "wcag22-aaa-apca-contrast-reduced-motion"
+    },
+    {
+      "package": "@theme.tools/status",
+      "version": "workspace:*",
+      "tier": 2,
+      "surface": "health-probes-telemetry-status"
+    },
+    {
+      "package": "@theme.tools/kb",
+      "version": "workspace:*",
+      "tier": 2,
+      "surface": "rag-docs-search-and-support-ask"
+    },
+    {
+      "package": "@theme.tools/workflows",
+      "version": "workspace:*",
+      "tier": 2,
+      "surface": "durable-object-crawl-extract-browser-coordinators"
+    },
+    {
+      "package": "@theme.tools/notifications",
+      "version": "workspace:*",
+      "tier": 2,
+      "surface": "hmac-sha256-lifecycle-webhooks"
+    },
+    {
+      "package": "@theme.tools/flags",
+      "version": "workspace:*",
+      "tier": 3,
+      "surface": "posthog-feature-flag-exposure-edge-toggles"
+    }
+  ]
 }

@@ -1,0 +1,33 @@
+{
+  "document": {
+    "version": "https://jsonfeed.org/version/1.1",
+    "title": "crawl.cheap Engineering Blog",
+    "home_page_url": "https://crawl.cheap/blog/",
+    "feed_url": "https://crawl.cheap/blog/feed.json",
+    "description": "Firecrawl-compatible edge web scraping, Cloudflare Browser Rendering /crawl, and @theme.tools architecture guides.",
+    "language": "en-US",
+    "items": [
+      {
+        "id": "https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/",
+        "url": "https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/",
+        "title": "Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents",
+        "summary": "OpenAPI contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic HTML-to-Markdown distillation.",
+        "date_published": "2026-11-19T14:00:00Z",
+        "date_modified": "2026-11-19T14:00:00Z",
+        "authors": [
+          {
+            "name": "Brian Zalewski"
+          }
+        ],
+        "tags": [
+          "saas-platform",
+          "architecture",
+          "cloudflare-workers",
+          "theme-tools",
+          "platejs"
+        ]
+      }
+    ]
+  },
+  "json": "{\n  \"version\": \"https://jsonfeed.org/version/1.1\",\n  \"title\": \"crawl.cheap Engineering Blog\",\n  \"home_page_url\": \"https://crawl.cheap/blog/\",\n  \"feed_url\": \"https://crawl.cheap/blog/feed.json\",\n  \"description\": \"Firecrawl-compatible edge web scraping, Cloudflare Browser Rendering /crawl, and @theme.tools architecture guides.\",\n  \"language\": \"en-US\",\n  \"items\": [\n    {\n      \"id\": \"https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/\",\n      \"url\": \"https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/\",\n      \"title\": \"Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents\",\n      \"summary\": \"OpenAPI contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic HTML-to-Markdown distillation.\",\n      \"date_published\": \"2026-11-19T14:00:00Z\",\n      \"date_modified\": \"2026-11-19T14:00:00Z\",\n      \"authors\": [\n        {\n          \"name\": \"Brian Zalewski\"\n        }\n      ],\n      \"tags\": [\n        \"saas-platform\",\n        \"architecture\",\n        \"cloudflare-workers\",\n        \"theme-tools\",\n        \"platejs\"\n      ]\n    }\n  ]\n}"
+}

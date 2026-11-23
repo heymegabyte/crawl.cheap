@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { z } from 'zod';
+import { getLangfuseSafeClient } from '@crawlcheap/engine';
 import { engineEnv, type Env } from '../env';
 import type { ExtractStatusResult } from '../extract-do';
 import { fail, parseBody, assertUuidOrFail } from '../lib/respond';
@@ -203,6 +204,27 @@ route.post('/agent', async (c) => {
       jobId: id,
     });
   }
+
+  const lf = getLangfuseSafeClient({
+    publicKey: c.env.LANGFUSE_PUBLIC_KEY,
+    secretKey: c.env.LANGFUSE_SECRET_KEY,
+    baseUrl: c.env.LANGFUSE_HOST ?? c.env.LANGFUSE_BASEURL,
+    serviceName: 'crawl-cheap-api',
+    environment: c.env.SENTRY_ENVIRONMENT ?? 'production',
+  });
+  void lf.traceSafe({
+    name: 'agent.multi_turn_research',
+    model: parsed.data.model ?? '@cf/meta/llama-3.1-8b-instruct',
+    input: {
+      prompt: parsed.data.prompt,
+      urls: parsed.data.urls ?? [],
+      threadId,
+      threadTurn: nextTurn,
+    },
+    output: { status: record.status, sourcesCount: sources.length },
+    durationMs: elapsed,
+    totalTokens: tokensUsed,
+  });
 
   return c.json({
     success: true as const,

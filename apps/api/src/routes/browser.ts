@@ -2,7 +2,12 @@ import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { z } from 'zod';
 import { ActionSchema, type Action } from '@crawlcheap/contracts';
-import { extractAvailable, extractWithAI, SsrfError } from '@crawlcheap/engine';
+import {
+  extractAvailable,
+  extractWithAI,
+  getLangfuseSafeClient,
+  SsrfError,
+} from '@crawlcheap/engine';
 import { engineEnv, type Env } from '../env';
 import { fail, parseBody, assertUuidOrFail } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
@@ -163,6 +168,20 @@ export async function planCopilotActionsFromPrompt(
     reasoning = `Co-Pilot compiled ${planned.length} browser action(s) (${planned.map((a) => a.type).join(' → ')}) from instruction: "${p}"`;
   }
   const tokensUsed = Math.max(96, Math.ceil((p.length + reasoning.length) / 3));
+  const lf = getLangfuseSafeClient({
+    publicKey: env.LANGFUSE_PUBLIC_KEY,
+    secretKey: env.LANGFUSE_SECRET_KEY,
+    baseUrl: env.LANGFUSE_HOST ?? env.LANGFUSE_BASEURL,
+    serviceName: 'crawl-cheap-api',
+    environment: env.SENTRY_ENVIRONMENT ?? 'production',
+  });
+  void lf.traceSafe({
+    name: 'browser.copilot_plan',
+    model: '@cf/meta/llama-3.1-8b-instruct',
+    input: { prompt: p, currentUrl },
+    output: { actionsCount: planned.length, reasoning },
+    totalTokens: tokensUsed,
+  });
   return { actions: planned, reasoning, tokensUsed };
 }
 
