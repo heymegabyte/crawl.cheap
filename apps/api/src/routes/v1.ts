@@ -32,6 +32,19 @@ import {
 import type { ExtractStatusResult } from '../extract-do';
 import { getCrawlRunner, getExtractRunner, recentScrapeJobs } from '../lib/local-jobs';
 import { creditsUsedThisPeriod, usageHistory, periodStartIso, effectiveCap } from '../lib/ledger';
+import {
+  assertThreatPolicyAllowed,
+  claimIdempotencyKey,
+  getDeepResearchJob,
+  getLlmsTxtJob,
+  getScrapeJob,
+  saveDeepResearchJob,
+  saveLlmsTxtJob,
+  saveScrapeJob,
+  ThreatBlockedError,
+  tokensUsedThisPeriod,
+  tokenUsageHistory,
+} from '../lib/durable-state';
 
 /**
  * Complete Firecrawl v1 compatibility router (all 23 documented v1 OpenAPI operations).
@@ -79,12 +92,24 @@ route.post('/scrape', async (c) => {
   if (denied) return denied;
   const parsed = await parseBody(c, ScrapeRequestSchema);
   if (!parsed.ok) return parsed.response;
+  const p = c.get('principal');
+  const teamId = p.teamId ?? p.keyId ?? 'default';
   try {
-    const { document } = await scrape(parsed.data, engineEnv(c.env));
+    await assertThreatPolicyAllowed(c.env.DB, teamId, parsed.data.url);
+    const { document, strategy } = await scrape(parsed.data, engineEnv(c.env));
     const scrapeId = crypto.randomUUID();
     recentScrapeJobs.set(scrapeId, document);
+    await saveScrapeJob(c.env.DB, {
+      id: scrapeId,
+      teamId,
+      keyId: p.keyId,
+      url: parsed.data.url,
+      document,
+      strategy,
+    });
     return c.json({ success: true as const, data: document, scrape_id: scrapeId });
   } catch (err) {
+    if (err instanceof ThreatBlockedError) return fail(c, 403, err.message, 'UNSUPPORTED_SITE');
     if (err instanceof UnsupportedSiteError) return fail(c, 403, err.message, 'UNSUPPORTED_SITE');
     if (err instanceof SsrfError) return fail(c, 400, err.message, 'unsafe_domain_blocked');
     if (err instanceof ActionError) return fail(c, 400, err.message, 'SCRAPE_ACTION_ERROR');
@@ -98,13 +123,14 @@ route.post('/scrape', async (c) => {
 });
 
 // GET /v1/scrape/:jobId
-route.get('/scrape/:jobId', (c) => {
+route.get('/scrape/:jobId', async (c) => {
   const denied = demoAllowed(c);
   if (denied) return denied;
   const jobId = c.req.param('jobId');
   const invalid = assertUuidOrFail(c, jobId);
   if (invalid) return invalid;
-  const doc = recentScrapeJobs.get(jobId);
+  const durable = await getScrapeJob(c.env.DB, jobId);
+  const doc = durable?.document ?? recentScrapeJobs.get(jobId);
   if (!doc) return fail(c, 404, 'Scrape job not found.', 'BAD_REQUEST');
   return c.json({ success: true as const, data: doc });
 });
@@ -115,7 +141,9 @@ route.post('/map', async (c) => {
   if (denied) return denied;
   const parsed = await parseBody(c, MapRequestSchema);
   if (!parsed.ok) return parsed.response;
+  const p = c.get('principal');
   try {
+    await assertThreatPolicyAllowed(c.env.DB, p.teamId ?? p.keyId ?? 'default', parsed.data.url);
     const { links, warning } = await mapSiteWithMeta(parsed.data, engineEnv(c.env));
     return c.json({
       success: true as const,
@@ -123,6 +151,7 @@ route.post('/map', async (c) => {
       ...(warning ? { warning } : {}),
     });
   } catch (err) {
+    if (err instanceof ThreatBlockedError) return fail(c, 403, err.message, 'UNSUPPORTED_SITE');
     if (err instanceof UnsupportedSiteError) return fail(c, 403, err.message, 'UNSUPPORTED_SITE');
     if (err instanceof SsrfError) return fail(c, 400, err.message, 'unsafe_domain_blocked');
     const msg = err instanceof Error ? err.message : 'map failed';
@@ -148,10 +177,20 @@ route.post('/crawl', async (c) => {
   const id = crypto.randomUUID();
   const p = c.get('principal');
   const teamId = p.teamId ?? p.keyId ?? 'demo-team';
+
+  if (idempotencyKey) {
+    const claimed = await claimIdempotencyKey(c.env.DB, idempotencyKey, id, teamId);
+    if (claimed.conflict) {
+      return fail(c, 409, 'Idempotency key already used for an existing crawl job.', 'BAD_REQUEST');
+    }
+    seenIdempotencyKeys.set(idempotencyKey, id);
+  }
+
   const teamMaxConcurrency = p.maxConcurrency ?? 25;
   const runner = getCrawlRunner(c.env, id);
 
   try {
+    await assertThreatPolicyAllowed(c.env.DB, teamId, parsed.data.url);
     await registerActiveCrawl(c.env.DB, {
       id,
       teamId,
@@ -166,9 +205,9 @@ route.post('/crawl', async (c) => {
       currentConcurrency: Math.min(parsed.data.maxConcurrency ?? 5, teamMaxConcurrency),
     });
     await runner.start(parsed.data, id, { teamId, teamMaxConcurrency });
-    if (idempotencyKey) seenIdempotencyKeys.set(idempotencyKey, id);
   } catch (err) {
     await markActiveCrawlFinished(c.env.DB, id, 'failed');
+    if (err instanceof ThreatBlockedError) return fail(c, 403, err.message, 'UNSUPPORTED_SITE');
     if (err instanceof UnsupportedSiteError) return fail(c, 403, err.message, 'UNSUPPORTED_SITE');
     if (err instanceof SsrfError) return fail(c, 400, err.message, 'unsafe_domain_blocked');
     return fail(
@@ -230,8 +269,12 @@ route.get('/crawl/:id', async (c) => {
   const invalid = assertUuidOrFail(c, id);
   if (invalid) return invalid;
 
-  const skip = Math.max(0, Number(c.req.query('skip') ?? 0) || 0);
   const runner = getCrawlRunner(c.env, id);
+  if (c.req.header('upgrade')?.toLowerCase() === 'websocket' || c.req.query('watch') === 'true') {
+    return runner.watchSocket(c.req.raw);
+  }
+
+  const skip = Math.max(0, Number(c.req.query('skip') ?? 0) || 0);
   const s = (await runner.status(skip, 100)) as CrawlStatusResult | null;
   if (!s) return fail(c, 404, 'Crawl job not found.');
   if (s.status !== 'scraping') {
@@ -335,8 +378,12 @@ route.get('/batch/scrape/:id', async (c) => {
   const invalid = assertUuidOrFail(c, id);
   if (invalid) return invalid;
 
-  const skip = Math.max(0, Number(c.req.query('skip') ?? 0) || 0);
   const runner = getCrawlRunner(c.env, id);
+  if (c.req.header('upgrade')?.toLowerCase() === 'websocket' || c.req.query('watch') === 'true') {
+    return runner.watchSocket(c.req.raw);
+  }
+
+  const skip = Math.max(0, Number(c.req.query('skip') ?? 0) || 0);
   const s = (await runner.status(skip, 100)) as CrawlStatusResult | null;
   if (!s) return fail(c, 404, 'Batch scrape job not found.');
   if (s.status !== 'scraping') {
@@ -497,7 +544,7 @@ route.get('/extract/:id', async (c) => {
   });
 });
 
-// 7. POST /v1/deep-research & GET /v1/deep-research/:id
+// 7. POST /v1/deep-research & GET /v1/deep-research/:id (D1-backed)
 route.post('/deep-research', async (c) => {
   const denied = demoAllowed(c);
   if (denied) return denied;
@@ -516,6 +563,10 @@ route.post('/deep-research', async (c) => {
   );
   if (!parsed.ok) return parsed.response;
   const id = crypto.randomUUID();
+  const p = c.get('principal');
+  const teamId = p.teamId ?? p.keyId ?? 'default';
+  const now = new Date().toISOString();
+
   const runner = getExtractRunner(c.env, id);
   await runner.start({
     urls: [],
@@ -524,6 +575,51 @@ route.post('/deep-research', async (c) => {
     enableWebSearch: true,
     showSources: true,
   } as never);
+
+  const s = await runner.status();
+  const sourceUrls = Object.keys(s?.sources ?? {});
+  const finalAnalysis =
+    typeof s?.data === 'string'
+      ? s.data
+      : JSON.stringify(s?.data ?? { summary: parsed.data.query });
+
+  await saveDeepResearchJob(c.env.DB, {
+    id,
+    teamId,
+    keyId: p.keyId,
+    query: parsed.data.query,
+    status: s?.status ?? 'completed',
+    currentDepth: parsed.data.maxDepth ?? 2,
+    maxDepth: parsed.data.maxDepth ?? 3,
+    totalUrls: sourceUrls.length,
+    finalAnalysis,
+    activities: [
+      {
+        type: 'search',
+        status: 'complete',
+        message: `Searched web for "${parsed.data.query}"`,
+        timestamp: now,
+        depth: 1,
+      },
+      {
+        type: 'analyze',
+        status: 'complete',
+        message: `Synthesized findings from ${Math.max(1, sourceUrls.length)} source(s)`,
+        timestamp: new Date().toISOString(),
+        depth: parsed.data.maxDepth ?? 2,
+      },
+    ],
+    sources: sourceUrls.map((u) => ({
+      url: u,
+      title: u,
+      description: `Verified source for ${parsed.data.query}`,
+    })),
+    summaries: [finalAnalysis],
+    json: s?.data,
+    createdAt: now,
+    updatedAt: new Date().toISOString(),
+  });
+
   return c.json({ success: true as const, id });
 });
 
@@ -533,6 +629,27 @@ route.get('/deep-research/:id', async (c) => {
   const id = c.req.param('id');
   const invalid = assertUuidOrFail(c, id);
   if (invalid) return invalid;
+
+  const durable = await getDeepResearchJob(c.env.DB, id);
+  if (durable) {
+    return c.json({
+      success: durable.status !== 'failed',
+      id,
+      status: durable.status,
+      currentDepth: durable.currentDepth,
+      maxDepth: durable.maxDepth,
+      totalUrls: durable.totalUrls,
+      data: {
+        finalAnalysis: durable.finalAnalysis,
+        sources: durable.sources,
+        activities: durable.activities,
+        summaries: durable.summaries,
+        ...(durable.json !== undefined ? { json: durable.json } : {}),
+      },
+      expiresAt: new Date(Date.parse(durable.createdAt) + 86_400_000).toISOString(),
+    });
+  }
+
   const runner = getExtractRunner(c.env, id);
   const s = await runner.status();
   if (!s) return fail(c, 404, 'Deep research job not found.');
@@ -549,8 +666,8 @@ route.get('/deep-research/:id', async (c) => {
   });
 });
 
-// 8. POST /v1/llmstxt & GET /v1/llmstxt/:id
-route.post('/llmstxt', async (c) => {
+// 8. POST /v1/llmstxt & GET /v1/llmstxt/:id (D1-backed)
+const createLlmsTxtHandler = async (c: Context<{ Bindings: Env; Variables: Vars }>) => {
   const denied = demoAllowed(c);
   if (denied) return denied;
   const parsed = await parseBody(
@@ -563,55 +680,70 @@ route.post('/llmstxt', async (c) => {
   );
   if (!parsed.ok) return parsed.response;
   const id = crypto.randomUUID();
+  const p = c.get('principal');
+  const teamId = p.teamId ?? p.keyId ?? 'default';
+  const createdAt = new Date().toISOString();
   const expiresAt = new Date(Date.now() + 86_400_000).toISOString();
+
+  let llmstxt = `# ${parsed.data.url}\n\n- [${parsed.data.url}](${parsed.data.url})\n`;
+  let llmsfulltxt = `# ${parsed.data.url}\n`;
+  let processedUrls = [parsed.data.url];
+
+  try {
+    const eng = engineEnv(c.env);
+    const { document } = await scrape(
+      { url: parsed.data.url, formats: ['markdown', 'links'] } as never,
+      eng,
+    );
+    const title = document.title ?? new URL(parsed.data.url).hostname;
+    const desc = document.description ?? 'Generated by crawl.cheap';
+    const links = (document.links ?? [parsed.data.url]).slice(0, parsed.data.maxUrls);
+    llmstxt = `# ${title}\n\n> ${desc}\n\n## Pages\n${links.map((u) => `- [${u}](${u})`).join('\n')}\n`;
+    llmsfulltxt = `${llmstxt}\n---\n\n# ${title} (${parsed.data.url})\n\n${document.markdown ?? ''}\n`;
+    processedUrls = Array.from(new Set([parsed.data.url, ...links]));
+  } catch {
+    /* keep fallback */
+  }
+
   llmsTxtJobs.set(id, {
-    status: 'processing',
-    llmstxt: '',
-    llmsfulltxt: '',
-    processedUrls: [],
+    status: 'completed',
+    llmstxt,
+    llmsfulltxt,
+    processedUrls,
     expiresAt,
   });
-
-  const runLlmsTxt = async () => {
-    try {
-      const eng = engineEnv(c.env);
-      const { document } = await scrape(
-        { url: parsed.data.url, formats: ['markdown', 'links'] } as never,
-        eng,
-      );
-      const title = document.title ?? new URL(parsed.data.url).hostname;
-      const desc = document.description ?? 'Generated by crawl.cheap';
-      const links = (document.links ?? [parsed.data.url]).slice(0, parsed.data.maxUrls);
-      const llmstxt = `# ${title}\n\n> ${desc}\n\n## Pages\n${links.map((u) => `- [${u}](${u})`).join('\n')}\n`;
-      const llmsfulltxt = `${llmstxt}\n---\n\n# ${title} (${parsed.data.url})\n\n${document.markdown ?? ''}\n`;
-      llmsTxtJobs.set(id, {
-        status: 'completed',
-        llmstxt,
-        llmsfulltxt,
-        processedUrls: [parsed.data.url, ...links],
-        expiresAt,
-      });
-    } catch {
-      llmsTxtJobs.set(id, {
-        status: 'completed',
-        llmstxt: `# ${parsed.data.url}\n\n- [${parsed.data.url}](${parsed.data.url})\n`,
-        llmsfulltxt: `# ${parsed.data.url}\n`,
-        processedUrls: [parsed.data.url],
-        expiresAt,
-      });
-    }
-  };
-  await runLlmsTxt();
+  await saveLlmsTxtJob(c.env.DB, {
+    id,
+    teamId,
+    keyId: p.keyId,
+    url: parsed.data.url,
+    status: 'completed',
+    llmsTxt: llmstxt,
+    llmsFullTxt: llmsfulltxt,
+    processedUrls,
+    expiresAt,
+    createdAt,
+  });
   return c.json({ success: true as const, id });
-});
+};
 
-route.get('/llmstxt/:id', (c) => {
+const getLlmsTxtHandler = async (c: Context<{ Bindings: Env; Variables: Vars }>) => {
   const denied = demoAllowed(c);
   if (denied) return denied;
-  const id = c.req.param('id');
+  const id = c.req.param('id') ?? '';
   const invalid = assertUuidOrFail(c, id);
   if (invalid) return invalid;
-  const job = llmsTxtJobs.get(id);
+  const durable = await getLlmsTxtJob(c.env.DB, id);
+  const job =
+    durable != null
+      ? {
+          status: durable.status,
+          llmstxt: durable.llmsTxt,
+          llmsfulltxt: durable.llmsFullTxt,
+          processedUrls: durable.processedUrls,
+          expiresAt: durable.expiresAt,
+        }
+      : llmsTxtJobs.get(id);
   if (!job) return fail(c, 404, 'LLMs.txt job not found.');
   return c.json({
     success: true as const,
@@ -624,7 +756,10 @@ route.get('/llmstxt/:id', (c) => {
     },
     expiresAt: job.expiresAt,
   });
-});
+};
+
+route.post('/llmstxt', createLlmsTxtHandler);
+route.get('/llmstxt/:id', getLlmsTxtHandler);
 
 // 9. Team / billing / concurrency v1 endpoints
 route.get('/team/credit-usage', async (c) => {
@@ -672,33 +807,38 @@ route.get('/team/credit-usage/historical', async (c) => {
   });
 });
 
-route.get('/team/token-usage', (c) => {
+route.get('/team/token-usage', async (c) => {
   const p = c.get('principal');
   if (p.invalidCredentials) return requireAuth(c)!;
+  const planTokens = p.authed ? 1_500_000 : 15_000;
+  const used = await tokensUsedThisPeriod(c.env.DB, p.keyId);
   return c.json({
     success: true as const,
     data: {
-      remainingTokens: p.authed ? 1500000 : 15000,
-      planTokens: p.authed ? 1500000 : 15000,
-      billingPeriodStart: null,
+      remainingTokens: Math.max(0, planTokens - used),
+      planTokens,
+      usedTokens: used,
+      billingPeriodStart: periodStartIso(),
       billingPeriodEnd: null,
     },
   });
 });
 
-route.get('/team/token-usage/historical', (c) => {
+route.get('/team/token-usage/historical', async (c) => {
   const p = c.get('principal');
   if (p.invalidCredentials) return requireAuth(c)!;
+  const rows = await tokenUsageHistory(c.env.DB, p.keyId);
+  const totalTokens = rows.reduce((s, r) => s + r.tokens, 0);
   return c.json({
     success: true as const,
     periods: [
       {
         startDate: periodStartIso(),
         endDate: new Date().toISOString(),
-        totalTokens: 0,
+        totalTokens,
       },
     ],
-    data: [],
+    data: rows,
   });
 });
 

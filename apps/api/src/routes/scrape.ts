@@ -9,6 +9,13 @@ import { fail, parseBody, assertUuidOrFail } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
 import { allowDemo } from '../lib/ratelimit';
 import { recentScrapeJobs } from '../lib/local-jobs';
+import {
+  assertThreatPolicyAllowed,
+  getScrapeJob,
+  recordTokenUsage,
+  saveScrapeJob,
+  ThreatBlockedError,
+} from '../lib/durable-state';
 
 const route = new Hono<{ Bindings: Env; Variables: Vars }>();
 
@@ -32,6 +39,8 @@ route.post('/scrape', async (c) => {
   const parsed = await parseBody(c, ScrapeRequestSchema);
   if (!parsed.ok) return parsed.response;
 
+  const teamId = p.teamId ?? p.keyId ?? 'default';
+
   const fmts = parsed.data.formats ?? [];
   const ct = fmts.find(
     (f) => f === 'changeTracking' || (typeof f === 'object' && f.type === 'changeTracking'),
@@ -45,6 +54,8 @@ route.post('/scrape', async (c) => {
     : null;
 
   try {
+    await assertThreatPolicyAllowed(c.env.DB, teamId, parsed.data.url);
+
     // Cache read: serve a fresh-enough stored result (no re-fetch of the target).
     if (key && maxAge > 0) {
       const cached = await readCache(c.env, key, maxAge);
@@ -52,6 +63,14 @@ route.post('/scrape', async (c) => {
         c.header('x-crawlcheap-strategy', 'cache');
         const scrapeId = crypto.randomUUID();
         recentScrapeJobs.set(scrapeId, cached);
+        await saveScrapeJob(c.env.DB, {
+          id: scrapeId,
+          teamId,
+          keyId: p.keyId,
+          url: parsed.data.url,
+          document: cached,
+          strategy: 'cache',
+        });
         return c.json({ success: true as const, data: cached, scrape_id: scrapeId });
       }
     }
@@ -96,9 +115,34 @@ route.post('/scrape', async (c) => {
       const oldest = recentScrapeJobs.keys().next().value;
       if (oldest) recentScrapeJobs.delete(oldest);
     }
+    await saveScrapeJob(c.env.DB, {
+      id: scrapeId,
+      teamId,
+      keyId: p.keyId,
+      url: parsed.data.url,
+      document,
+      strategy,
+    });
+
+    if (p.keyId && (document.json !== undefined || document.answer !== undefined)) {
+      const approxTokens = Math.max(
+        64,
+        Math.ceil(
+          ((document.markdown ?? '').length + JSON.stringify(document.json ?? '').length) / 4,
+        ),
+      );
+      await recordTokenUsage(c.env.DB, {
+        keyId: p.keyId,
+        teamId,
+        operation: 'scrape.ai',
+        tokens: approxTokens,
+        jobId: scrapeId,
+      });
+    }
 
     return c.json({ success: true as const, data: document, scrape_id: scrapeId });
   } catch (err) {
+    if (err instanceof ThreatBlockedError) return fail(c, 403, err.message, 'UNSUPPORTED_SITE');
     if (err instanceof UnsupportedSiteError) return fail(c, 403, err.message, 'UNSUPPORTED_SITE');
     if (err instanceof SsrfError) return fail(c, 400, err.message, 'unsafe_domain_blocked');
     if (err instanceof ActionError) return fail(c, 400, err.message, 'SCRAPE_ACTION_ERROR');
@@ -110,14 +154,15 @@ route.post('/scrape', async (c) => {
   }
 });
 
-// GET /v2/scrape/:jobId — retrieve a previously completed scrape job
-route.get('/scrape/:jobId', (c) => {
+// GET /v2/scrape/:jobId — retrieve a previously completed scrape job from D1 or memory
+route.get('/scrape/:jobId', async (c) => {
   const p = c.get('principal');
   if (p.invalidCredentials) return requireAuth(c)!;
   const jobId = c.req.param('jobId');
   const invalid = assertUuidOrFail(c, jobId);
   if (invalid) return invalid;
-  const doc = recentScrapeJobs.get(jobId);
+  const durable = await getScrapeJob(c.env.DB, jobId);
+  const doc = durable?.document ?? recentScrapeJobs.get(jobId);
   if (!doc) return fail(c, 404, 'Scrape job not found.', 'BAD_REQUEST');
   return c.json({ success: true as const, data: doc });
 });
@@ -127,16 +172,24 @@ route.post('/scrape/:jobId/interact', async (c) => {
   const p = c.get('principal');
   if (p.invalidCredentials) return requireAuth(c)!;
   const jobId = c.req.param('jobId');
+  const invalid = assertUuidOrFail(c, jobId);
+  if (invalid) return invalid;
   const parsed = await parseBody(
     c,
-    z.object({
-      actions: z.array(ActionSchema).optional(),
-      prompt: z.string().optional(),
-      code: z.string().optional(),
-    }),
+    z
+      .object({
+        actions: z.array(ActionSchema).optional(),
+        prompt: z.string().optional(),
+        code: z.string().optional(),
+      })
+      .refine(
+        (b) => Boolean((b.actions && b.actions.length > 0) || b.prompt || b.code),
+        'Provide actions, prompt, or code',
+      ),
   );
   if (!parsed.ok) return parsed.response;
-  const doc = recentScrapeJobs.get(jobId);
+  const durable = await getScrapeJob(c.env.DB, jobId);
+  const doc = durable?.document ?? recentScrapeJobs.get(jobId);
   return c.json({
     success: true as const,
     id: jobId,
@@ -154,6 +207,8 @@ route.delete('/scrape/:jobId/interact', (c) => {
   const p = c.get('principal');
   if (p.invalidCredentials) return requireAuth(c)!;
   const jobId = c.req.param('jobId');
+  const invalid = assertUuidOrFail(c, jobId);
+  if (invalid) return invalid;
   recentScrapeJobs.delete(jobId);
   return c.json({ success: true as const, status: 'stopped' });
 });

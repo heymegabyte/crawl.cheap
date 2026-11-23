@@ -115,13 +115,16 @@ app.use(
 const INFO = {
   service: 'crawl.cheap MCP',
   transport: 'Streamable HTTP (stateless JSON-RPC 2.0)',
+  toolsRegistered: TOOLS.length,
+  toolsListable: listTools('full').length,
   endpoints: {
     full: 'POST /v2/mcp',
     searchOnly: 'POST /v2/mcp-search',
+    keyless: 'POST /v2/mcp-keyless',
     alias: 'POST /mcp',
   },
-  liveTools: ['firecrawl_scrape', 'firecrawl_map'],
-  note: 'Other Firecrawl tools are advertised for compatibility but return an explicit not-yet-implemented error until their increment ships.',
+  liveTools: TOOLS.map((t) => t.name),
+  note: 'All 30 pinned firecrawl_* tools (28 listable + 2 deprecated shims) are implemented and live.',
 };
 
 app.get('/', (c) => c.json(INFO));
@@ -195,6 +198,7 @@ const mount = (path: string, profile: ToolProfile) => {
 mount('/v2/mcp', 'full');
 mount('/mcp', 'full');
 mount('/v2/mcp-search', 'search');
+mount('/v2/mcp-keyless', 'keyless');
 
 export default Sentry.withSentry(sentryOptions, {
   fetch: (req: Request, env: Env, ctx: ExecutionContext) => app.fetch(req, env, ctx),

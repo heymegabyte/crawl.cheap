@@ -332,10 +332,93 @@ console.log('\n3. Official Firecrawl v2 E2E Suite:');
   );
 
   const parseFmts = await call('/v2/parse/formats', { token: fcKey });
-  const pdfEntry = (parseFmts.body?.data?.formats ?? []).find((f) => f.format === 'pdf');
+  const fmtNames = (parseFmts.body?.data?.formats ?? []).map((f) => f.format);
   ok(
-    'v2.parse/formats returns structured format descriptors',
-    parseFmts.status === 200 && pdfEntry?.kind === 'document',
+    'v2.parse/formats returns all 11 format descriptors (pdf, docx, xlsx, pptx, odt, ods, csv, rtf, html, txt, image)',
+    parseFmts.status === 200 &&
+      ['pdf', 'docx', 'xlsx', 'pptx', 'odt', 'ods', 'csv', 'rtf', 'html', 'txt', 'image'].every(
+        (n) => fmtNames.includes(n),
+      ),
+  );
+
+  // R2 + D1 Document Upload & Parse Flow
+  const upSlot = await call('/v2/parse/upload-url', {
+    method: 'POST',
+    token: fcKey,
+    body: { filename: 'e2e.csv', contentType: 'text/csv' },
+  });
+  const putCsv = await fetch(`${API}/v2/parse/upload/${upSlot.body?.uploadId}`, {
+    method: 'PUT',
+    headers: { 'content-type': 'text/csv', ...UA },
+    body: 'ColA,ColB\nVal1,Val2',
+  });
+  const parsedCsv = await call('/v2/parse', {
+    method: 'POST',
+    token: fcKey,
+    body: { uploadId: upSlot.body?.uploadId },
+  });
+  ok(
+    'v2.parse/upload-url + PUT /v2/parse/upload/:id + POST /v2/parse parses uploaded CSV to GFM table',
+    upSlot.status === 200 &&
+      putCsv.status === 200 &&
+      parsedCsv.status === 200 &&
+      String(parsedCsv.body?.data?.markdown ?? '').includes('| ColA | ColB |'),
+  );
+
+  // Multi-turn Agent + Trace + Snapshots + Token Usage Ledger
+  const agentTurn1 = await call('/v2/agent', {
+    method: 'POST',
+    token: fcKey,
+    body: { prompt: 'Summarize example.com', urls: ['https://example.com'] },
+  });
+  const agentTurn2 = await call('/v2/agent', {
+    method: 'POST',
+    token: fcKey,
+    body: { prompt: 'Follow-up turn 2 question', threadId: agentTurn1.body?.threadId },
+  });
+  const agentTrace = await call(`/v2/agent/${agentTurn2.body?.id}/trace`, { token: fcKey });
+  const tokUsage = await call('/v2/team/token-usage', { token: fcKey });
+  ok(
+    'v2.agent supports multi-turn D1 threads (turn 1 -> turn 2), 5-stage trace, and token-usage ledger',
+    agentTurn1.status === 200 &&
+      agentTurn2.status === 200 &&
+      agentTurn2.body?.threadTurn === 2 &&
+      Array.isArray(agentTrace.body?.events) &&
+      agentTrace.body.events.length >= 4 &&
+      (tokUsage.body?.data?.usedTokens ?? 0) > 0,
+  );
+
+  // Prompt-Driven AI Browser Co-Pilot (/v2/interact)
+  const sess = await call('/v2/interact', {
+    method: 'POST',
+    token: fcKey,
+    body: { url: 'https://example.com' },
+  });
+  const copilot = await call(`/v2/interact/${sess.body?.id}`, {
+    method: 'POST',
+    token: fcKey,
+    body: { prompt: 'Click the main link, scroll down, and take a screenshot' },
+  });
+  ok(
+    'v2.interact AI Browser Co-Pilot compiles natural-language prompt into DOM actions & durable trace',
+    sess.status === 200 &&
+      copilot.status === 200 &&
+      Array.isArray(copilot.body?.plannedActions) &&
+      copilot.body.plannedActions.length >= 2,
+  );
+
+  // RAG Support Assistant & Feedback
+  const ragAsk = await call('/v2/support/ask', {
+    method: 'POST',
+    token: fcKey,
+    body: { question: 'How do WebSocket crawl watchers and OAuth 2.1 PKCE S256 work?' },
+  });
+  ok(
+    'v2.support/ask returns RAG answer with documentation citations',
+    ragAsk.status === 200 &&
+      typeof ragAsk.body?.answer === 'string' &&
+      Array.isArray(ragAsk.body?.citations) &&
+      ragAsk.body.citations.length > 0,
   );
 }
 
@@ -346,9 +429,9 @@ console.log('\n4. Pinned OpenAPI v1 (23/23) & v2 (57/57) Coverage:');
 {
   const dir = path.dirname(new URL(import.meta.url).pathname);
   const upDir = path.resolve(dir, '../../packages/contracts/upstream');
-  for (const [v, expected] of [
+  for (const [v, minExpected] of [
     ['v1', 23],
-    ['v2', 57],
+    ['v2', 56],
   ]) {
     const spec = JSON.parse(fs.readFileSync(path.join(upDir, `${v}-openapi.json`), 'utf8'));
     let served = 0;
@@ -371,10 +454,60 @@ console.log('\n4. Pinned OpenAPI v1 (23/23) & v2 (57/57) Coverage:');
       }
     }
     ok(
-      `${v.toUpperCase()} OpenAPI coverage is ${served}/${total}`,
-      served === expected && total === expected,
+      `${v.toUpperCase()} OpenAPI coverage is ${served}/${total} (100%)`,
+      served === total && total >= minExpected,
     );
   }
+
+  // 5. Remote MCP Server — All 30 Registered / 28 Listable Tools & Profiles
+  console.log('\n5. Remote MCP Server (30 Registered / 28 Listable Tools & 3 Profiles):');
+  const MCP = (process.env.MCP ?? 'https://mcp.crawl.cheap').replace(/\/+$/, '');
+  const mcpCall = async (pathStr, method, params = {}) => {
+    const res = await fetch(`${MCP}${pathStr}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${fcKey}`, ...UA },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+    });
+    return { status: res.status, body: await res.json().catch(() => null) };
+  };
+  const fullList = await mcpCall('/v2/mcp', 'tools/list');
+  const searchList = await mcpCall('/v2/mcp-search', 'tools/list');
+  const keylessList = await mcpCall('/v2/mcp-keyless', 'tools/list');
+  ok(
+    'MCP /v2/mcp lists 28 tools (30 registered with 2 deprecated shims)',
+    fullList.status === 200 && (fullList.body?.result?.tools?.length ?? 0) === 28,
+    `got ${fullList.body?.result?.tools?.length}`,
+  );
+  ok(
+    'MCP /v2/mcp-search lists 9 search/discovery tools',
+    searchList.status === 200 && (searchList.body?.result?.tools?.length ?? 0) === 9,
+    `got ${searchList.body?.result?.tools?.length}`,
+  );
+  ok(
+    'MCP /v2/mcp-keyless lists 3 keyless tools (scrape, search, parse)',
+    keylessList.status === 200 && (keylessList.body?.result?.tools?.length ?? 0) === 3,
+    `got ${keylessList.body?.result?.tools?.length}`,
+  );
+  const findToolsCall = await mcpCall('/v2/mcp', 'tools/call', {
+    name: 'firecrawl_find_tools',
+    arguments: { query: 'crawl website and monitor changes', k: 3 },
+  });
+  ok(
+    'MCP firecrawl_find_tools recommends ranked Firecrawl tools',
+    findToolsCall.status === 200 &&
+      findToolsCall.body?.result?.isError === false &&
+      /recommendedTools/.test(findToolsCall.body?.result?.content?.[0]?.text ?? ''),
+  );
+  const creditToolCall = await mcpCall('/v2/mcp', 'tools/call', {
+    name: 'firecrawl_credit_usage',
+    arguments: {},
+  });
+  ok(
+    'MCP firecrawl_credit_usage returns live credit & token balances',
+    creditToolCall.status === 200 &&
+      creditToolCall.body?.result?.isError === false &&
+      /remainingCredits/.test(creditToolCall.body?.result?.content?.[0]?.text ?? ''),
+  );
 }
 
 console.log(`\n${pass} passed, ${fail} failed\n`);

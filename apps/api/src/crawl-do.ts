@@ -257,6 +257,135 @@ export class CrawlCoordinator extends DurableObject<Env> {
     return engineEnv(this.env);
   }
 
+  private broadcastWs(payload: Record<string, unknown>, close = false): void {
+    try {
+      const sockets = this.ctx.getWebSockets ? this.ctx.getWebSockets() : [];
+      const raw = JSON.stringify(payload);
+      for (const ws of sockets) {
+        try {
+          ws.send(raw);
+          if (close) ws.close(1000, 'completed');
+        } catch {
+          /* socket already closed */
+        }
+      }
+    } catch {
+      /* getWebSockets unavailable */
+    }
+  }
+
+  private async emitWebhook(
+    meta: CrawlMeta,
+    suffix: 'started' | 'page' | 'completed' | 'failed',
+    extra?: { data?: Document[]; error?: string },
+  ): Promise<void> {
+    if (!meta.options.webhook) return;
+    const prefix = meta.mode === 'batch' ? 'batch_scrape' : 'crawl';
+    const type = `${prefix}.${suffix}` as
+      | 'crawl.started'
+      | 'crawl.page'
+      | 'crawl.completed'
+      | 'crawl.failed'
+      | 'batch_scrape.started'
+      | 'batch_scrape.page'
+      | 'batch_scrape.completed'
+      | 'batch_scrape.failed';
+    const wh: WebhookConfig =
+      typeof meta.options.webhook === 'string'
+        ? { url: meta.options.webhook }
+        : meta.options.webhook;
+    await deliverWebhook(
+      wh,
+      {
+        success: suffix !== 'failed',
+        type,
+        id: meta.id ?? '',
+        ...(extra?.data ? { data: extra.data } : {}),
+        ...(extra?.error ? { error: extra.error } : {}),
+        metadata: {
+          ...(wh.metadata ?? {}),
+          total: meta.total,
+          completed: meta.completed,
+          creditsUsed: meta.creditsUsed,
+        },
+      },
+      this.env.WEBHOOK_SECRET || 'crawlcheap-default-webhook-secret',
+    );
+  }
+
+  /** Hibernatable WebSocket endpoint for official Firecrawl `client.watcher(jobId)` / `crawlUrlAndWatch`. */
+  override async fetch(request: Request): Promise<Response> {
+    if (request.headers.get('upgrade')?.toLowerCase() !== 'websocket') {
+      const st = await this.status(0, 100);
+      if (!st) {
+        return new Response(JSON.stringify({ success: false, error: 'Crawl job not found.' }), {
+          status: 404,
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+      return new Response(JSON.stringify({ success: true, ...st }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+
+    const meta = (await this.ctx.storage.get<CrawlMeta>('meta')) ?? null;
+    if (!meta) {
+      return new Response(JSON.stringify({ success: false, error: 'Crawl job not found.' }), {
+        status: 404,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+
+    const pages: Document[] = [];
+    for (let i = 0; i < meta.completed; i += 1) {
+      const d = await this.ctx.storage.get<Document>(`page:${i}`);
+      if (d) pages.push(d);
+    }
+
+    const pair = new WebSocketPair();
+    const client = pair[0];
+    const server = pair[1];
+    if (this.ctx.acceptWebSocket) {
+      this.ctx.acceptWebSocket(server);
+    } else {
+      server.accept();
+    }
+
+    server.send(
+      JSON.stringify({
+        type: 'catchup',
+        data: {
+          id: meta.id,
+          status: meta.status,
+          total: meta.total,
+          completed: meta.completed,
+          creditsUsed: meta.creditsUsed,
+          expiresAt: meta.expiresAt,
+          data: pages,
+        },
+      }),
+    );
+
+    if (meta.status !== 'scraping') {
+      server.send(
+        JSON.stringify({
+          type: 'done',
+          data: {
+            id: meta.id,
+            status: meta.status,
+            total: meta.total,
+            completed: meta.completed,
+            creditsUsed: meta.creditsUsed,
+            data: pages,
+          },
+        }),
+      );
+    }
+
+    return new Response(null, { status: 101, webSocket: client });
+  }
+
   /** Initialize the job, seed the frontier (sitemap + start URL), and kick off the alarm loop. */
   async start(
     body: CrawlRequest,
@@ -306,11 +435,11 @@ export class CrawlCoordinator extends DurableObject<Env> {
     const createdAt = new Date().toISOString();
     const expiresAt = new Date(Date.now() + 86_400_000).toISOString();
 
-    // 2. Try native Cloudflare Browser Rendering `/crawl` when enabled & bound
+    // 2. Try native Cloudflare Browser Rendering `/crawl` automatically whenever available
     let cfJobId: string | undefined;
     const useCfNativeCrawl =
-      Boolean(this.env.BROWSER?.crawl) ||
-      (this.env.CF_CRAWL_ENABLED === 'true' && cloudflareCrawlAvailable(eng));
+      this.env.CF_CRAWL_ENABLED !== 'false' &&
+      (Boolean(this.env.BROWSER?.crawl) || cloudflareCrawlAvailable(eng));
 
     if (useCfNativeCrawl) {
       try {
@@ -392,6 +521,7 @@ export class CrawlCoordinator extends DurableObject<Env> {
     await this.ctx.storage.put('errors', [] as CrawlError[]);
     await this.ctx.storage.put('robotsBlocked', [] as string[]);
     await this.ctx.storage.put('robotsTxt', robotsTxt);
+    await this.emitWebhook(meta, 'started');
     await this.ctx.storage.setAlarm(Date.now() + 10);
     return { ok: true, ...(cfJobId ? { cfJobId } : {}) };
   }
@@ -479,7 +609,12 @@ export class CrawlCoordinator extends DurableObject<Env> {
     await this.ctx.storage.put('errors', [] as CrawlError[]);
     await this.ctx.storage.put('robotsBlocked', [] as string[]);
     await this.ctx.storage.put('robotsTxt', null);
-    if (valid.length > 0) await this.ctx.storage.setAlarm(Date.now() + 10);
+    if (valid.length > 0) {
+      await this.emitWebhook(meta, 'started');
+      await this.ctx.storage.setAlarm(Date.now() + 10);
+    } else {
+      await this.emitWebhook(meta, 'failed', { error: 'No valid URLs to scrape.' });
+    }
     return { invalidURLs };
   }
 
@@ -490,9 +625,15 @@ export class CrawlCoordinator extends DurableObject<Env> {
     // Mode 1: Cloudflare Browser Rendering `/crawl` native job sync
     if (meta.cfJobId) {
       try {
+        const prevCompleted = meta.completed;
         const cfStatus = await getCloudflareCrawlStatus(meta.cfJobId, this.eng());
         for (let i = 0; i < cfStatus.documents.length; i += 1) {
-          await this.ctx.storage.put(`page:${i}`, capDoc(cfStatus.documents[i]!));
+          const capped = capDoc(cfStatus.documents[i]!);
+          await this.ctx.storage.put(`page:${i}`, capped);
+          if (i >= prevCompleted) {
+            this.broadcastWs({ type: 'document', data: capped });
+            await this.emitWebhook(meta, 'page', { data: [capped] });
+          }
         }
         meta.completed = cfStatus.documents.length;
         meta.total = Math.max(cfStatus.total, meta.completed);
@@ -510,6 +651,21 @@ export class CrawlCoordinator extends DurableObject<Env> {
             await markActiveCrawlFinished(this.env.DB, meta.id, cfStatus.status);
           }
           await this.ctx.storage.put('meta', meta);
+          await this.emitWebhook(meta, cfStatus.status === 'failed' ? 'failed' : 'completed');
+          this.broadcastWs(
+            {
+              type: 'done',
+              data: {
+                id: meta.id,
+                status: meta.status,
+                total: meta.total,
+                completed: meta.completed,
+                creditsUsed: meta.creditsUsed,
+                data: cfStatus.documents,
+              },
+            },
+            true,
+          );
           return;
         }
         await this.ctx.storage.put('meta', meta);
@@ -603,9 +759,12 @@ export class CrawlCoordinator extends DurableObject<Env> {
         meta.mode === 'batch' || pathAllowed(document.metadata?.sourceURL ?? item.url, opts);
 
       if (shouldIncludeDoc) {
-        await this.ctx.storage.put(`page:${meta.completed}`, capDoc(document));
+        const capped = capDoc(document);
+        await this.ctx.storage.put(`page:${meta.completed}`, capped);
         meta.completed += 1;
         meta.creditsUsed += 1;
+        this.broadcastWs({ type: 'document', data: capped });
+        await this.emitWebhook(meta, 'page', { data: [capped] });
       }
 
       if (item.depth < meta.maxDepth && meta.completed + frontier.length < meta.limit) {
@@ -668,27 +827,27 @@ export class CrawlCoordinator extends DurableObject<Env> {
       await this.ctx.storage.setAlarm(Date.now() + delay);
     }
 
-    // Deliver a signed completion webhook (best-effort, retried) when configured.
-    if (done && !cancelled && meta.options.webhook && this.env.WEBHOOK_SECRET) {
-      const type = meta.mode === 'batch' ? 'batch_scrape.completed' : 'crawl.completed';
-      const wh: WebhookConfig =
-        typeof meta.options.webhook === 'string'
-          ? { url: meta.options.webhook }
-          : meta.options.webhook;
-      await deliverWebhook(
-        wh,
+    // Deliver a signed completion webhook (best-effort, retried) and broadcast WebSocket done frame.
+    if (done && !cancelled) {
+      await this.emitWebhook(meta, 'completed');
+      const allPages: Document[] = [];
+      for (let i = 0; i < meta.completed; i += 1) {
+        const d = await this.ctx.storage.get<Document>(`page:${i}`);
+        if (d) allPages.push(d);
+      }
+      this.broadcastWs(
         {
-          success: true,
-          type,
-          id: meta.id ?? '',
-          metadata: {
-            ...(wh.metadata ?? {}),
+          type: 'done',
+          data: {
+            id: meta.id,
+            status: meta.status,
             total: meta.total,
             completed: meta.completed,
             creditsUsed: meta.creditsUsed,
+            data: allPages,
           },
         },
-        this.env.WEBHOOK_SECRET,
+        true,
       );
     }
   }

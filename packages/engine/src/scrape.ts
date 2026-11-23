@@ -431,17 +431,55 @@ async function scrapeInner(request: ScrapeRequest, env: EngineEnv): Promise<Scra
     }
   }
 
-  // Question / Query format → `doc.answer`
+  // Question / Query format → `doc.answer` (powered by Workers AI when bound, with deterministic fallback)
   if (formats.has('question') || formats.has('query')) {
-    doc.answer = summarize(markdown);
+    const qFmt = (options.formats ?? []).find(
+      (f) =>
+        typeof f === 'object' &&
+        f !== null &&
+        'type' in f &&
+        (f.type === 'question' || f.type === 'query'),
+    ) as { question?: string; query?: string } | undefined;
+    const questionText = qFmt?.question ?? qFmt?.query ?? 'Summarize the key point of this page.';
+    if (extractAvailable(env)) {
+      try {
+        const aiAns = (await extractWithAI(
+          doc.markdown ?? markdown,
+          {
+            prompt: `Answer the following question concisely based strictly on the document: ${questionText}`,
+            schema: {
+              type: 'object',
+              properties: { answer: { type: 'string' } },
+              required: ['answer'],
+            },
+          },
+          env,
+        )) as { answer?: string } | null;
+        if (aiAns && typeof aiAns.answer === 'string' && aiAns.answer.trim()) {
+          doc.answer = aiAns.answer.trim();
+        }
+      } catch {
+        /* fallback below */
+      }
+    }
+    if (!doc.answer) {
+      doc.answer = summarize(markdown);
+    }
   }
   // Highlights format → `doc.highlights`
   if (formats.has('highlights')) {
-    doc.highlights = markdown
+    const hFmt = (options.formats ?? []).find(
+      (f) => typeof f === 'object' && f !== null && 'type' in f && f.type === 'highlights',
+    ) as { query?: string } | undefined;
+    const hQuery = hFmt?.query?.toLowerCase() ?? '';
+    const paragraphs = markdown
       .split(/\n+/)
       .map((s) => s.trim())
-      .filter((s) => s.length > 20)
-      .slice(0, 5);
+      .filter((s) => s.length > 20);
+    const matched = hQuery
+      ? paragraphs.filter((p) => p.toLowerCase().includes(hQuery))
+      : paragraphs;
+    doc.highlights = (matched.length > 0 ? matched : paragraphs).slice(0, 5);
   }
 
   return { document: doc, strategy };
@@ -488,10 +526,9 @@ async function browserScrape(
   if (attributeSelectors.length) {
     // Browser-only renders have no server-side DOM; the quick-action markdown is not a
     // reliable attribute source, so report the gap honestly instead of returning [].
-    doc.warning = appendWarning(
-      doc.warning,
-      'attributes format needs the static (HTTP) tier; not extracted on a browser-only render.',
-    );
+    const msg =
+      'attributes format needs the static (HTTP) tier; not extracted on a browser-only render.';
+    doc.warning = doc.warning ? `${doc.warning} ${msg}` : msg;
   }
   if (formats.has('screenshot')) {
     if (env.ARTIFACTS) {

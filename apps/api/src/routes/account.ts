@@ -6,30 +6,16 @@ import { fail, parseBody } from '../lib/respond';
 import { setSpendLimit } from '../lib/keys';
 import { creditsUsedThisPeriod, usageHistory, periodStartIso, effectiveCap } from '../lib/ledger';
 import { getActiveConcurrencyForTeam } from '../crawl-do';
+import {
+  deleteThreatPolicy,
+  getThreatPolicy,
+  saveThreatPolicy,
+  tokensUsedThisPeriod,
+  tokenUsageHistory,
+  type ThreatProtectionPolicy,
+} from '../lib/durable-state';
 
 const route = new Hono<{ Bindings: Env; Variables: Vars }>();
-
-interface ThreatProtectionPolicy {
-  mode: 'off' | 'monitor' | 'enforce';
-  riskScoreThreshold: number;
-  blacklist: string[];
-  whitelist: string[];
-  blockedTlds: string[];
-  failurePolicy: 'fail_open' | 'fail_closed';
-  allowRequestOverrides: boolean;
-}
-
-const threatPolicies = new Map<string, ThreatProtectionPolicy>();
-
-const DEFAULT_THREAT_POLICY: ThreatProtectionPolicy = {
-  mode: 'enforce',
-  riskScoreThreshold: 80,
-  blacklist: [],
-  whitelist: [],
-  blockedTlds: [],
-  failurePolicy: 'fail_closed',
-  allowRequestOverrides: true,
-};
 
 route.get('/team/credit-usage', async (c) => {
   const p = c.get('principal');
@@ -90,34 +76,39 @@ route.get('/team/credit-usage/historical', async (c) => {
   return c.json({ success: true as const, periods: [], data: [] });
 });
 
-route.get('/team/token-usage', (c) => {
+route.get('/team/token-usage', async (c) => {
   const p = c.get('principal');
   if (p.invalidCredentials) return requireAuth(c)!;
   const authed = p.authed;
+  const planTokens = authed ? 1_500_000 : 15_000;
+  const used = await tokensUsedThisPeriod(c.env.DB, p.keyId);
   return c.json({
     success: true as const,
     data: {
-      remainingTokens: authed ? 1500000 : 15000,
-      planTokens: authed ? 1500000 : 15000,
-      billingPeriodStart: null,
+      remainingTokens: Math.max(0, planTokens - used),
+      planTokens,
+      usedTokens: used,
+      billingPeriodStart: periodStartIso(),
       billingPeriodEnd: null,
     },
   });
 });
 
-route.get('/team/token-usage/historical', (c) => {
+route.get('/team/token-usage/historical', async (c) => {
   const p = c.get('principal');
   if (p.invalidCredentials) return requireAuth(c)!;
+  const rows = await tokenUsageHistory(c.env.DB, p.keyId);
+  const totalTokens = rows.reduce((s, r) => s + r.tokens, 0);
   return c.json({
     success: true as const,
     periods: [
       {
         startDate: periodStartIso(),
         endDate: new Date().toISOString(),
-        totalTokens: 0,
+        totalTokens,
       },
     ],
-    data: [],
+    data: rows,
   });
 });
 
@@ -202,11 +193,11 @@ route.get('/team/activity', async (c) => {
   });
 });
 
-route.get('/team/threat-protection', (c) => {
+route.get('/team/threat-protection', async (c) => {
   const p = c.get('principal');
   if (p.invalidCredentials) return requireAuth(c)!;
   const teamKey = p.teamId ?? p.keyId ?? 'default';
-  const policy = threatPolicies.get(teamKey) ?? DEFAULT_THREAT_POLICY;
+  const policy = await getThreatPolicy(c.env.DB, teamKey);
   return c.json({ success: true as const, data: policy });
 });
 
@@ -215,22 +206,32 @@ route.put('/team/threat-protection', async (c) => {
   if (p.invalidCredentials) return requireAuth(c)!;
   const parsed = await parseBody(
     c,
-    z.object({
-      mode: z.enum(['off', 'monitor', 'enforce']).optional(),
-      riskScoreThreshold: z.number().min(0).max(100).optional(),
-      blacklist: z.array(z.string()).optional(),
-      whitelist: z.array(z.string()).optional(),
-      blockedTlds: z.array(z.string()).optional(),
-      failurePolicy: z.enum(['fail_open', 'fail_closed']).optional(),
-      allowRequestOverrides: z.boolean().optional(),
-    }),
+    z
+      .object({
+        mode: z.enum(['off', 'monitor', 'enforce']).optional(),
+        riskScoreThreshold: z.number().min(0).max(100).optional(),
+        blacklist: z.array(z.string()).optional(),
+        whitelist: z.array(z.string()).optional(),
+        blockedTlds: z.array(z.string()).optional(),
+        failurePolicy: z.enum(['fail_open', 'fail_closed']).optional(),
+        allowRequestOverrides: z.boolean().optional(),
+      })
+      .refine((b) => Object.keys(b).length > 0, 'Provide at least one threat-protection field'),
   );
   if (!parsed.ok) return parsed.response;
   const teamKey = p.teamId ?? p.keyId ?? 'default';
-  const current = threatPolicies.get(teamKey) ?? DEFAULT_THREAT_POLICY;
+  const current = await getThreatPolicy(c.env.DB, teamKey);
   const updated: ThreatProtectionPolicy = { ...current, ...parsed.data };
-  threatPolicies.set(teamKey, updated);
+  await saveThreatPolicy(c.env.DB, teamKey, updated);
   return c.json({ success: true as const, data: updated });
+});
+
+route.delete('/team/threat-protection', async (c) => {
+  const p = c.get('principal');
+  if (p.invalidCredentials) return requireAuth(c)!;
+  const teamKey = p.teamId ?? p.keyId ?? 'default';
+  await deleteThreatPolicy(c.env.DB, teamKey);
+  return c.json({ success: true as const, deleted: true });
 });
 
 route.get('/keyless/eligibility', (c) =>

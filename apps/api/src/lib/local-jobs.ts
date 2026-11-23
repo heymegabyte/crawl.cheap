@@ -3,6 +3,7 @@ import type {
   CrawlRequest,
   Document,
   ExtractRequest,
+  WebhookConfig,
 } from '@crawlcheap/contracts';
 import {
   assertSafeUrl,
@@ -25,6 +26,45 @@ import {
   type CrawlStatusResult,
 } from '../crawl-do';
 import type { ExtractStatusResult } from '../extract-do';
+import { deliverWebhook } from './webhook';
+
+async function emitLocalWebhook(
+  env: Env,
+  meta: CrawlMeta,
+  suffix: 'started' | 'page' | 'completed' | 'failed',
+  extra?: { data?: Document[]; error?: string },
+): Promise<void> {
+  if (!meta.options.webhook) return;
+  const prefix = meta.mode === 'batch' ? 'batch_scrape' : 'crawl';
+  const type = `${prefix}.${suffix}` as
+    | 'crawl.started'
+    | 'crawl.page'
+    | 'crawl.completed'
+    | 'crawl.failed'
+    | 'batch_scrape.started'
+    | 'batch_scrape.page'
+    | 'batch_scrape.completed'
+    | 'batch_scrape.failed';
+  const wh: WebhookConfig =
+    typeof meta.options.webhook === 'string' ? { url: meta.options.webhook } : meta.options.webhook;
+  await deliverWebhook(
+    wh,
+    {
+      success: suffix !== 'failed',
+      type,
+      id: meta.id ?? '',
+      ...(extra?.data ? { data: extra.data } : {}),
+      ...(extra?.error ? { error: extra.error } : {}),
+      metadata: {
+        ...(wh.metadata ?? {}),
+        total: meta.total,
+        completed: meta.completed,
+        creditsUsed: meta.creditsUsed,
+      },
+    },
+    env.WEBHOOK_SECRET || 'crawlcheap-default-webhook-secret',
+  );
+}
 
 /**
  * In-isolate fallback runners for Crawl, Batch Scrape, and Extract/Agent jobs when
@@ -153,6 +193,7 @@ export function getCrawlRunner(env: Env, id: string) {
       cancel: () => stub.cancel(),
       getErrors: () =>
         stub.getErrors() as Promise<{ errors: CrawlError[]; robotsBlocked: string[] } | null>,
+      watchSocket: (req: Request) => stub.fetch(req),
     };
   }
 
@@ -221,6 +262,7 @@ export function getCrawlRunner(env: Env, id: string) {
       localCrawls.set(jobId, state);
 
       const runAsync = async () => {
+        await emitLocalWebhook(env, state.meta, 'started');
         const ignoreQuery = effectiveBody.ignoreQueryParameters ?? false;
         const seen = new Set<string>([normalizeLocal(base.toString(), ignoreQuery)]);
         const frontier: Array<{ url: string; depth: number }> = [
@@ -335,6 +377,7 @@ export function getCrawlRunner(env: Env, id: string) {
               state.pages.push(res.document);
               state.meta.completed += 1;
               state.meta.creditsUsed += 1;
+              await emitLocalWebhook(env, state.meta, 'page', { data: [res.document] });
             }
             if (res.item.depth < maxDepth && state.meta.completed + frontier.length < limit) {
               for (const link of res.discoveredLinks) {
@@ -376,6 +419,9 @@ export function getCrawlRunner(env: Env, id: string) {
           state.meta.warning = `Only ${state.meta.completed} result(s) found for ${base.toString()}. Consider setting crawlEntireDomain=true or starting from a higher-level path on ${base.hostname}.`;
         }
         await markActiveCrawlFinished(env.DB, jobId, state.meta.status);
+        if (state.meta.status === 'completed') {
+          await emitLocalWebhook(env, state.meta, 'completed');
+        }
       };
 
       state.task = runAsync();
@@ -453,6 +499,7 @@ export function getCrawlRunner(env: Env, id: string) {
         const eng = engineEnv(env);
         const queue = [...valid];
         state.task = (async () => {
+          await emitLocalWebhook(env, state.meta, 'started');
           while (queue.length > 0) {
             if (state.meta.status === 'cancelled') break;
             const batch = queue.splice(0, maxConcurrency);
@@ -485,6 +532,7 @@ export function getCrawlRunner(env: Env, id: string) {
                 state.pages.push(r.document);
                 state.meta.completed += 1;
                 state.meta.creditsUsed += 1;
+                await emitLocalWebhook(env, state.meta, 'page', { data: [r.document] });
               } else {
                 state.errors.push({
                   id: crypto.randomUUID(),
@@ -501,6 +549,9 @@ export function getCrawlRunner(env: Env, id: string) {
           ).toISOString();
           state.meta.duration = computeDurationSec(state.meta.createdAt, state.meta.completedAt);
           await markActiveCrawlFinished(env.DB, jobId, state.meta.status);
+          if (state.meta.status === 'completed') {
+            await emitLocalWebhook(env, state.meta, 'completed');
+          }
         })();
       }
       return { invalidURLs };
@@ -543,6 +594,71 @@ export function getCrawlRunner(env: Env, id: string) {
       const state = localCrawls.get(id);
       if (!state) return null;
       return { errors: state.errors, robotsBlocked: state.robotsBlocked };
+    },
+
+    async watchSocket(_request: Request): Promise<Response> {
+      const state = localCrawls.get(id);
+      if (!state) {
+        return new Response(JSON.stringify({ success: false, error: 'Crawl job not found.' }), {
+          status: 404,
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+      if (state.task) {
+        await state.task;
+      }
+      const frames = [
+        {
+          type: 'catchup',
+          data: {
+            id: state.meta.id,
+            status: state.meta.status,
+            total: state.meta.total,
+            completed: state.meta.completed,
+            creditsUsed: state.meta.creditsUsed,
+            expiresAt: state.meta.expiresAt,
+            data: state.pages,
+          },
+        },
+        ...state.pages.map((doc) => ({ type: 'document', data: doc })),
+        {
+          type: 'done',
+          data: {
+            id: state.meta.id,
+            status: state.meta.status,
+            total: state.meta.total,
+            completed: state.meta.completed,
+            creditsUsed: state.meta.creditsUsed,
+            data: state.pages,
+          },
+        },
+      ];
+      if (typeof WebSocketPair !== 'undefined') {
+        const pair = new WebSocketPair();
+        const client = pair[0];
+        const server = pair[1];
+        server.accept();
+        for (const frame of frames) {
+          server.send(JSON.stringify(frame));
+        }
+        return new Response(null, { status: 101, webSocket: client });
+      }
+      return new Response(
+        JSON.stringify({
+          success: true,
+          protocol: 'firecrawl-watcher-v2',
+          id: state.meta.id,
+          status: state.meta.status,
+          frames,
+        }),
+        {
+          status: 200,
+          headers: {
+            'content-type': 'application/json',
+            'x-firecrawl-watcher': 'catchup,document,done',
+          },
+        },
+      );
     },
   };
 }

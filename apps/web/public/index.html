@@ -370,20 +370,20 @@
   <h2 class="sec">What's live today.</h2>
   <table>
     <tr><th>Endpoint</th><th>Status</th><th>Engine</th></tr>
-    <tr><td><code>POST /v2/scrape</code></td><td><span class="ok">● live</span></td><td>static + browser tier + Workers AI json</td></tr>
-    <tr><td><code>POST /v2/map</code></td><td><span class="ok">● live</span></td><td>sitemap + link discovery</td></tr>
-    <tr><td><code>POST /v2/crawl</code> (+status/cancel/errors)</td><td><span class="ok">● live</span></td><td>Durable Object coordinator</td></tr>
-    <tr><td><code>POST /v2/batch/scrape</code></td><td><span class="ok">● live</span></td><td>Durable Object (fixed frontier)</td></tr>
-    <tr><td><code>POST /v2/extract</code> (+status)</td><td><span class="ok">● live</span></td><td>Workers AI</td></tr>
-    <tr><td><code>POST /v2/search</code> (web/news/images)</td><td><span class="ok">● live</span></td><td>pluggable provider + scrape + tbs</td></tr>
-    <tr><td><code>POST /v2/parse</code></td><td><span class="ok">● live</span></td><td>unpdf / HTML / text</td></tr>
-    <tr><td><code>POST /v2/agent</code> (+status)</td><td><span class="ok">● live</span></td><td>web-search + scrape + AI synthesis</td></tr>
-    <tr><td><code>POST /v2/monitor</code> (+run/checks/webhook)</td><td><span class="ok">● live</span></td><td>cron sweep + change diff + signed alerts</td></tr>
-    <tr><td><code>POST /v2/browser</code> · <code>/:id/act</code> (interact)</td><td><span class="ok">● live</span></td><td>persistent Puppeteer session (DO)</td></tr>
-    <tr><td><code>POST /v2/ai-search/*</code> (RAG)</td><td><span class="ok">● live</span></td><td>Vectorize + Workers AI</td></tr>
-    <tr><td><code>GET /v2/pricing</code> · <code>POST /v2/quote</code></td><td><span class="ok">● live</span></td><td>price book + preflight estimate</td></tr>
-    <tr><td>Remote MCP (<code>/v2/mcp</code>, <code>/v2/mcp-search</code>)</td><td><span class="ok">● live</span></td><td>createMcpHandler-style, stateless · ~13 tools</td></tr>
-    <tr><td>Stripe subscriptions + one-time credit packs</td><td><span class="soon">◐ planned</span></td><td>built behind the ledger; awaiting a Stripe test key</td></tr>
+    <tr><td><code>POST /v2/scrape</code> · <code>/v1/scrape</code></td><td><span class="ok">● live</span></td><td>static + Cloudflare "Markdown for Agents" + Browser Rendering + Workers AI JSON/Branding</td></tr>
+    <tr><td><code>POST /v2/map</code> · <code>/v1/map</code></td><td><span class="ok">● live</span></td><td>sitemap + link discovery (v2 objects · v1 string[])</td></tr>
+    <tr><td><code>POST /v2/crawl</code> · <code>/v1/crawl</code> (+WebSocket watcher)</td><td><span class="ok">● live</span></td><td>Cloudflare Browser Rendering /crawl + Durable Object + Hibernatable WebSocket Watcher + signed lifecycle webhooks</td></tr>
+    <tr><td><code>POST /v2/batch/scrape</code> · <code>/v1/batch/scrape</code></td><td><span class="ok">● live</span></td><td>Durable Object coordinator + WebSocket watcher</td></tr>
+    <tr><td><code>POST /v2/extract</code> · <code>/v1/extract</code></td><td><span class="ok">● live</span></td><td>Workers AI + ExtractCoordinator DO</td></tr>
+    <tr><td><code>POST /v2/search</code> · <code>/v1/search</code></td><td><span class="ok">● live</span></td><td>Exa / Tavily / Cloudflare Edge fallback + scrapeOptions + tbs</td></tr>
+    <tr><td><code>POST /v2/parse</code> (+upload-url + 10 formats)</td><td><span class="ok">● live</span></td><td>Workers AI toMarkdown() + unpdf (PDF, DOCX, XLSX, PPTX, ODT, ODS, CSV, RTF, HTML, Images)</td></tr>
+    <tr><td><code>POST /v2/agent</code> · <code>/v1/deep-research</code> · <code>/v1/llmstxt</code></td><td><span class="ok">● live</span></td><td>multi-turn D1 threads + trace + snapshots + llms.txt generator</td></tr>
+    <tr><td><code>POST /v2/monitor</code> (+PATCH/DELETE/run/checks)</td><td><span class="ok">● live</span></td><td>cron sweep + git-diff &amp; AI JSON diff + signed alerts</td></tr>
+    <tr><td><code>POST /v2/browser</code> · <code>/v2/interact/*</code> (AI Co-Pilot)</td><td><span class="ok">● live</span></td><td>persistent Puppeteer DO + natural-language AI Browser Co-Pilot</td></tr>
+    <tr><td><code>Better Auth + OAuth 2.1</code> (<code>/.well-known/*</code>, PKCE S256)</td><td><span class="ok">● live</span></td><td>RFC 9728, RFC 8414, RFC 7591 DCR, PKCE S256, session rotation, RBAC, fc- &amp; cc_live_ keys</td></tr>
+    <tr><td><code>POST /v2/ai-search/*</code> · <code>/v2/support/*</code> (RAG)</td><td><span class="ok">● live</span></td><td>Vectorize + Workers AI semantic search &amp; docs assistant</td></tr>
+    <tr><td><code>GET /v2/pricing</code> · <code>POST /v2/quote</code></td><td><span class="ok">● live</span></td><td>price book + preflight estimate + D1 credit &amp; token ledgers</td></tr>
+    <tr><td>Remote MCP (<code>/v2/mcp</code>, <code>/v2/mcp-search</code>, <code>/v2/mcp-keyless</code>)</td><td><span class="ok">● live</span></td><td>Streamable-HTTP JSON-RPC · all 30 pinned firecrawl_* tools</td></tr>
   </table>
 </div></section>
 
@@ -422,7 +422,7 @@
 </footer>
 
 <script>
-  const API = 'https://crawl-cheap-api.manhattan.workers.dev';
+  const API = 'https://api.crawl.cheap';
   // Scroll reveal
   const io = new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));

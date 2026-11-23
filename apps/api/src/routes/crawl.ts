@@ -15,6 +15,11 @@ import { fail, parseBody, assertUuidOrFail } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
 import { allowDemo } from '../lib/ratelimit';
 import { getCrawlRunner } from '../lib/local-jobs';
+import {
+  assertThreatPolicyAllowed,
+  claimIdempotencyKey,
+  ThreatBlockedError,
+} from '../lib/durable-state';
 
 const route = new Hono<{ Bindings: Env; Variables: Vars }>();
 
@@ -49,10 +54,8 @@ route.post('/crawl', async (c) => {
   if (denied) return denied;
 
   const idempotencyKey = c.req.header('x-idempotency-key')?.trim();
-  if (idempotencyKey) {
-    if (seenIdempotencyKeys.has(idempotencyKey)) {
-      return fail(c, 409, 'Idempotency key already used for an existing crawl job.', 'BAD_REQUEST');
-    }
+  if (idempotencyKey && seenIdempotencyKeys.has(idempotencyKey)) {
+    return fail(c, 409, 'Idempotency key already used for an existing crawl job.', 'BAD_REQUEST');
   }
 
   const parsed = await parseBody(c, CrawlRequestSchema);
@@ -61,10 +64,20 @@ route.post('/crawl', async (c) => {
   const id = crypto.randomUUID();
   const p = c.get('principal');
   const teamId = p.teamId ?? p.keyId ?? 'demo-team';
+
+  if (idempotencyKey) {
+    const claimed = await claimIdempotencyKey(c.env.DB, idempotencyKey, id, teamId);
+    if (claimed.conflict) {
+      return fail(c, 409, 'Idempotency key already used for an existing crawl job.', 'BAD_REQUEST');
+    }
+    seenIdempotencyKeys.set(idempotencyKey, id);
+  }
+
   const teamMaxConcurrency = p.maxConcurrency ?? 25;
   const runner = getCrawlRunner(c.env, id);
 
   try {
+    await assertThreatPolicyAllowed(c.env.DB, teamId, parsed.data.url);
     await registerActiveCrawl(c.env.DB, {
       id,
       teamId,
@@ -79,9 +92,9 @@ route.post('/crawl', async (c) => {
       currentConcurrency: Math.min(parsed.data.maxConcurrency ?? 5, teamMaxConcurrency),
     });
     await runner.start(parsed.data, id, { teamId, teamMaxConcurrency });
-    if (idempotencyKey) seenIdempotencyKeys.set(idempotencyKey, id);
   } catch (err) {
     await markActiveCrawlFinished(c.env.DB, id, 'failed');
+    if (err instanceof ThreatBlockedError) return fail(c, 403, err.message, 'UNSUPPORTED_SITE');
     if (err instanceof UnsupportedSiteError) return fail(c, 403, err.message, 'UNSUPPORTED_SITE');
     if (err instanceof SsrfError) return fail(c, 400, err.message, 'unsafe_domain_blocked');
     return fail(
@@ -136,7 +149,6 @@ const activeCrawlsHandler = async (c: Context<{ Bindings: Env; Variables: Vars }
   for (const [id, entry] of activeCrawlsRegistry.entries()) {
     if (entry.status !== 'scraping') continue;
     if (teamId && entry.teamId !== teamId && entry.teamId !== 'demo-team') continue;
-    // Double-check live status from DO / local runner
     try {
       const s = await getCrawlRunner(c.env, id).status(0, 1);
       if (s && s.status !== 'scraping') {
@@ -172,8 +184,14 @@ route.get('/crawl/:id', async (c) => {
   const invalid = assertUuidOrFail(c, id);
   if (invalid) return invalid;
 
-  const skip = Math.max(0, Number(c.req.query('skip') ?? 0) || 0);
   const runner = getCrawlRunner(c.env, id);
+
+  // Hibernatable WebSocket Watcher support for official Firecrawl `client.watcher(jobId)` / `crawlUrlAndWatch`
+  if (c.req.header('upgrade')?.toLowerCase() === 'websocket' || c.req.query('watch') === 'true') {
+    return runner.watchSocket(c.req.raw);
+  }
+
+  const skip = Math.max(0, Number(c.req.query('skip') ?? 0) || 0);
   const s = (await runner.status(skip, 10)) as CrawlStatusResult | null;
   if (!s) return fail(c, 404, 'Crawl job not found.');
   if (s.status !== 'scraping') {

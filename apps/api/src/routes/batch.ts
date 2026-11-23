@@ -7,6 +7,7 @@ import { fail, parseBody, assertUuidOrFail } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
 import { allowDemo } from '../lib/ratelimit';
 import { getCrawlRunner } from '../lib/local-jobs';
+import { assertThreatPolicyAllowed, ThreatBlockedError } from '../lib/durable-state';
 
 const route = new Hono<{ Bindings: Env; Variables: Vars }>();
 
@@ -54,9 +55,18 @@ route.post('/batch/scrape', async (c) => {
     return fail(c, 400, `Invalid URLs: ${malformed.join(', ')}`, 'BAD_REQUEST');
   }
 
-  const id = crypto.randomUUID();
   const p = c.get('principal');
   const teamId = p.teamId ?? p.keyId ?? 'demo-team';
+  try {
+    for (const u of parsed.data.urls) {
+      await assertThreatPolicyAllowed(c.env.DB, teamId, u);
+    }
+  } catch (err) {
+    if (err instanceof ThreatBlockedError) return fail(c, 403, err.message, 'UNSUPPORTED_SITE');
+    throw err;
+  }
+
+  const id = crypto.randomUUID();
   const teamMaxConcurrency = p.maxConcurrency ?? 25;
   const runner = getCrawlRunner(c.env, id);
 
@@ -90,8 +100,13 @@ route.get('/batch/scrape/:id', async (c) => {
   const invalid = assertUuidOrFail(c, id);
   if (invalid) return invalid;
 
-  const skip = Math.max(0, Number(c.req.query('skip') ?? 0) || 0);
   const runner = getCrawlRunner(c.env, id);
+
+  if (c.req.header('upgrade')?.toLowerCase() === 'websocket' || c.req.query('watch') === 'true') {
+    return runner.watchSocket(c.req.raw);
+  }
+
+  const skip = Math.max(0, Number(c.req.query('skip') ?? 0) || 0);
   const s = (await runner.status(skip, 10)) as CrawlStatusResult | null;
   if (!s) return fail(c, 404, 'Batch scrape job not found.');
   if (s.status !== 'scraping') {

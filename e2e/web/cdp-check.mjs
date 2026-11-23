@@ -15,7 +15,7 @@
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 
-const URL_ = process.env.URL ?? 'https://crawl-cheap-web.manhattan.workers.dev';
+const URL_ = (process.env.URL ?? 'https://crawl.cheap').replace(/\/+$/, '');
 const PORT = Number(process.env.CDP_PORT ?? 9333);
 const BINS = [
   process.env.CHROME,
@@ -230,6 +230,66 @@ async function main() {
     mkdirSync('e2e/web/screenshots', { recursive: true });
     writeFileSync('e2e/web/screenshots/home.png', Buffer.from(data, 'base64'));
     console.log('\n  📸 e2e/web/screenshots/home.png');
+  } catch {}
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Flagship Developer Studio (/app/) + 6-Breakpoint Responsive Audit
+  // ───────────────────────────────────────────────────────────────────────────
+  console.log(`\nFlagship Developer Studio (/app/) + 6-Breakpoint Audit → ${URL_}/app/\n`);
+  const studioErrStart = consoleErrors.length;
+  const loadedStudio = waitFor(
+    (m) => m.method === 'Page.loadEventFired' && m.sessionId === sessionId,
+    20000,
+  );
+  await S('Page.navigate', { url: `${URL_}/app/` });
+  await loadedStudio;
+  await sleep(1500);
+
+  const studioTitle = await ev15("document.querySelector('h1.t')?.innerText||''");
+  ok(
+    'Studio H1 renders Developer Studio & AI Command Center',
+    /Developer Studio/i.test(studioTitle),
+    studioTitle,
+  );
+
+  const bgRgb = await ev15('getComputedStyle(document.body).backgroundColor');
+  ok('Dark-first #060610 background (rgb(6, 6, 16)) verified', bgRgb === 'rgb(6, 6, 16)', bgRgb);
+
+  const graphNodes = await ev15("document.querySelectorAll('#crawlGraphSvg circle').length");
+  ok('WebSocket Crawl Graph SVG topology rendered', graphNodes >= 2, `nodes=${graphNodes}`);
+
+  // Test all 6 required responsive breakpoints (320px, 375px, 768px, 1024px, 1280px, 1440px)
+  for (const width of [320, 375, 768, 1024, 1280, 1440]) {
+    await S('Emulation.setDeviceMetricsOverride', {
+      width,
+      height: 900,
+      deviceScaleFactor: 2,
+      mobile: width < 768,
+    });
+    await sleep(150);
+    const overflow = await ev15(
+      'document.documentElement.scrollWidth - document.documentElement.clientWidth',
+    );
+    ok(
+      `Breakpoint ${width}px has zero horizontal overflow`,
+      overflow <= 1,
+      `overflow=${overflow}px`,
+    );
+  }
+
+  const studioErrors = consoleErrors.slice(studioErrStart);
+  ok(
+    '0 console errors / CSP violations on /app/ across all 6 breakpoints',
+    studioErrors.length === 0,
+    '\n   - ' + studioErrors.join('\n   - '),
+  );
+
+  try {
+    const { data } = await S('Page.captureScreenshot', { format: 'png' });
+    const { writeFileSync, mkdirSync } = await import('node:fs');
+    mkdirSync('e2e/web/screenshots', { recursive: true });
+    writeFileSync('e2e/web/screenshots/studio.png', Buffer.from(data, 'base64'));
+    console.log('  📸 e2e/web/screenshots/studio.png');
   } catch {}
 
   console.log(`\n${pass} passed, ${fail} failed\n`);

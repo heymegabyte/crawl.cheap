@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { SearchRequestSchema } from '@crawlcheap/contracts';
 import { webSearch, searchAvailable, scrape, SsrfError } from '@crawlcheap/engine';
 import { engineEnv, type Env } from '../env';
-import { fail, parseBody } from '../lib/respond';
+import { fail, parseBody, assertUuidOrFail } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
 import { allowDemo } from '../lib/ratelimit';
 
@@ -274,18 +274,26 @@ route.get('/search/research/papers/:id/similar', (c) => {
 route.post('/search/:jobId/feedback', async (c) => {
   const denied = gate(c);
   if (denied) return denied;
+  const jobId = c.req.param('jobId');
+  const invalid = assertUuidOrFail(c, jobId);
+  if (invalid) return invalid;
   const parsed = await parseBody(
     c,
-    z.object({
-      vote: z.enum(['up', 'down', 'good', 'bad']).optional(),
-      comment: z.string().max(2000).optional(),
-      rating: z.number().optional(),
-    }),
+    z
+      .object({
+        vote: z.enum(['up', 'down', 'good', 'bad']).optional(),
+        comment: z.string().max(2000).optional(),
+        rating: z.number().optional(),
+      })
+      .refine(
+        (b) => Boolean(b.vote || b.comment || b.rating !== undefined),
+        'Provide vote, comment, or rating',
+      ),
   );
   if (!parsed.ok) return parsed.response;
   return c.json({
     success: true as const,
-    id: c.req.param('jobId'),
+    id: jobId,
   });
 });
 
