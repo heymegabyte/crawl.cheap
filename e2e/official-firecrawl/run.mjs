@@ -138,6 +138,53 @@ console.log('1. Better Auth & OAuth 2.1 Authorization Server:');
     'GET /api/auth/session → verified Better Auth user & tenant',
     sessCheck.status === 200 && sessCheck.body?.user?.email === email,
   );
+
+  // Google OAuth, GitHub OAuth & Single-Use Magic Email Link E2E
+  const googleSocial = await call('/api/auth/sign-in/social', {
+    method: 'POST',
+    body: { provider: 'google', callbackURL: 'https://crawl.cheap/app/' },
+  });
+  ok(
+    'POST /api/auth/sign-in/social (provider: google) → returns Google OAuth URL',
+    googleSocial.status === 200 && googleSocial.body?.provider === 'google',
+  );
+
+  const githubSocial = await call('/api/auth/sign-in/social', {
+    method: 'POST',
+    body: { provider: 'github', callbackURL: 'https://crawl.cheap/app/' },
+  });
+  ok(
+    'POST /api/auth/sign-in/social (provider: github) → returns GitHub OAuth URL',
+    githubSocial.status === 200 && githubSocial.body?.provider === 'github',
+  );
+
+  const magicEmail = `magic-${crypto.randomUUID().slice(0, 8)}@crawl.cheap`;
+  const magicSend = await call('/api/auth/sign-in/magic-link', {
+    method: 'POST',
+    body: { email: magicEmail, callbackURL: 'https://crawl.cheap/app/' },
+  });
+  const magicTok = magicSend.body?.token ?? magicSend.body?.verifyToken ?? '';
+  ok(
+    'POST /api/auth/sign-in/magic-link → issues single-use ml_ token',
+    magicSend.status === 200 && /^ml_/.test(magicTok),
+  );
+
+  const magicVerify = await call(
+    `/api/auth/magic-link/verify?token=${encodeURIComponent(magicTok)}`,
+    { headers: { accept: 'application/json' } },
+  );
+  ok(
+    'GET /api/auth/magic-link/verify → mints TT-SESSION + cc_live_ API key',
+    magicVerify.status === 200 &&
+      magicVerify.body?.user?.email === magicEmail &&
+      /^cc_live_/.test(magicVerify.body?.apiKey ?? ''),
+  );
+
+  const magicReplay = await call(
+    `/api/auth/magic-link/verify?token=${encodeURIComponent(magicTok)}`,
+    { headers: { accept: 'application/json' } },
+  );
+  ok('Replaying consumed Magic Email Link is rejected with 401', magicReplay.status === 401);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

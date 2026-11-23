@@ -301,4 +301,88 @@ describe('Better Auth + OAuth 2.1 Cloudflare-native Authentication & Firecrawl C
     expect(creditViaFcKey.status).toBe(200);
     expect(creditViaFcKey.body.success).toBe(true);
   });
+
+  it('supports Google OAuth, GitHub OAuth, and single-use Magic Email Link sign-in / sign-up flows', async () => {
+    // 1. Google Social OAuth flow
+    const googleInit = await req('/api/auth/sign-in/social', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        provider: 'google',
+        email: 'google.founder@crawl.cheap',
+        name: 'Google Founder',
+        callbackURL: 'https://crawl.cheap/app/',
+      }),
+    });
+    expect(googleInit.status).toBe(200);
+    expect(googleInit.body.provider).toBe('google');
+    expect(googleInit.body.url).toContain('/api/auth/callback/google');
+
+    const googleCbPath =
+      new URL(googleInit.body.url).pathname + new URL(googleInit.body.url).search;
+    const googleCb = await req(googleCbPath);
+    expect(googleCb.status).toBe(302);
+    const googleDest = new URL(googleCb.headers.get('location')!);
+    expect(googleDest.searchParams.get('provider')).toBe('google');
+    expect(googleDest.searchParams.get('email')).toBe('google.founder@crawl.cheap');
+    expect(googleDest.searchParams.get('apiKey')).toMatch(/^cc_live_/);
+    expect(googleDest.searchParams.get('token')).toBeTruthy();
+
+    // 2. GitHub Social OAuth flow
+    const ghInit = await req('/api/auth/sign-in/social', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        provider: 'github',
+        email: 'github.hacker@crawl.cheap',
+        name: 'GitHub Hacker',
+        callbackURL: 'https://crawl.cheap/app/',
+      }),
+    });
+    expect(ghInit.status).toBe(200);
+    expect(ghInit.body.provider).toBe('github');
+    const ghCbPath = new URL(ghInit.body.url).pathname + new URL(ghInit.body.url).search;
+    const ghCb = await req(ghCbPath);
+    expect(ghCb.status).toBe(302);
+    const ghDest = new URL(ghCb.headers.get('location')!);
+    expect(ghDest.searchParams.get('provider')).toBe('github');
+    expect(ghDest.searchParams.get('email')).toBe('github.hacker@crawl.cheap');
+    expect(ghDest.searchParams.get('apiKey')).toMatch(/^cc_live_/);
+
+    // 3. Magic Email Link flow (send + verify + single-use enforcement)
+    const magicSend = await req('/api/auth/sign-in/magic-link', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        email: 'magic.admin@crawl.cheap',
+        name: 'Magic Admin',
+        callbackURL: 'https://crawl.cheap/app/',
+      }),
+    });
+    expect(magicSend.status).toBe(200);
+    expect(magicSend.body.success).toBe(true);
+    expect(magicSend.body.verifyToken).toMatch(/^ml_/);
+    expect(magicSend.body.magicLinkUrl).toContain('/api/auth/magic-link/verify');
+
+    const magicVerify = await req('/api/auth/magic-link/verify', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ token: magicSend.body.verifyToken }),
+    });
+    expect(magicVerify.status).toBe(200);
+    expect(magicVerify.body.success).toBe(true);
+    expect(magicVerify.body.provider).toBe('magic-link');
+    expect(magicVerify.body.user.email).toBe('magic.admin@crawl.cheap');
+    expect(magicVerify.body.apiKey).toMatch(/^cc_live_/);
+    expect(magicVerify.body.token).toBeTruthy();
+
+    // Replaying the consumed Magic Link token is rejected with 401
+    const magicReplay = await req('/api/auth/magic-link/verify', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ token: magicSend.body.verifyToken }),
+    });
+    expect(magicReplay.status).toBe(401);
+    expect(magicReplay.body.success).toBe(false);
+  });
 });

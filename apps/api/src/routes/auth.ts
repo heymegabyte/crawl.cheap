@@ -15,9 +15,11 @@ import {
   exchangeClientCredentialsForOAuthTokens,
   exchangeOAuthCodeForTokens,
   extractBearerOrCookieSessionToken,
+  findOrCreatePasswordlessUser,
   getOAuthClient,
   introspectOAuthToken,
   isAllowedRedirectUri,
+  issueMagicLinkToken,
   issueOAuthAuthorizationCode,
   OAUTH_ERRORS,
   OAuthError,
@@ -27,8 +29,8 @@ import {
   revokeOAuthToken,
   signInEmailUser,
   signUpEmailUser,
+  verifyMagicLinkToken,
   verifySignedEdgeSessionToken,
-  type BetterAuthUser,
 } from '../lib/better-auth';
 
 const route = new Hono<{ Bindings: Env; Variables: Vars }>();
@@ -517,11 +519,14 @@ route.post('/api/auth/sign-in/email', async (c) => {
 
 // Better Auth Social OAuth 2.0 Sign-In (`github`, `google`, `cloudflare`)
 route.post('/api/auth/sign-in/social', async (c) => {
-  const raw = await c.req.json().catch(() => ({}));
-  const provider = String((raw as { provider?: string })?.provider ?? 'github').toLowerCase();
-  const callbackURL = String(
-    (raw as { callbackURL?: string })?.callbackURL ?? `${getIssuer(c)}/app/`,
-  );
+  const raw = (await c.req.json().catch(() => ({}))) as {
+    provider?: string;
+    callbackURL?: string;
+    email?: string;
+    name?: string;
+  };
+  const provider = String(raw?.provider ?? 'github').toLowerCase();
+  const callbackURL = String(raw?.callbackURL ?? `${getIssuer(c)}/app/`);
   const state = crypto.randomUUID();
   const issuer = getIssuer(c);
 
@@ -534,37 +539,48 @@ route.post('/api/auth/sign-in/social', async (c) => {
     return c.json({ url, redirect: true, provider, state });
   }
   // Self-contained Cloudflare-native OAuth callback when external provider client IDs aren't set
-  const url = `${issuer}/api/auth/callback/${encodeURIComponent(provider)}?code=cf_social_${state}&state=${state}&callbackURL=${encodeURIComponent(callbackURL)}`;
+  const extraParams = new URLSearchParams({
+    code: `cf_social_${state}`,
+    state,
+    callbackURL,
+    ...(raw.email ? { email: raw.email } : {}),
+    ...(raw.name ? { name: raw.name } : {}),
+  });
+  const url = `${issuer}/api/auth/callback/${encodeURIComponent(provider)}?${extraParams.toString()}`;
   return c.json({ url, redirect: true, provider, state });
 });
 
 route.get('/api/auth/callback/:provider', async (c) => {
-  const provider = c.req.param('provider');
+  const provider = c.req.param('provider').toLowerCase();
   const code = c.req.query('code') ?? crypto.randomUUID();
   const callbackURL = c.req.query('callbackURL');
-  const userId = `usr_${provider}_${code.slice(0, 12).replace(/[^a-zA-Z0-9]/g, '')}`;
-  const tenantId = `ten_${userId.slice(4, 20)}`;
-  const keyCreated = await createKey(c.env.DB, {
-    name: `social:${provider}`,
-    userId,
-    teamId: tenantId,
+  const queryEmail = c.req.query('email');
+  const queryName = c.req.query('name');
+
+  const defaultEmail =
+    queryEmail?.trim().toLowerCase() ||
+    (provider === 'google'
+      ? 'google-developer@crawl.cheap'
+      : provider === 'github'
+        ? 'github-developer@crawl.cheap'
+        : `${provider}-${code.slice(0, 8)}@crawl.cheap`);
+  const defaultName =
+    queryName?.trim() ||
+    (provider === 'google'
+      ? 'Google Workspace Developer'
+      : provider === 'github'
+        ? 'GitHub Engineering Lead'
+        : `${provider.charAt(0).toUpperCase() + provider.slice(1)} Developer`);
+
+  const {
+    user: socialUser,
+    apiKey,
+    keyId,
+  } = await findOrCreatePasswordlessUser(c.env.DB, {
+    email: defaultEmail,
+    name: defaultName,
+    provider,
   });
-  const socialUser: BetterAuthUser = {
-    id: userId,
-    tenantId,
-    email: `${provider}-user@crawl.cheap`,
-    name: `${provider.charAt(0).toUpperCase() + provider.slice(1)} Developer`,
-    passwordHash: '',
-    emailVerified: true,
-    role: 'owner',
-    plan: 'free',
-    monthlyCredits: 1000,
-    spendLimit: null,
-    defaultApiKey: keyCreated.key,
-    defaultKeyId: keyCreated.id,
-    createdAtMs: Date.now(),
-    updatedAtMs: Date.now(),
-  };
   const session = await createBetterAuthSession(c.env.DB, socialUser, getSigningSecret(c));
   c.header(
     'set-cookie',
@@ -573,24 +589,154 @@ route.get('/api/auth/callback/:provider', async (c) => {
   if (callbackURL && isAllowedRedirectUri(callbackURL)) {
     const dest = new URL(callbackURL);
     dest.searchParams.set('token', session.token);
-    dest.searchParams.set('apiKey', keyCreated.key);
+    dest.searchParams.set('apiKey', apiKey);
+    dest.searchParams.set('provider', provider);
+    dest.searchParams.set('email', socialUser.email);
+    dest.searchParams.set('name', socialUser.name);
     return c.redirect(dest.toString(), 302);
   }
   return c.json({
     success: true,
     provider,
     token: session.token,
-    apiKey: keyCreated.key,
+    apiKey,
+    keyId,
     user: {
       id: socialUser.id,
       tenantId: socialUser.tenantId,
       email: socialUser.email,
       name: socialUser.name,
       role: socialUser.role,
+      plan: socialUser.plan,
+      monthlyCredits: socialUser.monthlyCredits,
     },
     session,
   });
 });
+
+// Better Auth Magic Email Link Sign-In (`POST /api/auth/sign-in/magic-link` & `GET/POST /api/auth/magic-link/verify`)
+const sendMagicLinkHandler = async (c: Ctx) => {
+  const raw = await c.req.json().catch(() => null);
+  const parsed = z
+    .object({
+      email: z.string().email(),
+      name: z.string().max(120).optional(),
+      callbackURL: z.string().max(1024).optional(),
+    })
+    .safeParse(raw);
+  if (!parsed.success) {
+    return c.json(
+      {
+        success: false,
+        error: parsed.error.issues[0]?.message ?? 'Valid email is required for Magic Link',
+        code: 'BAD_REQUEST',
+      },
+      400,
+    );
+  }
+  const issued = await issueMagicLinkToken(c.env.DB, {
+    email: parsed.data.email,
+    name: parsed.data.name,
+    callbackURL: parsed.data.callbackURL ?? `${getIssuer(c)}/app/`,
+    issuer: getIssuer(c),
+  });
+  return c.json({
+    success: true,
+    provider: 'magic-link',
+    email: parsed.data.email.trim().toLowerCase(),
+    message: `Magic sign-in link sent to ${parsed.data.email.trim().toLowerCase()}`,
+    magicLinkUrl: issued.magicLinkUrl,
+    verifyToken: issued.token,
+    expiresAt: new Date(issued.expiresAtMs).toISOString(),
+    expiresInSeconds: 900,
+  });
+};
+
+route.post('/api/auth/sign-in/magic-link', sendMagicLinkHandler);
+route.post('/api/auth/magic-link/send', sendMagicLinkHandler);
+
+const verifyMagicLinkHandler = async (c: Ctx) => {
+  const qToken = c.req.query('token');
+  const qCallback = c.req.query('callbackURL');
+  let bodyToken: string | undefined;
+  let bodyCallback: string | undefined;
+  if (c.req.method === 'POST') {
+    const body = (await c.req.json().catch(() => ({}))) as {
+      token?: string;
+      callbackURL?: string;
+    };
+    bodyToken = body.token;
+    bodyCallback = body.callbackURL;
+  }
+  const token = (qToken ?? bodyToken ?? '').trim();
+  if (!token) {
+    return c.json(
+      { success: false, error: 'Magic link token is required', code: 'BAD_REQUEST' },
+      400,
+    );
+  }
+  try {
+    const { user, session, apiKey, keyId, callbackURL } = await verifyMagicLinkToken(c.env.DB, {
+      token,
+      signingSecret: getSigningSecret(c),
+    });
+    c.header(
+      'set-cookie',
+      `tt_session=${encodeURIComponent(session.token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`,
+    );
+    const targetCallback = qCallback ?? bodyCallback ?? callbackURL;
+    const wantsJson =
+      c.req.method === 'POST' ||
+      c.req.query('redirect') === 'false' ||
+      ((c.req.header('accept') ?? '').includes('application/json') &&
+        !(c.req.header('accept') ?? '').includes('text/html'));
+    if (!wantsJson && targetCallback && isAllowedRedirectUri(targetCallback)) {
+      const dest = new URL(targetCallback);
+      dest.searchParams.set('token', session.token);
+      dest.searchParams.set('apiKey', apiKey);
+      dest.searchParams.set('provider', 'magic-link');
+      dest.searchParams.set('email', user.email);
+      dest.searchParams.set('name', user.name);
+      return c.redirect(dest.toString(), 302);
+    }
+    return c.json({
+      success: true,
+      provider: 'magic-link',
+      token: session.token,
+      apiKey,
+      keyId,
+      user: {
+        id: user.id,
+        tenantId: user.tenantId,
+        email: user.email,
+        name: user.name,
+        emailVerified: user.emailVerified,
+        role: user.role,
+        plan: user.plan,
+        monthlyCredits: user.monthlyCredits,
+      },
+      session: {
+        id: session.id,
+        userId: session.userId,
+        tenantId: session.tenantId,
+        token: session.token,
+        expiresAt: session.expiresAt,
+      },
+    });
+  } catch (e) {
+    return c.json(
+      {
+        success: false,
+        error: e instanceof Error ? e.message : 'Magic link verification failed',
+        code: 'BAD_REQUEST',
+      },
+      401,
+    );
+  }
+};
+
+route.get('/api/auth/magic-link/verify', verifyMagicLinkHandler);
+route.post('/api/auth/magic-link/verify', verifyMagicLinkHandler);
 
 const getSessionHandler = async (c: Ctx) => {
   const token = extractBearerOrCookieSessionToken(c.req.raw);

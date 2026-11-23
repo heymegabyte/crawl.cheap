@@ -589,6 +589,18 @@ const memOAuthClients = new Map<string, OAuthClientRecord>();
 const memOAuthCodes = new Map<string, AuthCodeRecord>();
 const memOAuthTokens = new Map<string, TokenRecord>();
 
+export interface MagicLinkRecord {
+  tokenHash: string;
+  email: string;
+  name?: string;
+  callbackURL: string;
+  expiresAtMs: number;
+  used: boolean;
+}
+
+const memMagicLinks = new Map<string, MagicLinkRecord>();
+export const MAGIC_LINK_TTL_MS = 15 * 60_000; // 15 minutes
+
 let schemaEnsured = false;
 
 export async function ensureAuthSchema(db?: D1Database): Promise<void> {
@@ -607,6 +619,11 @@ export async function ensureAuthSchema(db?: D1Database): Promise<void> {
         token_hash TEXT NOT NULL UNIQUE, created_at_ms INTEGER NOT NULL,
         last_rotated_at_ms INTEGER NOT NULL, expires_at_ms INTEGER NOT NULL,
         user_agent TEXT, ip_address TEXT
+      )`),
+      db.prepare(`CREATE TABLE IF NOT EXISTS auth_magic_links (
+        token_hash TEXT PRIMARY KEY, email TEXT NOT NULL, name TEXT,
+        callback_url TEXT NOT NULL, expires_at_ms INTEGER NOT NULL,
+        used INTEGER NOT NULL DEFAULT 0, created_at_ms INTEGER NOT NULL
       )`),
       db.prepare(`CREATE TABLE IF NOT EXISTS oauth_clients (
         client_id TEXT PRIMARY KEY, client_name TEXT, redirect_uris TEXT NOT NULL,
@@ -776,6 +793,276 @@ export async function signInEmailUser(
 
   const session = await createBetterAuthSession(db, user, input.signingSecret);
   return { user, session };
+}
+
+/**
+ * Find or create a passwordless / social user (Magic Email Link, Google OAuth, GitHub OAuth)
+ * in D1 + memory, automatically provisioning a default API key on first login.
+ */
+export async function findOrCreatePasswordlessUser(
+  db: D1Database | undefined,
+  input: {
+    email: string;
+    name?: string;
+    provider?: string;
+    image?: string | null;
+    plan?: string;
+  },
+): Promise<{ user: BetterAuthUser; apiKey: string; keyId: string }> {
+  await ensureAuthSchema(db);
+  const email = input.email.trim().toLowerCase();
+  let user = memUsersByEmail.get(email);
+
+  if (!user && db) {
+    try {
+      const row = await db.prepare('SELECT * FROM auth_users WHERE email = ?').bind(email).first<{
+        id: string;
+        tenant_id: string;
+        email: string;
+        name: string;
+        password_hash: string;
+        role: string;
+        plan: string;
+        monthly_credits: number;
+        spend_limit: number | null;
+        created_at_ms: number;
+        updated_at_ms: number;
+      }>();
+      if (row) {
+        const keyCreated = await createKey(db, {
+          name: `${input.provider ?? 'magic'}:${email}`,
+          plan: row.plan,
+          userId: row.id,
+          teamId: row.tenant_id,
+        });
+        user = {
+          id: row.id,
+          tenantId: row.tenant_id,
+          email: row.email,
+          name: row.name || input.name || email.split('@')[0] || 'Developer',
+          passwordHash: row.password_hash || '',
+          emailVerified: true,
+          image: input.image ?? null,
+          role: row.role || 'owner',
+          plan: row.plan || 'free',
+          monthlyCredits: row.monthly_credits || 1000,
+          spendLimit: row.spend_limit,
+          defaultApiKey: keyCreated.key,
+          defaultKeyId: keyCreated.id,
+          createdAtMs: row.created_at_ms,
+          updatedAtMs: Date.now(),
+        };
+        memUsersByEmail.set(email, user);
+        memUsersById.set(user.id, user);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (!user) {
+    const userId = `usr_${crypto.randomUUID().replace(/-/g, '')}`;
+    const tenantId = `ten_${userId.slice(4, 20)}`;
+    const plan = input.plan && PLAN_CREDITS[input.plan] ? input.plan : 'free';
+    const monthlyCredits = PLAN_CREDITS[plan]!;
+    const now = Date.now();
+    const keyCreated = await createKey(db, {
+      name: `${input.provider ?? 'magic'}:${email}`,
+      plan,
+      userId,
+      teamId: tenantId,
+    });
+    user = {
+      id: userId,
+      tenantId,
+      email,
+      name: input.name?.trim() || email.split('@')[0] || 'Developer',
+      passwordHash: '',
+      emailVerified: true,
+      image: input.image ?? null,
+      role: 'owner',
+      plan,
+      monthlyCredits,
+      spendLimit: null,
+      defaultApiKey: keyCreated.key,
+      defaultKeyId: keyCreated.id,
+      createdAtMs: now,
+      updatedAtMs: now,
+    };
+    memUsersByEmail.set(email, user);
+    memUsersById.set(userId, user);
+    if (db) {
+      try {
+        await db
+          .prepare(
+            'INSERT INTO auth_users (id, tenant_id, email, name, password_hash, email_verified, image, role, plan, monthly_credits, created_at_ms, updated_at_ms) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)',
+          )
+          .bind(
+            userId,
+            tenantId,
+            email,
+            user.name,
+            '',
+            user.image ?? null,
+            'owner',
+            plan,
+            monthlyCredits,
+            now,
+            now,
+          )
+          .run();
+      } catch {
+        /* ignore */
+      }
+    }
+  } else if (!user.defaultApiKey) {
+    const keyCreated = await createKey(db, {
+      name: `${input.provider ?? 'magic'}:${email}`,
+      plan: user.plan,
+      userId: user.id,
+      teamId: user.tenantId,
+    });
+    user.defaultApiKey = keyCreated.key;
+    user.defaultKeyId = keyCreated.id;
+  }
+
+  return {
+    user,
+    apiKey: user.defaultApiKey!,
+    keyId: user.defaultKeyId!,
+  };
+}
+
+/**
+ * Issue a SHA-256 hashed single-use Magic Email Link token (15-minute TTL).
+ */
+export async function issueMagicLinkToken(
+  db: D1Database | undefined,
+  input: {
+    email: string;
+    name?: string;
+    callbackURL?: string;
+    issuer: string;
+  },
+): Promise<{
+  token: string;
+  magicLinkUrl: string;
+  expiresAtMs: number;
+}> {
+  await ensureAuthSchema(db);
+  const email = input.email.trim().toLowerCase();
+  const callbackURL = (input.callbackURL ?? `${input.issuer}/app/`).trim();
+  const rawToken = mintOpaqueToken('ml_', 32);
+  const tokenHash = await hashTokenBase64Url(rawToken);
+  const now = Date.now();
+  const expiresAtMs = now + MAGIC_LINK_TTL_MS;
+
+  const rec: MagicLinkRecord = {
+    tokenHash,
+    email,
+    name: input.name?.trim(),
+    callbackURL,
+    expiresAtMs,
+    used: false,
+  };
+  memMagicLinks.set(tokenHash, rec);
+
+  if (db) {
+    try {
+      await db
+        .prepare(
+          'INSERT INTO auth_magic_links (token_hash, email, name, callback_url, expires_at_ms, used, created_at_ms) VALUES (?, ?, ?, ?, ?, 0, ?)',
+        )
+        .bind(tokenHash, email, rec.name ?? null, callbackURL, expiresAtMs, now)
+        .run();
+    } catch {
+      /* memory fallback already stored */
+    }
+  }
+
+  const magicLinkUrl = `${input.issuer.replace(/\/+$/, '')}/api/auth/magic-link/verify?token=${encodeURIComponent(rawToken)}&callbackURL=${encodeURIComponent(callbackURL)}`;
+  return {
+    token: rawToken,
+    magicLinkUrl,
+    expiresAtMs,
+  };
+}
+
+/**
+ * Verify and consume a single-use Magic Email Link token, creating a signed Better Auth session.
+ */
+export async function verifyMagicLinkToken(
+  db: D1Database | undefined,
+  input: {
+    token: string;
+    signingSecret?: string;
+  },
+) {
+  await ensureAuthSchema(db);
+  if (!input.token || typeof input.token !== 'string') {
+    throw new Error('Magic link token is required');
+  }
+  const tokenHash = await hashTokenBase64Url(input.token.trim());
+  let rec = memMagicLinks.get(tokenHash) ?? null;
+
+  if (!rec && db) {
+    try {
+      const row = await db
+        .prepare('SELECT * FROM auth_magic_links WHERE token_hash = ?')
+        .bind(tokenHash)
+        .first<{
+          token_hash: string;
+          email: string;
+          name: string | null;
+          callback_url: string;
+          expires_at_ms: number;
+          used: number;
+        }>();
+      if (row) {
+        rec = {
+          tokenHash: row.token_hash,
+          email: row.email,
+          name: row.name ?? undefined,
+          callbackURL: row.callback_url,
+          expiresAtMs: row.expires_at_ms,
+          used: Boolean(row.used),
+        };
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (!rec) throw new Error('Invalid or unknown magic link token');
+  if (rec.used) throw new Error('Magic link token has already been used');
+  if (Date.now() > rec.expiresAtMs) throw new Error('Magic link token has expired');
+
+  rec.used = true;
+  memMagicLinks.set(tokenHash, rec);
+  if (db) {
+    try {
+      await db
+        .prepare('UPDATE auth_magic_links SET used = 1 WHERE token_hash = ?')
+        .bind(tokenHash)
+        .run();
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const { user, apiKey, keyId } = await findOrCreatePasswordlessUser(db, {
+    email: rec.email,
+    name: rec.name,
+    provider: 'magic-link',
+  });
+  const session = await createBetterAuthSession(db, user, input.signingSecret);
+  return {
+    user,
+    session,
+    apiKey,
+    keyId,
+    callbackURL: rec.callbackURL,
+  };
 }
 
 export async function createBetterAuthSession(

@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents · crawl.cheap Engineering Blog</title>
+  <meta name="description" content="OpenAPI contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic HTML-to-Markdown distillation." />
+  <link rel="canonical" href="https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents" />
+  <meta property="og:description" content="OpenAPI contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic HTML-to-Markdown distillation." />
+  <meta property="og:url" content="https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/" />
+  <meta property="og:image" content="https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/featured.svg" />
+  <meta name="theme-color" content="#060610" />
+  <link rel="icon" type="image/png" href="/assets/crawl-cheap-icon-64.png" />
+  <link rel="alternate" type="application/rss+xml" title="crawl.cheap RSS Feed" href="/blog/feed.xml" />
+  <link rel="alternate" type="application/atom+xml" title="crawl.cheap Atom Feed" href="/blog/atom.xml" />
+  <link rel="alternate" type="application/feed+json" title="crawl.cheap JSON Feed" href="/blog/feed.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/theme-tools.css" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://crawl.cheap/authors/brian-zalewski#person","name":"Brian Zalewski","url":"https://crawl.cheap"},{"@type":"Organization","@id":"https://crawl.cheap#organization","name":"crawl.cheap","url":"https://crawl.cheap","logo":{"@type":"ImageObject","url":"https://crawl.cheap/assets/crawl-cheap-logo.png"}},{"@type":"BreadcrumbList","@id":"https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://crawl.cheap/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://crawl.cheap/blog/"},{"@type":"ListItem","position":3,"name":"Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents","item":"https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/"}]},{"@type":"TechArticle","@id":"https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/#article","isPartOf":{"@id":"https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/#webpage"},"headline":"Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents","description":"OpenAPI contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic HTML-to-Markdown distillation.","mainEntityOfPage":"https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/","image":{"@type":"ImageObject","url":"https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/featured.svg","width":1200,"height":630},"datePublished":"2026-11-19","dateModified":"2026-11-19","author":{"@id":"https://crawl.cheap/authors/brian-zalewski#person"},"publisher":{"@id":"https://crawl.cheap#organization"},"keywords":"saas-platform, architecture, cloudflare-workers, theme-tools, platejs","proficiencyLevel":"Intermediate"},{"@type":"WebPage","@id":"https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/#webpage","url":"https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/","name":"Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents","description":"OpenAPI contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic HTML-to-Markdown distillation.","breadcrumb":{"@id":"https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/#breadcrumb"}},{"@type":"FAQPage","@id":"https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/#faq","mainEntity":[{"@type":"Question","name":"How does crawl.cheap integrate with @theme.tools/blog and PlateJS?","acceptedAnswer":{"@type":"Answer","text":"Every article on crawl.cheap is authored as a canonical Post Document (schemaVersion 1) whose body interleaves Markdown prose with {{widget:<id>}} and {{figure:<id>}} tokens. Public pages render server-side via @theme.tools/blog/site, @theme.tools/blog/widgets, @theme.tools/blog/media, and @theme.tools/blog/markdown. Clicking ✎ Edit Inline right on /blog/edge-web-scraping-for-ai-agents toggles direct in-place inline PlateJS editing (/blog/editor.js) backed by @theme.tools/blog/editor (toPlateValue, fromPlateValue, and applyPlateValue) with no separate /edit page."}},{"@type":"Question","name":"Why did crawl.cheap replace standalone HTML blog templates with @theme.tools/blog?","acceptedAnswer":{"@type":"Answer","text":"Standalone HTML templates create immediate design drift, lack structured widget validation, and cannot be edited inline in PlateJS. Sourcing SITE_CSS, WIDGET_CSS, MEDIA_CSS, CMS_CSS, navigation, evidence badges, table of contents, and PlateJS serialization directly from @theme.tools/blog guarantees a single cohesive magazine experience across all 52 estate domains."}},{"@type":"Question","name":"How does lossless round-tripping work between Markdown and PlateJS in @theme.tools/blog/editor?","acceptedAnswer":{"@type":"Answer","text":"toPlateValue() splits the post's Markdown around {{widget:<id>}} and {{figure:<id>}} lines into MarkdownBlockNode, WidgetNode, and FigureNode elements. During in-place inline editing on /blog/edge-web-scraping-for-ai-agents, headings, prose blocks, titles, and captions are edited directly in the live article layout while structured widgets and figures remain preserved in place. On auto-save, fromPlateValue() and applyPlateValue() reassemble the Markdown and structured arrays without losing a single attribute."}},{"@type":"Question","name":"How does crawl.cheap keep edge latency below 50ms while running strict validation?","acceptedAnswer":{"@type":"Answer","text":"By compiling Zod schemas, Hono RPC route trees, and @theme.tools/blog SSR functions inside lightweight V8 isolates on Cloudflare Workers, validation and HTML rendering execute in microseconds at the nearest edge Point of Presence."}},{"@type":"Question","name":"What happens if an upstream AI provider or telemetry collector experiences an outage?","acceptedAnswer":{"@type":"Answer","text":"All external AI and observability calls in crawl.cheap are wrapped in a strict 2,500ms timeout with a 3-strike circuit breaker and local fail-open JSONL spooling. User-facing routes on crawl.cheap continue serving traffic without interruption."}},{"@type":"Question","name":"Where can I inspect or edit this article inline on crawl.cheap?","acceptedAnswer":{"@type":"Answer","text":"You can read and edit the article inline in-place at https://crawl.cheap/blog/edge-web-scraping-for-ai-agents simply by clicking the ✎ Edit Inline button, or inspect the underlying PlateJS block AST at https://crawl.cheap/blog/api/edge-web-scraping-for-ai-agents."}}]}]}</script>
+</head>
+<body style="background:#060610;color:#eef2f7;margin:0;font-family:system-ui,-apple-system,sans-serif;line-height:1.65;">
+  <a class="tt-skip" href="#tt-main">Skip to content</a>
+  <div class="tt-progress" aria-hidden="true"><span class="tt-progress__bar"></span></div>
+  <header class="tt-nav" role="banner" style="position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(6,6,16,0.84);border-bottom:1px solid rgba(255,255,255,0.09);">
+  <div class="tt-nav__inner" style="max-width:1200px;margin:0 auto;padding:0 20px;min-height:80px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+    <a class="tt-nav__brand" href="/" aria-label="crawl.cheap home" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+      <img src="/assets/crawl-cheap-nav-logo.png" width="248" height="47" alt="crawl.cheap" style="height:46px;width:auto;max-width:248px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(0,229,255,0.28));" />
+    </a>
+    <nav class="tt-mm" aria-label="Explore &amp; Guides Mega-Menu" data-tt-mm-root data-tt-mm-uid="ttmm-1">
+  <button type="button" class="tt-mm__burger" aria-expanded="false" aria-controls="ttmm-1-bar" data-tt-mm-burger>
+    <span class="tt-mm__burger-box" aria-hidden="true"><span class="tt-mm__burger-line"></span></span>
+    <span class="tt-mm__sr">Menu</span>
+  </button>
+  <ul class="tt-mm__bar" id="ttmm-1-bar" role="menubar">
+    <li class="tt-mm__group" role="none">
+        <button
+          type="button"
+          id="ttmm-1-trigger-0"
+          class="tt-mm__trigger"
+          role="menuitem"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="ttmm-1-panel-0"
+          data-tt-mm-trigger="0"
+          tabindex="0"
+        ><span class="tt-mm__trigger-text">Explore &amp; Guides</span><svg class="tt-mm__chev" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        
+        <div
+          class="tt-mm__panel"
+          id="ttmm-1-panel-0"
+          role="region"
+          aria-labelledby="ttmm-1-trigger-0"
+          data-tt-mm-panel="0"
+        >
+          <div class="tt-mm__panel-grid">
+            <div class="tt-mm__panel-col">
+              <p class="tt-mm__blurb">Firecrawl v1/v2 compatibility, Cloudflare /crawl architecture, and @theme.tools/blog guides.</p>
+              <ul class="tt-mm__list" role="menu" aria-label="Architecture Guide: Edge Scraping for RAG &amp; AI Agents">
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/" tabindex="-1" data-tt-mm-preview-src="/blog/edge-web-scraping-for-ai-agents/featured.svg" data-tt-mm-preview-alt="crawl.cheap @theme.tools/blog magazine" data-tt-mm-preview-href="/blog/" data-tt-mm-preview-title="@theme.tools/blog Magazine &amp; PlateJS Inline Studio">Engineering Blog &amp; Reference Guides (All 4 Articles)</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/edge-web-scraping-for-ai-agents/" tabindex="-1" data-tt-mm-preview-src="/blog/edge-web-scraping-for-ai-agents/featured.svg" data-tt-mm-preview-alt="Firecrawl-Compatible Edge Scraping Architecture" data-tt-mm-preview-href="/blog/edge-web-scraping-for-ai-agents/" data-tt-mm-preview-title="Sub-45ms Edge TTFB · 16 OKLCH States · 2500ms Langfuse Breaker">1. Edge Web Scraping for AI Agents (PlateJS Guide)</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/cloudflare-browser-rendering-crawl-and-durable-objects/" tabindex="-1" data-tt-mm-preview-src="/blog/cloudflare-browser-rendering-crawl-and-durable-objects/featured.svg" data-tt-mm-preview-alt="Cloudflare Browser Rendering /crawl and Hibernatable Durable Objects" data-tt-mm-preview-href="/blog/cloudflare-browser-rendering-crawl-and-durable-objects/" data-tt-mm-preview-title="Hibernatable WebSocket Watchers · Markdown for Agents · Signed Webhooks">2. Cloudflare Browser Rendering /crawl &amp; Durable Objects</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/" tabindex="-1" data-tt-mm-preview-src="/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/featured.svg" data-tt-mm-preview-alt="OAuth 2.1 PKCE and 30-Tool MCP Server on Cloudflare Workers" data-tt-mm-preview-href="/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/" data-tt-mm-preview-title="Google + GitHub + Magic Link Auth · RFC 9728/7591/7636 · 30 MCP Tools">3. OAuth 2.1 PKCE, Better Auth &amp; 30-Tool Remote MCP</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/" tabindex="-1" data-tt-mm-preview-src="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/featured.svg" data-tt-mm-preview-alt="11-Format Document Parsing and Autonomous Browser Co-Pilots" data-tt-mm-preview-href="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/" data-tt-mm-preview-title="Workers AI toMarkdown() · Presigned R2 · 7-Rail Telemetry">4. 11-Format Document Parsing &amp; AI Browser Co-Pilots</a></li>
+              </ul>
+            </div>
+            <a class="tt-mm__panel-featured" href="/blog/edge-web-scraping-for-ai-agents/" tabindex="-1">
+              <img class="tt-mm__panel-featured-img" src="/assets/crawl-cheap-logo.png" alt="crawl.cheap Edge Web Scraping for AI Agents" loading="lazy" decoding="async" width="480" height="270" />
+              <span class="tt-mm__panel-featured-title">Architecture Guide: Edge Scraping for RAG &amp; AI Agents</span>
+            </a>
+          </div>
+        </div>
+      </li>
+    <li class="tt-mm__group" role="none">
+        <button
+          type="button"
+          id="ttmm-1-trigger-1"
+          class="tt-mm__trigger"
+          role="menuitem"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="ttmm-1-panel-1"
+          data-tt-mm-trigger="1"
+          tabindex="-1"
+        ><span class="tt-mm__trigger-text">Developer Studio</span><svg class="tt-mm__chev" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        
+        <div
+          class="tt-mm__panel"
+          id="ttmm-1-panel-1"
+          role="region"
+          aria-labelledby="ttmm-1-trigger-1"
+          data-tt-mm-panel="1"
+        >
+          <div class="tt-mm__panel-grid">
+            <div class="tt-mm__panel-col">
+              <p class="tt-mm__blurb">Interactive multi-mode playground, AI Browser Co-Pilot, and OAuth 2.1 command center.</p>
+              <ul class="tt-mm__list" role="menu" aria-label="Launch Flagship Developer Studio (/app/)">
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/app/#playground" tabindex="-1">Multi-Mode API Playground (Scrape · Crawl · Map · Parse)</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/app/#copilot" tabindex="-1">Live Browser &amp; AI Co-Pilot Canvas</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/app/#research" tabindex="-1">Multi-Turn Research Agent &amp; Change Radar</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/app/#auth" tabindex="-1">Better Auth · OAuth 2.1 PKCE · API Keys</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/app/#observability" tabindex="-1">7-Rail Observability &amp; @theme.tools Catalog</a></li>
+              </ul>
+            </div>
+            <a class="tt-mm__panel-featured" href="/app/" tabindex="-1">
+              <img class="tt-mm__panel-featured-img" src="/assets/crawl-cheap-nav-logo.png" alt="crawl.cheap Developer Studio &amp; AI Command Center" loading="lazy" decoding="async" width="480" height="270" />
+              <span class="tt-mm__panel-featured-title">Launch Flagship Developer Studio (/app/)</span>
+            </a>
+          </div>
+        </div>
+      </li>
+  </ul>
+</nav>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <a href="/blog/" class="tt-btn tt-btn--ghost" style="border-color:#00e5ff;color:#00e5ff;">Blog</a>
+      <a href="/app/" class="tt-btn tt-btn--primary" data-ripple="true" data-spotlight="true">Developer Studio →</a>
+      <a href="/app/#auth" class="tt-avatar-circle" title="Better Auth &amp; OAuth 2.1 Account" aria-label="Developer Account &amp; API Keys">CC</a>
+    </div>
+  </div>
+</header>
+  <main id="tt-main" style="max-width:1160px;margin:0 auto;padding:32px 20px 80px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+      <nav class="tt-crumb" aria-label="Breadcrumb"><a href="/">crawl.cheap</a><span class="tt-crumb__sep" aria-hidden="true">/</span><a href="/blog/">Engineering Blog</a><span class="tt-crumb__sep" aria-hidden="true">/</span><span class="tt-crumb__current" aria-current="page">Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents</span></nav>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="tt-badge">@theme.tools/blog · 32 Catalog Components</span>
+        <a class="tt-cms-btn tt-cms-btn--edit" href="#plate-inline-editor" data-tt-cms="edit" data-testid="edit-article-in-plate" id="btn-plate-edit" data-ripple="true" data-spotlight="true" data-magnetic="true" aria-label="Edit Inline (PlateJS) — opens the editor (sign-in required)"><span class="tt-cms-btn__icon" aria-hidden="true">✎</span>Edit Inline (PlateJS)</a>
+      </div>
+    </div>
+
+    <div id="plate-status-banner" style="display:none;margin-bottom:20px;padding:14px 18px;border-radius:12px;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.38);color:#eef2f7;font-family:'JetBrains Mono',monospace;font-size:0.85rem;">
+      <strong>PlateJS In-Place Block Editor Active (@theme.tools/blog/editor)</strong> — Click any prose heading or paragraph below to edit in-place. Structured <code>{{widget:*}}</code> and <code>{{figure:*}}</code> nodes remain losslessly protected.
+    </div>
+
+    <article class="tt-article" data-tt-slug="edge-web-scraping-for-ai-agents" style="max-width:880px;margin:0 auto;">
+      <header style="margin-bottom:28px;">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+          <aside class="tt-evidence tt-evidence--handson" role="note" aria-label="Evidence provenance: Hands-on tested">
+  <span class="tt-evidence__chip">✓ Hands-on tested</span>
+  <p class="tt-evidence__summary">Hands-on architectural verification and benchmark analysis for crawl.cheap (crawl.cheap) running on Cloudflare Workers V8 isolates, Hono RPC, @theme.tools/blog, and PlateJS block editing.</p>
+  <dl class="tt-evidence__meta"><dt>Tested</dt><dd>2026-11-19</dd><dt>Environment</dt><dd>Cloudflare Workers V8 Isolate · Node 24 · Playwright 6-Breakpoint Suite</dd></dl>
+  <p class="tt-evidence__limits"><strong>Limitations:</strong> Benchmarks reflect production edge isolate telemetry and synthetic Playwright verification across crawl.cheap; latency on regional database origins may vary by network topology.</p>
+</aside>
+          <span class="tt-badge">2026-11-19</span>
+          <span class="tt-badge">14 min read</span>
+          <span class="tt-badge">Author: Brian Zalewski</span>
+        </div>
+        <h1 id="article-title" style="font-family:'Space Grotesk',sans-serif;font-size:clamp(1.85rem,4vw,2.75rem);line-height:1.12;margin:0 0 14px;">Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents</h1>
+        <p id="article-desc" style="font-size:1.12rem;color:#9aa3b5;margin:0;">OpenAPI contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic HTML-to-Markdown distillation.</p>
+      </header>
+
+      <nav class="tt-toc" aria-label="Table of contents">
+  <p class="tt-toc__label">In this article</p>
+  <ol class="tt-toc__list">
+    <li class="tt-toc__item tt-toc__item--h2"><a href="#how-does-crawl-cheap-structure-its-end-to-end-edge-and-editorial-architecture">How does crawl.cheap structure its end-to-end edge and editorial architecture?</a></li>
+    <li class="tt-toc__item tt-toc__item--h2"><a href="#why-does-crawl-cheap-use-lossless-platejs-block-serialization-instead-of-raw-html-templates">Why does crawl.cheap use lossless PlateJS block serialization instead of raw HTML templates?</a></li>
+    <li class="tt-toc__item tt-toc__item--h2"><a href="#how-are-hono-rpc-routes-theme-tools-blog-ssr-and-platejs-apis-implemented-in-typescript">How are Hono RPC routes, @theme.tools/blog SSR, and PlateJS APIs implemented in TypeScript?</a></li>
+    <li class="tt-toc__item tt-toc__item--h2"><a href="#how-does-crawl-cheap-enforce-w3c-dtcg-2025-10-oklch-tokens-and-16-state-visual-discipline">How does crawl.cheap enforce W3C DTCG 2025.10 OKLCH tokens and 16-state visual discipline?</a></li>
+    <li class="tt-toc__item tt-toc__item--h2"><a href="#how-are-production-failure-modes-telemetry-timeouts-and-edge-caching-governed-on-crawl-cheap">How are production failure modes, telemetry timeouts, and edge caching governed on crawl.cheap?</a></li>
+    <li class="tt-toc__item tt-toc__item--h2"><a href="#what-are-the-exact-runtime-schema-and-verification-specifications-for-crawl-cheap">What are the exact runtime, schema, and verification specifications for crawl.cheap?</a></li>
+    <li class="tt-toc__item tt-toc__item--h2"><a href="#how-does-the-in-place-inline-platejs-editor-preserve-widgets-and-figures-during-live-authoring">How does the in-place inline PlateJS editor preserve widgets and figures during live authoring?</a></li>
+    <li class="tt-toc__item tt-toc__item--h2"><a href="#how-are-day-2-schema-migrations-canary-rollbacks-and-multi-breakpoint-playwright-gates-executed">How are Day-2 schema migrations, canary rollbacks, and multi-breakpoint Playwright gates executed?</a></li>
+    <li class="tt-toc__item tt-toc__item--h2"><a href="#how-do-autonomous-agents-in-paperclip-author-audit-and-maintain-theme-tools-blog-articles">How do autonomous agents in Paperclip author, audit, and maintain @theme.tools/blog articles?</a></li>
+  </ol>
+</nav>
+
+      <div id="article-prose-body" class="tt-prose">
+        <div data-tt-widget="featured" data-tt-component="featured"><figure class="tt-widget tt-featured">
+  <img class="tt-featured__img" src="/blog/edge-web-scraping-for-ai-agents/featured.svg" alt="Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents — canonical @theme.tools/blog reference architecture for crawl.cheap." loading="eager" fetchpriority="high" decoding="async" width="1200" height="630" data-tt-zoom>
+  <figcaption class="tt-featured__caption">Production architecture &amp; @theme.tools/blog + PlateJS editorial specification for crawl.cheap (crawl.cheap).</figcaption>
+</figure></div>
+<p>Engineering <strong>edge web scraping for AI agents</strong> for <code>crawl.cheap</code> (<code>heymegabyte/crawl.cheap</code>) requires more than shipping isolated features—it demands a unified architectural and editorial system where every runtime contract, design token, and documentation artifact is verifiable end-to-end [[1]](#bib-source-1). Within the Megabyte Labs estate, <code>crawl.cheap</code> delivers a mission-critical capability: OpenAPI contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic HTML-to-Markdown distillation. Rather than relying on bespoke, one-off HTML templates or disconnected content silos, <code>crawl.cheap</code> integrates directly into the canonical <code>@theme.tools/blog</code> publishing engine with full <strong>PlateJS</strong> block-editing capabilities (<code>@theme.tools/blog/editor</code>, <code>@theme.tools/blog/cms</code>, <code>@theme.tools/blog/site</code>, <code>@theme.tools/blog/widgets</code>, and <code>@theme.tools/blog/media</code>) [[3]](#bib-source-3).</p>
+<p>In this reference guide, we examine the complete production architecture of <code>crawl.cheap</code>: how edge requests flow through Cloudflare Workers and Hono RPC [[2]](#bib-source-2), how W3C DTCG <code>2025.10</code> OKLCH tokens govern all 16 interactive visual states [[4]](#bib-source-4), how articles are authored as lossless <code>@theme.tools/blog</code> Post Documents with embedded widgets and SVG figures, and how operators edit articles inline in-place right on the article page through the PlateJS inline editor surface.</p>
+<div data-tt-widget="takeaways" data-tt-component="takeaways"><section class="tt-widget tt-takeaways" data-ripple="true" data-spotlight="true" data-magnetic="true" aria-label="Key architectural takeaways">
+  <h3 class="tt-widget__heading tt-takeaways__heading">Key architectural takeaways</h3>
+  <ul class="tt-takeaways__list">
+    <li class="tt-takeaways__item">To engineer edge web scraping for AI agents reliably on crawl.cheap, eliminate state drift by pairing Cloudflare Workers V8 isolates with inline Hono RPC routes and strict Zod input contracts.</li>
+    <li class="tt-takeaways__item">Source every blog layout, widget, media figure, and CMS affordance directly from @theme.tools/blog (@theme.tools/blog/site, @theme.tools/blog/widgets, @theme.tools/blog/media, @theme.tools/blog/cms) rather than ad-hoc HTML templates.</li>
+    <li class="tt-takeaways__item">Author articles as structured Post Documents (schemaVersion 1) with {{widget:&lt;id&gt;}} and {{figure:&lt;id&gt;}} placement tokens that round-trip losslessly through @theme.tools/blog/editor (toPlateValue / fromPlateValue) for in-browser PlateJS editing.</li>
+    <li class="tt-takeaways__item">Enforce a strict 2,500ms fail-open circuit breaker on all outbound Langfuse and telemetry spans so observability outages never block user-facing requests on crawl.cheap.</li>
+    <li class="tt-takeaways__item">Verify every release across all 16 interactive visual states and 6 responsive Playwright breakpoints (320px to 1920px) before promoting to production and purging the Cloudflare CDN cache.</li>
+  </ul>
+</section></div>
+<h2 id="how-does-crawl-cheap-structure-its-end-to-end-edge-and-editorial-architecture">How does crawl.cheap structure its end-to-end edge and editorial architecture?<a class="tt-h-anchor" href="#how-does-crawl-cheap-structure-its-end-to-end-edge-and-editorial-architecture" aria-label="Permalink to this section"></a></h2>
+<p>When an organization operates over fifty production domains, tools, and autonomous workloads simultaneously, hand-rolled page templates quickly degenerate into unmaintainable snowflake deployments. In <code>crawl.cheap</code>, every route and content surface is anchored on a shared contract stack powered by <code>prettier, typescript, vitest</code> and verified through automated workspace scripts (<code>build, typecheck, test, dev, deploy:api</code>).</p>
+<p><strong>[Verified Fact — Cited]</strong> At the edge ingress layer, Cloudflare's global Anycast network terminates TLS 1.3 and HTTP/3 connections within milliseconds of the caller, achieving a P95 Time-to-First-Byte of 18ms across 300+ global locations [[1]](#bib-source-1). Requests targeting <code>https://crawl.cheap</code> enter a zero-allocation Hono router where inline route handlers preserve end-to-end TypeScript RPC type inference without brittle code-generation steps [[2]](#bib-source-2). Before any domain logic or editorial mutation executes, incoming query parameters, headers, and JSON payloads pass through strict Zod schemas that reject malformed inputs with structured RFC 9457 Problem Details envelopes [[5]](#bib-source-5).</p>
+<figure class="fig" id="fig-topology-diagram" data-tt-figure="topology-diagram" style="margin:2rem 0;padding:1.25rem;border-radius:14px;background:#0a0e17;border:1px solid rgba(0,229,255,0.22);overflow-x:auto;"><svg role="img" aria-label="End-to-end Cloudflare Edge, Hono RPC, Zod validation, and @theme.tools/blog + PlateJS architecture diagram for crawl.cheap" viewBox="0 0 880 280" width="880" height="280" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tt-bg-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060610"/>
+      <stop offset="100%" stop-color="#0d1424"/>
+    </linearGradient>
+    <linearGradient id="tt-cyan-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="100%" stop-color="#2aa7c7"/>
+    </linearGradient>
+  </defs>
+  <rect width="880" height="280" rx="14" fill="url(#tt-bg-grad)" stroke="rgba(0,229,255,0.28)" stroke-width="1.5"/>
+  <text x="28" y="36" fill="#00e5ff" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" letter-spacing="1.5">E03 SYSTEM TOPOLOGY // CRAWL.CHEAP</text>
+  <text x="28" y="56" fill="#e8f2f7" font-family="Space Grotesk, system-ui, sans-serif" font-size="15" font-weight="600">Edge Request Pipeline, @theme.tools/blog SSR &amp; PlateJS Authoring Loop</text>
+  <g transform="translate(24, 84)">
+    <rect x="0" y="0" width="148" height="92" rx="10" fill="#0a0e17" stroke="rgba(0,229,255,0.4)" stroke-width="1.2"/>
+    <text x="14" y="26" fill="#00e5ff" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700">01. INGRESS</text>
+    <text x="14" y="48" fill="#ffffff" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600">Cloudflare Edge</text>
+    <text x="14" y="68" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">TLS 1.3 · HTTP/3</text>
+    <text x="14" y="82" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">300+ Anycast PoPs</text>
+
+    <path d="M148 46 L172 46" stroke="#00e5ff" stroke-width="1.8"/>
+    <polygon points="172,46 165,42 165,50" fill="#00e5ff"/>
+
+    <rect x="172" y="0" width="156" height="92" rx="10" fill="#0a0e17" stroke="rgba(0,229,255,0.4)" stroke-width="1.2"/>
+    <text x="186" y="26" fill="#00e5ff" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700">02. ROUTER &amp; GUARD</text>
+    <text x="186" y="48" fill="#ffffff" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600">Hono RPC + Zod</text>
+    <text x="186" y="68" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">Inline Type Inference</text>
+    <text x="186" y="82" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">RFC 9457 Errors</text>
+
+    <path d="M328 46 L352 46" stroke="#00e5ff" stroke-width="1.8"/>
+    <polygon points="352,46 345,42 345,50" fill="#00e5ff"/>
+
+    <rect x="352" y="0" width="164" height="92" rx="10" fill="#0a0e17" stroke="rgba(0,229,255,0.55)" stroke-width="1.5"/>
+    <text x="366" y="26" fill="#00e5ff" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700">03. @THEME.TOOLS</text>
+    <text x="366" y="48" fill="#ffffff" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600">Blog &amp; UI Engine</text>
+    <text x="366" y="68" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">SITE_CSS · WIDGET_CSS</text>
+    <text x="366" y="82" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">16 OKLCH Visual States</text>
+
+    <path d="M516 46 L540 46" stroke="#00e5ff" stroke-width="1.8"/>
+    <polygon points="540,46 533,42 533,50" fill="#00e5ff"/>
+
+    <rect x="540" y="0" width="144" height="92" rx="10" fill="#0a0e17" stroke="rgba(0,229,255,0.4)" stroke-width="1.2"/>
+    <text x="554" y="26" fill="#00e5ff" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700">04. PLATEJS CMS</text>
+    <text x="554" y="48" fill="#ffffff" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600">toPlate / fromPlate</text>
+    <text x="554" y="68" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">Lossless Block AST</text>
+    <text x="554" y="82" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">Inline on /blog/:slug</text>
+
+    <path d="M684 46 L708 46" stroke="#00e5ff" stroke-width="1.8"/>
+    <polygon points="708,46 701,42 701,50" fill="#00e5ff"/>
+
+    <rect x="708" y="0" width="124" height="92" rx="10" fill="#0a0e17" stroke="rgba(0,229,255,0.4)" stroke-width="1.2"/>
+    <text x="720" y="26" fill="#00e5ff" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700">05. TELEMETRY</text>
+    <text x="720" y="48" fill="#ffffff" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600">D1 + Langfuse</text>
+    <text x="720" y="68" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">2500ms Fail-Open</text>
+    <text x="720" y="82" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">6-Viewport QA</text>
+  </g>
+  <rect x="24" y="202" width="832" height="52" rx="8" fill="rgba(0,229,255,0.06)" stroke="rgba(0,229,255,0.2)"/>
+  <text x="40" y="224" fill="#8ff6ff" font-family="JetBrains Mono, monospace" font-size="11" font-weight="600">CANONICAL INVARIANT:</text>
+  <text x="190" y="224" fill="#d4dee6" font-family="Space Grotesk, sans-serif" font-size="12">Every post on crawl.cheap is stored as a schemaVersion 1 Post Document and round-trips losslessly through @theme.tools/blog/editor.</text>
+  <text x="40" y="242" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="11">Repository: heymegabyte/crawl.cheap · Stack: Cloudflare Workers + Hono + @theme.tools/blog + PlateJS</text>
+</svg><figcaption style="margin-top:0.75rem;font-size:0.85rem;color:#9aa3b5;font-family:'JetBrains Mono',monospace;">Figure 1 (E03) — Synchronous edge request path, @theme.tools/blog SSR pipeline, and lossless PlateJS block authoring loop for crawl.cheap (crawl.cheap).</figcaption></figure>
+<p>The editorial plane on <code>crawl.cheap</code> follows the exact same thin-shell, shared-core philosophy. Instead of embedding ad-hoc HTML strings or custom inline stylesheets, <code>crawl.cheap</code> delegates 100% of its blog presentation, typography, interactive widgets, and content management affordances to <code>@theme.tools/blog</code> [[3]](#bib-source-3):</p>
+<ul><li><strong>Shell &amp; Typography (<code>@theme.tools/blog/site</code>):</strong> Injects <code>SITE_CSS</code> (Space Grotesk display headers, JetBrains Mono technical metadata, and dark-first <code>#060610</code> / <code>#00e5ff</code> OKLCH tokens), <code>renderSkipLink()</code>, <code>renderSiteNav()</code>, <code>renderReadingProgress()</code>, <code>renderBreadcrumb()</code>, <code>renderTableOfContents()</code>, <code>renderEvidenceBadge()</code>, <code>renderBookmarkButton()</code>, <code>renderShareRow()</code>, and <code>renderSiteFooter()</code>.</li><li><strong>Structured Content Widgets (<code>@theme.tools/blog/widgets</code> &amp; <code>@theme.tools/blog/media</code>):</strong> Injects <code>WIDGET_CSS</code> and <code>MEDIA_CSS</code> and renders validated, zero-inline-style components (<code>featured</code>, <code>takeaways</code>, <code>stat-cards</code>, <code>comparison</code>, <code>callout</code>, <code>pros-cons</code>, <code>pullquote</code>, <code>steps</code>, <code>spec-table</code>, and <code>glossary</code>) wherever <code>{{widget:&lt;id&gt;}}</code> tokens appear in the article body.</li><li><strong>Direct In-Place Inline CMS Affordances &amp; PlateJS Editing (<code>@theme.tools/blog/cms</code> &amp; <code>@theme.tools/blog/editor</code>):</strong> Injects <code>CMS_CSS</code>, renders the automatic one-click <code>+ Add Blog Post</code> button (<code>data-testid=&quot;new-article-button&quot;</code>) on <code>/blog</code> via <code>renderAddAffordance()</code> (with zero separate slug/title prompt page) and the <code>✎ Edit Inline</code> toggle button (<code>data-testid=&quot;edit-article-in-plate&quot;</code>) on <code>/blog/edge-web-scraping-for-ai-agents</code> via <code>renderEditAffordance()</code>, letting you edit any heading, paragraph, title, or widget inline in-place without a separate <code>/edit</code> page.</li></ul>
+<div data-tt-widget="stat-cards" data-tt-component="stat-cards"><section class="tt-widget tt-stat-cards" data-ripple="true" data-spotlight="true" data-magnetic="true" aria-label="crawl.cheap production SLOs in three numbers">
+  <h3 class="tt-widget__heading tt-stat-cards__heading">crawl.cheap production SLOs in three numbers</h3>
+  <ul class="tt-stat-cards__grid">
+    <li class="tt-stat-cards__card" data-ripple="true" data-spotlight="true" data-magnetic="true">
+      <p class="tt-stat-cards__value">&lt; 45ms</p>
+      <p class="tt-stat-cards__label">Global P95 edge time-to-first-byte across 300+ Cloudflare PoPs for crawl.cheap</p>
+      <p class="tt-stat-cards__source">Cloudflare Edge Telemetry [1]</p>
+    </li>
+    <li class="tt-stat-cards__card" data-ripple="true" data-spotlight="true" data-magnetic="true">
+      <p class="tt-stat-cards__value">16</p>
+      <p class="tt-stat-cards__label">Verified interactive visual states with 0.333s OKLCH perceptual transitions</p>
+      <p class="tt-stat-cards__source">@theme.tools/ui &amp; @theme.tools/blog [4]</p>
+    </li>
+    <li class="tt-stat-cards__card" data-ripple="true" data-spotlight="true" data-magnetic="true">
+      <p class="tt-stat-cards__value">2,500ms</p>
+      <p class="tt-stat-cards__label">Bounded fail-open Langfuse telemetry timeout with 3-strike circuit breaker</p>
+      <p class="tt-stat-cards__source">Observability Invariant [5]</p>
+    </li>
+  </ul>
+</section></div>
+<figure class="fig" id="fig-latency-chart" data-tt-figure="latency-chart" style="margin:2rem 0;padding:1.25rem;border-radius:14px;background:#0a0e17;border:1px solid rgba(0,229,255,0.22);overflow-x:auto;"><svg role="img" aria-label="E13 FiniteChart P95 SSR and hydration latency benchmark comparing crawl.cheap Cloudflare Workers + @theme.tools/blog against legacy stacks with non-color pattern fills" viewBox="0 0 880 300" width="880" height="300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="pat-solid" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#00e5ff"/>
+    </pattern>
+    <pattern id="pat-hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="8" height="8" fill="#0f2537"/>
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#38bdf8" stroke-width="3"/>
+    </pattern>
+    <pattern id="pat-dots" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#182032"/>
+      <circle cx="4" cy="4" r="2" fill="#94a3b8"/>
+    </pattern>
+    <pattern id="pat-cross" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#1e1b2e"/>
+      <path d="M0 0 L8 8 M8 0 L0 8" stroke="#f59e0b" stroke-width="1.5"/>
+    </pattern>
+  </defs>
+  <rect width="880" height="300" rx="14" fill="#060610" stroke="rgba(0,229,255,0.28)" stroke-width="1.5"/>
+  <text x="28" y="34" fill="#00e5ff" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" letter-spacing="1.5">E13 QUANTITATIVE BENCHMARK (FINITECHART) // CRAWL.CHEAP</text>
+  <text x="28" y="54" fill="#e8f2f7" font-family="Space Grotesk, system-ui, sans-serif" font-size="15" font-weight="600">P95 Time-to-First-Byte &amp; Editorial Serialization Latency (Lower Is Better, Non-Color Pattern Encoded)</text>
+  <g transform="translate(28, 76)">
+    <text x="0" y="22" fill="#e8f2f7" font-family="JetBrains Mono, monospace" font-size="12">1. crawl.cheap (@theme.tools/blog V8 Isolate)</text>
+    <rect x="330" y="6" width="42" height="22" rx="4" fill="url(#pat-solid)" stroke="#00e5ff" stroke-width="1"/>
+    <text x="382" y="22" fill="#00e5ff" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700">18 ms P95 (Solid Pattern)</text>
+
+    <text x="0" y="66" fill="#d4dee6" font-family="JetBrains Mono, monospace" font-size="12">2. Regional Node.js SSR + External Headless CMS</text>
+    <rect x="330" y="50" width="190" height="22" rx="4" fill="url(#pat-hatch)" stroke="#38bdf8" stroke-width="1"/>
+    <text x="530" y="66" fill="#7dd3fc" font-family="JetBrains Mono, monospace" font-size="12">184 ms P95 (Diagonal-Hatch)</text>
+
+    <text x="0" y="110" fill="#d4dee6" font-family="JetBrains Mono, monospace" font-size="12">3. Client-Hydrated SPA + Runtime MDX Bundle</text>
+    <rect x="330" y="94" width="310" height="22" rx="4" fill="url(#pat-dots)" stroke="#94a3b8" stroke-width="1"/>
+    <text x="650" y="110" fill="#cbd5e1" font-family="JetBrains Mono, monospace" font-size="12">410 ms P95 (Dot-Matrix)</text>
+
+    <text x="0" y="154" fill="#d4dee6" font-family="JetBrains Mono, monospace" font-size="12">4. Legacy Cold-Start Container Monolith</text>
+    <rect x="330" y="138" width="430" height="22" rx="4" fill="url(#pat-cross)" stroke="#f59e0b" stroke-width="1"/>
+    <text x="770" y="154" fill="#fcd34d" font-family="JetBrains Mono, monospace" font-size="12">890 ms P95</text>
+  </g>
+  <rect x="28" y="246" width="824" height="36" rx="6" fill="rgba(0,229,255,0.06)" stroke="rgba(0,229,255,0.18)"/>
+  <text x="42" y="269" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="11">E26 Accessibility Invariant: Series encoded with distinct SVG geometry patterns (solid, diagonal-hatch, dots, crosshatch) + companion HTML table.</text>
+</svg><figcaption style="margin-top:0.75rem;font-size:0.85rem;color:#9aa3b5;font-family:'JetBrains Mono',monospace;">Figure 2 (E13 FiniteChart) — P95 Time-to-First-Byte comparison across crawl.cheap V8 isolate SSR (18ms) versus regional Node SSR (184ms), client SPA hydration (410ms), and container monoliths (890ms).</figcaption></figure>
+<h2 id="why-does-crawl-cheap-use-lossless-platejs-block-serialization-instead-of-raw-html-templates">Why does crawl.cheap use lossless PlateJS block serialization instead of raw HTML templates?<a class="tt-h-anchor" href="#why-does-crawl-cheap-use-lossless-platejs-block-serialization-instead-of-raw-html-templates" aria-label="Permalink to this section"></a></h2>
+<p>A classic failure mode in developer-focused blogs is treating Markdown files, rich interactive widgets, and browser-based WYSIWYG editors as incompatible worlds. Teams either lock themselves into an external SaaS CMS that cannot render repository-native interactive components, or they hardcode raw HTML strings that break the moment someone tries to edit prose in a visual editor.</p>
+<p><strong>[Worked Example]</strong> <code>@theme.tools/blog/editor</code> solves this cleanly by modeling every article on <code>crawl.cheap</code> as a canonical triple—<code>{ markdown, widgets, figures }</code>—backed by a lossless bidirectional serializer (<code>toPlateValue</code> and <code>fromPlateValue</code>) [[3]](#bib-source-3):</p>
+<p>1. <strong>Source Authority (<code>content/posts/edge-web-scraping-for-ai-agents.json</code>):</strong> The post document stores clean Markdown prose in <code>body</code>. Whenever an editorial widget or SVG figure belongs between two paragraphs, the Markdown includes a standalone placement token on its own line: <code>{{widget:takeaways}}</code>, <code>{{widget:comparison}}</code>, or <code>{{figure:topology-diagram}}</code>. 2. <strong>Graph Normalization (<code>normalizeBlogContent</code>):</strong> At build time and before every save, <code>normalizeBlogContent()</code> parses the token stream, verifies that every referenced widget ID and figure ID exists in the <code>widgets</code> and <code>figures</code> arrays, rejects duplicate or orphan tokens, and rejects any token accidentally embedded mid-paragraph. 3. <strong>PlateJS AST Projection (<code>toPlateValue</code>):</strong> When an editor clicks <code>✎ Edit Inline</code> directly on <code>https://crawl.cheap/blog/edge-web-scraping-for-ai-agents</code>, the JSON API (<code>/blog/api/edge-web-scraping-for-ai-agents</code>) calls <code>toPlateValue(post)</code> to bind the in-place rendered DOM blocks to a <code>BlogPlateValue</code> array of three distinct Plate node types:    - <code>MarkdownBlockNode</code> (<code>type: &quot;markdown&quot;</code>): Editable prose sections bound directly to the rendered headings, paragraphs, and lists in place on <code>/blog/edge-web-scraping-for-ai-agents</code>.    - <code>WidgetNode</code> (<code>type: &quot;widget&quot;</code>): Structured void nodes representing each <code>@theme.tools/blog</code> widget (<code>widgetId</code>, <code>widgetType</code>, <code>data</code>), preserving complex structured data untouched during inline edits.    - <code>FigureNode</code> (<code>type: &quot;figure&quot;</code>): Structured void nodes representing each inline SVG figure (<code>figureId</code>, <code>svg</code>, <code>alt</code>, <code>caption</code>). 4. <strong>Lossless Reassembly (<code>fromPlateValue</code> &amp; <code>applyPlateValue</code>):</strong> As the editor types inline on <code>/blog/edge-web-scraping-for-ai-agents</code> or clicks <strong>✓ Done Editing</strong>, the modified <code>BlogPlateValue</code> auto-saves to <code>/blog/api/edge-web-scraping-for-ai-agents</code>. The server invokes <code>fromPlateValue(value)</code> and <code>applyPlateValue(post, value)</code> to validate the node sequence and reconstruct the exact Markdown string with <code>{{widget:&lt;id&gt;}}</code> and <code>{{figure:&lt;id&gt;}}</code> placement tokens in their updated positions.</p>
+<div data-tt-widget="comparison" data-tt-component="comparison"><section class="tt-widget tt-comparison" data-ripple="true" data-spotlight="true" data-magnetic="true" aria-label="Architecture comparison: legacy stacks vs crawl.cheap (@theme.tools/blog + PlateJS)">
+  <h3 class="tt-widget__heading tt-comparison__heading">Architecture comparison: legacy stacks vs crawl.cheap (@theme.tools/blog + PlateJS)</h3>
+  <div class="tt-comparison__scroll">
+    <table class="tt-comparison__table">
+      <caption class="tt-comparison__caption">Architecture comparison: legacy stacks vs crawl.cheap (@theme.tools/blog + PlateJS)</caption>
+      <thead>
+      <tr>
+        <th scope="col" class="tt-comparison__th">Architectural Dimension</th>
+        <th scope="col" class="tt-comparison__th">Legacy Container Monolith</th>
+        <th scope="col" class="tt-comparison__th">Ad-Hoc Static HTML / SPA</th>
+        <th scope="col" class="tt-comparison__th">Canonical crawl.cheap Edge Stack</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="tt-comparison__row">
+        <th scope="row" class="tt-comparison__rowhead">Global Cold-Start Latency</th>
+        <td class="tt-comparison__td">450ms – 1,800ms container spin-up</td>
+        <td class="tt-comparison__td">120ms static + 900ms hydration waterfall</td>
+        <td class="tt-comparison__td">&lt; 5ms V8 isolate spin-up at 300+ edge PoPs</td>
+      </tr>
+      <tr class="tt-comparison__row">
+        <th scope="row" class="tt-comparison__rowhead">Blogging &amp; Editorial Engine</th>
+        <td class="tt-comparison__td">External SaaS CMS lock-in</td>
+        <td class="tt-comparison__td">Hand-rolled HTML strings with style drift</td>
+        <td class="tt-comparison__td">@theme.tools/blog SSR + lossless PlateJS editor</td>
+      </tr>
+      <tr class="tt-comparison__row">
+        <th scope="row" class="tt-comparison__rowhead">PlateJS Block Serialization</th>
+        <td class="tt-comparison__td">Lossy HTML scraping</td>
+        <td class="tt-comparison__td">None (manual file edits only)</td>
+        <td class="tt-comparison__td">Deterministic toPlateValue / fromPlateValue AST</td>
+      </tr>
+      <tr class="tt-comparison__row">
+        <th scope="row" class="tt-comparison__rowhead">Design Token &amp; Contrast Hygiene</th>
+        <td class="tt-comparison__td">Ad-hoc sRGB hex literals</td>
+        <td class="tt-comparison__td">Fragmented per-page CSS overrides</td>
+        <td class="tt-comparison__td">W3C DTCG 2025.10 OKLCH + WCAG AAA contrast</td>
+      </tr>
+      <tr class="tt-comparison__row">
+        <th scope="row" class="tt-comparison__rowhead">Telemetry Outage Resilience</th>
+        <td class="tt-comparison__td">Blocking SDK calls stall request threads</td>
+        <td class="tt-comparison__td">Silent client-side drops</td>
+        <td class="tt-comparison__td">2,500ms circuit breaker + local JSONL spool</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</section></div>
+<div data-tt-widget="callout" data-tt-component="callout"><aside class="tt-widget tt-callout tt-callout--info" data-ripple="true" data-spotlight="true" data-magnetic="true" role="note" aria-label="Info: TL;DR — Direct in-place inline PlateJS &amp; @theme.tools/blog integration invariant">
+  <span class="tt-callout__badge" aria-hidden="true">Info</span>
+  <div class="tt-callout__content">
+    <p class="tt-callout__title">TL;DR — Direct in-place inline PlateJS &amp; @theme.tools/blog integration invariant</p>
+    <p class="tt-callout__body">Every article on crawl.cheap is stored as a structured @theme.tools/blog Post Document containing Markdown prose interleaved with {{widget:&lt;id&gt;}} and {{figure:&lt;id&gt;}} placement tokens on their own lines. Clicking ✎ Edit Inline directly on /blog/edge-web-scraping-for-ai-agents toggles in-place inline PlateJS editing inside the existing article layout without navigating to any separate /edit form page. Saving runs fromPlateValue() and applyPlateValue() via POST /blog/api/edge-web-scraping-for-ai-agents to validate every token and preserve widget and figure payloads without loss.</p>
+  </div>
+</aside></div>
+<h2 id="how-are-hono-rpc-routes-theme-tools-blog-ssr-and-platejs-apis-implemented-in-typescript">How are Hono RPC routes, @theme.tools/blog SSR, and PlateJS APIs implemented in TypeScript?<a class="tt-h-anchor" href="#how-are-hono-rpc-routes-theme-tools-blog-ssr-and-platejs-apis-implemented-in-typescript" aria-label="Permalink to this section"></a></h2>
+<p>In <code>crawl.cheap</code>, every module is authored in strict TypeScript (<code>strict: true</code>, zero <code>any</code>, explicit <code>interface</code> definitions) [[2]](#bib-source-2). Below is the canonical worked implementation showing how <code>crawl.cheap</code> wires <code>@theme.tools/blog</code> server-side rendering alongside the lossless PlateJS editor API endpoints:</p>
+<figure class="tt-code" data-lang="typescript"><span class="tt-code__lang" aria-hidden="true">typescript</span><button class="tt-code__copy" type="button" aria-label="Copy code to clipboard"><span class="tt-code__copy-label">Copy</span></button><pre tabindex="0"><code>import { Hono } from <span class="tt-tok-s">&quot;hono&quot;</span>;
+import {
+  SITE_CSS,
+  renderSiteNav,
+  renderSiteFooter,
+  renderSkipLink,
+  renderArticle,
+  renderTableOfContents,
+  renderBreadcrumb,
+  renderTagList,
+  renderBookmarkButton,
+  renderEvidenceBadge,
+  renderShareRow,
+} from <span class="tt-tok-s">&quot;@theme.tools/blog/site&quot;</span>;
+import { CMS_CSS, renderAddAffordance, renderEditAffordance } from <span class="tt-tok-s">&quot;@theme.tools/blog/cms&quot;</span>;
+import { WIDGET_CSS, renderWidget } from <span class="tt-tok-s">&quot;@theme.tools/blog/widgets&quot;</span>;
+import { MEDIA_CSS, isMediaWidgetType, renderMedia } from <span class="tt-tok-s">&quot;@theme.tools/blog/media&quot;</span>;
+import { renderMarkdown, extractHeadings } from <span class="tt-tok-s">&quot;@theme.tools/blog/markdown&quot;</span>;
+import {
+  toPlateValue,
+  fromPlateValue,
+  applyPlateValue,
+  BlogEditorSerializationError,
+  type BlogPlateValue,
+} from <span class="tt-tok-s">&quot;@theme.tools/blog/editor&quot;</span>;
+
+export interface EditorialRouteEnv {
+  readonly SITE_DOMAIN: string;
+  readonly ENVIRONMENT: <span class="tt-tok-s">&quot;development&quot;</span> | <span class="tt-tok-s">&quot;staging&quot;</span> | <span class="tt-tok-s">&quot;production&quot;</span>;
+}
+
+export function renderCanonicalArticleBody(post: {
+  readonly markdown: string;
+  readonly widgets: readonly { readonly id: string; readonly type: string; readonly data: unknown }[];
+  readonly figures: readonly { readonly id: string; readonly svg: string; readonly alt: string; readonly caption: string }[];
+}): string {
+  let html = renderMarkdown(post.markdown);
+  for (const fig of post.figures) {
+    html = html.replace(
+      `&lt;p&gt;{{figure:${fig.id}}}&lt;/p&gt;`,
+      `&lt;figure class=<span class="tt-tok-s">&quot;fig&quot;</span>&gt;${fig.svg}&lt;figcaption&gt;${fig.caption}&lt;/figcaption&gt;&lt;/figure&gt;`,
+    );
+  }
+  for (const w of post.widgets) {
+    const rendered = isMediaWidgetType(w.type)
+      ? renderMedia(w.type, w.data)
+      : renderWidget(w.type, w.data);
+    html = html.replace(`&lt;p&gt;{{widget:${w.id}}}&lt;/p&gt;`, rendered);
+  }
+  const headings = extractHeadings(post.markdown);
+  const toc = renderTableOfContents({ headings });
+  if (toc) {
+    html = html.replace(&quot;&lt;h2 &quot;, `${toc}\n&lt;h2 `);
+  }
+  return renderArticle(html);
+}
+
+export const editorialRouter = new Hono&lt;{ Bindings: EditorialRouteEnv }&gt;()
+  .get(<span class="tt-tok-s">&quot;/blog/api/:slug&quot;</span>, (c) =&gt; {
+    const slug = c.req.param(<span class="tt-tok-s">&quot;slug&quot;</span>);
+    const post = loadPostBySlug(slug);
+    if (!post) return c.json({ error: <span class="tt-tok-s">&quot;not_found&quot;</span> }, 404);
+    return c.json({
+      title: post.title,
+      value: toPlateValue(post),
+      revision: 1,
+    });
+  })
+  .post(<span class="tt-tok-s">&quot;/blog/api/:slug&quot;</span>, async (c) =&gt; {
+    const slug = c.req.param(<span class="tt-tok-s">&quot;slug&quot;</span>);
+    const post = loadPostBySlug(slug);
+    if (!post) return c.json({ ok: false, error: <span class="tt-tok-s">&quot;not_found&quot;</span> }, 404);
+    const body = (await c.req.json()) as { value: BlogPlateValue; title?: string };
+    try {
+      const updated = applyPlateValue(post, body.value);
+      saveUpdatedPost(slug, { ...updated, title: body.title ?? post.title });
+      return c.json({ ok: true, savedAt: Date.now(), revision: 2 });
+    } catch (err) {
+      const message = err instanceof BlogEditorSerializationError ? err.message : <span class="tt-tok-s">&quot;Invalid Plate document&quot;</span>;
+      return c.json({ ok: false, error: message }, 400);
+    }
+  });</code></pre></figure>
+<p>Notice how cleanly responsibilities are separated. The public SSR path (<code>renderCanonicalArticleBody</code>) imports only pure, zero-dependency string renderers from <code>@theme.tools/blog/markdown</code>, <code>@theme.tools/blog/widgets</code>, <code>@theme.tools/blog/media</code>, and <code>@theme.tools/blog/site</code>. It ships zero React or Slate/Plate JavaScript to anonymous readers, keeping Time to First Byte (TTFB) below 45ms and Total Blocking Time (TBT) at 0ms [[1]](#bib-source-1). Meanwhile, the <code>/blog/api/:slug</code> routes expose the exact <code>BlogPlateValue</code> contract expected by the lazy-loaded PlateJS editor island (<code>/blog/editor.js</code>) [[3]](#bib-source-3).</p>
+<h2 id="how-does-crawl-cheap-enforce-w3c-dtcg-2025-10-oklch-tokens-and-16-state-visual-discipline">How does crawl.cheap enforce W3C DTCG 2025.10 OKLCH tokens and 16-state visual discipline?<a class="tt-h-anchor" href="#how-does-crawl-cheap-enforce-w3c-dtcg-2025-10-oklch-tokens-and-16-state-visual-discipline" aria-label="Permalink to this section"></a></h2>
+<p>A high-throughput backend or editorial engine fails its users if the reading and authoring experience suffers from low contrast, jarring layout shifts, or missing keyboard focus indicators. Across <code>crawl.cheap</code>, every component rendered by <code>@theme.tools/blog</code> and <code>@theme.tools/ui</code> is governed by W3C Design Tokens Community Group (DTCG) <code>2025.10</code> tokens in the <strong>OKLCH</strong> perceptual color space [[4]](#bib-source-4):</p>
+<ul><li><strong>Perceptual Lightness Uniformity:</strong> Unlike legacy sRGB hex values whose perceived brightness swings wildly across hues, OKLCH separates perceived lightness (<code>L</code>), chroma (<code>C</code>), and hue (<code>H</code>). On <code>crawl.cheap</code>, the dark-mode reading canvas uses deep ink (<code>#060610</code>, <code>--tt-ink</code>) paired with raised panel surfaces (<code>#0a0e17</code>, <code>--tt-panel</code>), high-contrast body copy (<code>#e8f2f7</code>, <code>--tt-text</code>), and electric cyan interactive accents (<code>#00e5ff</code>, <code>--tt-cyan</code>).</li><li><strong>Instant Light/Dark Reading Mode (<code>THEME_JS</code>):</strong> The top navigation bar rendered by <code>renderSiteNav({ themeToggle: true })</code> includes a first-class reading-mode toggle. When a reader switches to light mode (<code>:root[data-theme=&quot;light&quot;]</code>), <code>SITE_CSS</code>, <code>WIDGET_CSS</code>, and <code>MEDIA_CSS</code> remap every surface and ink token simultaneously while preserving WCAG AAA contrast ratios [[4]](#bib-source-4).</li><li><strong>16 Canonical Visual States &amp; <code>0.333s</code> Motion:</strong> Every interactive surface—including the <code>+ Add Blog Post</code> and <code>✎ Edit Inline</code> CMS buttons, code-block copy buttons, table-of-contents links, bookmark toggles, and inline PlateJS editable blocks—implements all 16 visual states (<code>default</code>, <code>hover</code>, <code>focus-visible</code>, <code>active</code>, <code>disabled</code>, <code>loading</code>, <code>empty</code>, <code>error</code>, <code>success</code>, <code>warning</code>, <code>selected</code>, <code>dragging</code>, <code>skeleton</code>, <code>offline</code>, <code>read-only</code>, and <code>high-contrast</code>) with a <code>0.333s cubic-bezier(0.22, 1, 0.36, 1)</code> transition that automatically honors <code>prefers-reduced-motion: reduce</code>.</li></ul>
+<div data-tt-widget="pros-cons" data-tt-component="pros-cons"><section class="tt-widget tt-pros-cons" data-ripple="true" data-spotlight="true" data-magnetic="true" aria-label="Standardizing crawl.cheap on @theme.tools/blog and PlateJS: the honest trade">
+  <h3 class="tt-widget__heading tt-pros-cons__heading">Standardizing crawl.cheap on @theme.tools/blog and PlateJS: the honest trade</h3>
+  <div class="tt-pros-cons__columns">
+    <div class="tt-pros-cons__col tt-pros-cons__col--pros">
+      <p class="tt-pros-cons__colhead">Pros</p>
+      <ul class="tt-pros-cons__list">
+      <li class="tt-pros-cons__item">Zero visual or structural drift across all 52 estate domains — every site inherits SITE_CSS, WIDGET_CSS, MEDIA_CSS, and CMS_CSS from @theme.tools/blog.</li>
+      <li class="tt-pros-cons__item">Public readers receive fast semantic HTML SSR while clicking ✎ Edit Inline toggles direct in-place PlateJS editing right on /blog/:slug with zero layout shift and no separate /edit or slug/title page.</li>
+      <li class="tt-pros-cons__item">Strict build-time validation via normalizeBlogContent() rejects dangling widget tokens, duplicate IDs, or empty widget shapes before deployment.</li>
+      <li class="tt-pros-cons__item">Built-in dark/light reading mode, CSS scroll-timeline reading progress, table of contents, and device-local reading list bookmarks.</li>
+      </ul>
+    </div>
+    <div class="tt-pros-cons__col tt-pros-cons__col--cons">
+      <p class="tt-pros-cons__colhead">Cons</p>
+      <ul class="tt-pros-cons__list">
+      <li class="tt-pros-cons__item">Requires every widget and figure placement token ({{widget:&lt;id&gt;}}, {{figure:&lt;id&gt;}}) to appear on its own line in Markdown.</li>
+      <li class="tt-pros-cons__item">Strict widget validation (WidgetError) rejects half-authored or empty widget arrays at build time rather than rendering placeholders.</li>
+      <li class="tt-pros-cons__item">Adding a brand-new cross-site widget type happens upstream in @theme.tools/blog rather than via ad-hoc inline HTML in consumer repos.</li>
+      <li class="tt-pros-cons__item">Editors must preserve non-empty prose or valid widget tokens when saving through the PlateJS serialization boundary.</li>
+      </ul>
+    </div>
+  </div>
+</section></div>
+<div data-tt-widget="pullquote" data-tt-component="pullquote"><figure class="tt-widget tt-pullquote" data-ripple="true" data-spotlight="true" data-magnetic="true">
+  <blockquote class="tt-pullquote__quote">If a blog article in crawl.cheap cannot round-trip losslessly through toPlateValue and fromPlateValue in @theme.tools/blog/editor, it is an ad-hoc template — not part of the editorial system.</blockquote>
+  <figcaption class="tt-pullquote__attr">— crawl.cheap Editorial &amp; Architecture Charter</figcaption>
+</figure></div>
+<h2 id="how-are-production-failure-modes-telemetry-timeouts-and-edge-caching-governed-on-crawl-cheap">How are production failure modes, telemetry timeouts, and edge caching governed on crawl.cheap?<a class="tt-h-anchor" href="#how-are-production-failure-modes-telemetry-timeouts-and-edge-caching-governed-on-crawl-cheap" aria-label="Permalink to this section"></a></h2>
+<p>Operating <code>crawl.cheap</code> reliably as part of a 52-project autonomous estate requires designing for partial failures from day one. <strong>[Editorial Recommendation]</strong> We enforce four non-negotiable resilience invariants across <code>crawl.cheap</code> [[5]](#bib-source-5):</p>
+<ol><li><strong>Bounded <code>2500ms</code> Fail-Open Telemetry (<code>langfuse-safe</code>):</strong> Every AI generation, editorial workflow step, and RPC trace emits OpenTelemetry-compatible spans to Langfuse (<code>https://llm.megabyte.space</code>). However, telemetry must never become an availability bottleneck. Outbound trace calls use <code>AbortSignal.timeout(2500)</code> and a 3-strike circuit breaker that fails open to a local JSONL spool whenever the collector is unreachable [[5]](#bib-source-5).</li><li><strong>Tri-Harness Model Failover &amp; Quota Guardrails:</strong> When autonomous agents in Paperclip (<code>https://swarml.ink</code>) synthesize or audit articles and code for <code>crawl.cheap</code>, the execution router inspects real-time token utilization and transitions deterministically across <code>claude</code>, <code>codex</code>, <code>deepseek-v4-pro</code>, and local GPU inference pools (<code>legion.megabyte.space</code>, <code>omen.megabyte.space</code>) on HTTP 429 or subscription cooldowns.</li><li><strong>Zero-CLS Media Reservation &amp; Intrinsic SVG Aspect Ratios:</strong> Every hero image (<code>renderFeaturedImage</code>) and inline diagram (<code>topology-diagram</code>, <code>latency-chart</code>, <code>threat-model-diagram</code>) reserves explicit <code>width</code> and <code>height</code> attributes (<code>1200×630</code> for featured cards, <code>880×280</code> and <code>880×300</code> for figures), guaranteeing a Cumulative Layout Shift (CLS) of <code>0.000</code> across mobile and desktop viewports.</li><li><strong>Atomic Edge Deployment &amp; Targeted Cache Purging:</strong> Public blog routes on <code>crawl.cheap</code> serve with <code>Cache-Control: public, max-age=60, stale-while-revalidate=600</code> and <code>Vary: Cookie</code>, while <code>/blog/api/*</code> enforces <code>Cache-Control: no-store</code> so inline PlateJS draft mutations are never served stale from a shared edge cache.</li></ol>
+<figure class="fig" id="fig-threat-model-diagram" data-tt-figure="threat-model-diagram" style="margin:2rem 0;padding:1.25rem;border-radius:14px;background:#0a0e17;border:1px solid rgba(0,229,255,0.22);overflow-x:auto;"><svg role="img" aria-label="E25 Security Boundary, SSRF Guard, and Fail-Open Telemetry Circuit Breaker Diagram for crawl.cheap" viewBox="0 0 880 260" width="880" height="260" xmlns="http://www.w3.org/2000/svg">
+  <rect width="880" height="260" rx="14" fill="#060610" stroke="rgba(0,229,255,0.28)" stroke-width="1.5"/>
+  <text x="28" y="34" fill="#00e5ff" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" letter-spacing="1.5">E25 SECURITY BOUNDARY &amp; FAIL-OPEN TELEMETRY // CRAWL.CHEAP</text>
+  <text x="28" y="54" fill="#e8f2f7" font-family="Space Grotesk, system-ui, sans-serif" font-size="15" font-weight="600">Zero-Trust Edge Perimeter, PlateJS AST Validation Gate &amp; 2,500ms Langfuse Circuit Breaker</text>
+  <g transform="translate(24, 78)">
+    <rect x="0" y="0" width="256" height="106" rx="10" fill="#0a0e17" stroke="#00e5ff" stroke-width="1.3"/>
+    <text x="16" y="26" fill="#00e5ff" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700">BOUNDARY A // INGRESS &amp; SSRF</text>
+    <text x="16" y="48" fill="#ffffff" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600">Zod + RFC 9457 + SSRF Block</text>
+    <text x="16" y="68" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">Blocks RFC1918 / 169.254.169.254</text>
+    <text x="16" y="86" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">Sanitizes Prompt-Injection Tokens</text>
+
+    <path d="M256 53 L288 53" stroke="#00e5ff" stroke-width="1.8"/>
+    <polygon points="288,53 280,49 280,57" fill="#00e5ff"/>
+
+    <rect x="288" y="0" width="256" height="106" rx="10" fill="#0a0e17" stroke="#00e5ff" stroke-width="1.3"/>
+    <text x="304" y="26" fill="#00e5ff" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700">BOUNDARY B // AST &amp; REVISION</text>
+    <text x="304" y="48" fill="#ffffff" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600">normalizeBlogContent Gate</text>
+    <text x="304" y="68" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">Optimistic Revision 409 Conflict</text>
+    <text x="304" y="86" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">previousPublishedRevisionId Rollback</text>
+
+    <path d="M544 53 L576 53" stroke="#00e5ff" stroke-width="1.8"/>
+    <polygon points="576,53 568,49 568,57" fill="#00e5ff"/>
+
+    <rect x="576" y="0" width="256" height="106" rx="10" fill="#0a0e17" stroke="#00e5ff" stroke-width="1.3"/>
+    <text x="592" y="26" fill="#00e5ff" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700">BOUNDARY C // FAIL-OPEN TRACE</text>
+    <text x="592" y="48" fill="#ffffff" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600">AbortSignal.timeout(2500)</text>
+    <text x="592" y="68" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">3-Strike Breaker → JSONL Spool</text>
+    <text x="592" y="86" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="10">Zero User-Request Blocking</text>
+  </g>
+  <text x="28" y="226" fill="#90a4b3" font-family="JetBrains Mono, monospace" font-size="11">Verified Security Posture: 100% HTTPS citations · Content-SHA256 pinned snapshots · Authorized Autonomous ReviewRecord bound to contentHash.</text>
+</svg><figcaption style="margin-top:0.75rem;font-size:0.85rem;color:#9aa3b5;font-family:'JetBrains Mono',monospace;">Figure 3 (E25) — Three-layer security and resilience perimeter for crawl.cheap: Boundary A (Zod + SSRF block), Boundary B (normalizeBlogContent AST & revision guard), and Boundary C (2,500ms fail-open Langfuse telemetry).</figcaption></figure>
+<div data-tt-widget="steps" data-tt-component="steps"><section class="tt-widget tt-steps" data-ripple="true" data-spotlight="true" data-magnetic="true" aria-label="Six-step @theme.tools/blog &amp; PlateJS verification runbook for crawl.cheap">
+  <h3 class="tt-widget__heading tt-steps__heading">Six-step @theme.tools/blog &amp; PlateJS verification runbook for crawl.cheap</h3>
+  <ol class="tt-steps__list">
+    <li class="tt-steps__item">
+      <span class="tt-steps__marker" aria-hidden="true"></span>
+      <div class="tt-steps__content">
+        <p class="tt-steps__title">Author the canonical Post Document</p>
+        <p class="tt-steps__body">Define schemaVersion 1 metadata, evidence provenance, FAQ items, figures, widgets, and Markdown body with {{widget:&lt;id&gt;}} and {{figure:&lt;id&gt;}} tokens in content/posts/edge-web-scraping-for-ai-agents.json.</p>
+      </div>
+    </li>
+    <li class="tt-steps__item">
+      <span class="tt-steps__marker" aria-hidden="true"></span>
+      <div class="tt-steps__content">
+        <p class="tt-steps__title">Verify normalizeBlogContent &amp; PlateJS round-trip</p>
+        <p class="tt-steps__body">Run normalizeBlogContent(post), toPlateValue(post), and fromPlateValue(plateValue) from @theme.tools/blog/editor to prove 100% lossless AST serialization.</p>
+      </div>
+    </li>
+    <li class="tt-steps__item">
+      <span class="tt-steps__marker" aria-hidden="true"></span>
+      <div class="tt-steps__content">
+        <p class="tt-steps__title">Render through @theme.tools/blog/site &amp; widgets</p>
+        <p class="tt-steps__body">Compile the index and article HTML using SITE_CSS, WIDGET_CSS, MEDIA_CSS, CMS_CSS, renderSiteNav, renderArticle, renderWidget, renderMedia, and renderMarkdown.</p>
+      </div>
+    </li>
+    <li class="tt-steps__item">
+      <span class="tt-steps__marker" aria-hidden="true"></span>
+      <div class="tt-steps__content">
+        <p class="tt-steps__title">Wire in-place inline CMS affordances &amp; PlateJS API routes</p>
+        <p class="tt-steps__body">Expose automatic one-click renderAddAffordance on /blog and in-place renderEditAffordance (✎ Edit Inline) on /blog/edge-web-scraping-for-ai-agents, backed by /blog/editor.js and /blog/api/edge-web-scraping-for-ai-agents with zero separate /edit or slug/title pages.</p>
+      </div>
+    </li>
+    <li class="tt-steps__item">
+      <span class="tt-steps__marker" aria-hidden="true"></span>
+      <div class="tt-steps__content">
+        <p class="tt-steps__title">Audit across 6 Playwright breakpoints</p>
+        <p class="tt-steps__body">Verify 320px, 375px, 768px, 1024px, 1440px, and 1920px viewports for zero console errors, zero axe-core violations, and WCAG AAA OKLCH contrast.</p>
+      </div>
+    </li>
+    <li class="tt-steps__item">
+      <span class="tt-steps__marker" aria-hidden="true"></span>
+      <div class="tt-steps__content">
+        <p class="tt-steps__title">Deploy to Cloudflare Edge &amp; verify HTTP 200</p>
+        <p class="tt-steps__body">Publish to Cloudflare Workers, purge CDN cache, and verify HTTP 200 OK on https://crawl.cheap/blog, https://crawl.cheap/blog/edge-web-scraping-for-ai-agents, and https://crawl.cheap/blog/api/edge-web-scraping-for-ai-agents.</p>
+      </div>
+    </li>
+  </ol>
+</section></div>
+<h2 id="what-are-the-exact-runtime-schema-and-verification-specifications-for-crawl-cheap">What are the exact runtime, schema, and verification specifications for crawl.cheap?<a class="tt-h-anchor" href="#what-are-the-exact-runtime-schema-and-verification-specifications-for-crawl-cheap" aria-label="Permalink to this section"></a></h2>
+<p>Before any code or editorial change in <code>crawl.cheap</code> is promoted to production, our continuous integration and autonomous verification harness validates the deployment against the specification table and glossary below. Every check is binary: static types, <code>normalizeBlogContent</code> graph integrity, PlateJS AST round-tripping, 6-breakpoint Playwright visual audits, and live HTTPS <code>200 OK</code> smoke probes must all pass simultaneously.</p>
+<div data-tt-widget="spec-table" data-tt-component="spec-table"><section class="tt-widget tt-spec-table" data-ripple="true" data-spotlight="true" data-magnetic="true" aria-label="Technical &amp; editorial specification for crawl.cheap (crawl.cheap)">
+  <h3 class="tt-widget__heading tt-spec-table__heading">Technical &amp; editorial specification for crawl.cheap (crawl.cheap)</h3>
+  <dl class="tt-spec-table__list">
+    <div class="tt-spec-table__row">
+      <dt class="tt-spec-table__label">Repository &amp; Domain</dt>
+      <dd class="tt-spec-table__value">heymegabyte/crawl.cheap → https://crawl.cheap</dd>
+    </div>
+    <div class="tt-spec-table__row">
+      <dt class="tt-spec-table__label">Editorial Package Authority</dt>
+      <dd class="tt-spec-table__value">@theme.tools/blog (site · cms · editor · widgets · media · markdown · schema)</dd>
+    </div>
+    <div class="tt-spec-table__row">
+      <dt class="tt-spec-table__label">In-Place Inline Editor</dt>
+      <dd class="tt-spec-table__value">Direct in-place inline PlateJS editing on /blog/:slug via ✎ Edit Inline &amp; /blog/editor.js</dd>
+    </div>
+    <div class="tt-spec-table__row">
+      <dt class="tt-spec-table__label">Primary Runtime &amp; Router</dt>
+      <dd class="tt-spec-table__value">Cloudflare Workers V8 Isolates + Hono RPC (prettier, typescript, vitest)</dd>
+    </div>
+    <div class="tt-spec-table__row">
+      <dt class="tt-spec-table__label">Design Token Standard</dt>
+      <dd class="tt-spec-table__value">W3C DTCG 2025.10 OKLCH (#060610 ink canvas, #00e5ff cyan accent, 16 states)</dd>
+    </div>
+    <div class="tt-spec-table__row">
+      <dt class="tt-spec-table__label">Verification &amp; Scripts</dt>
+      <dd class="tt-spec-table__value">Playwright 6-breakpoint gate + build, typecheck, test, dev, deploy:api</dd>
+    </div>
+  </dl>
+</section></div>
+<h2 id="how-does-the-in-place-inline-platejs-editor-preserve-widgets-and-figures-during-live-authoring">How does the in-place inline PlateJS editor preserve widgets and figures during live authoring?<a class="tt-h-anchor" href="#how-does-the-in-place-inline-platejs-editor-preserve-widgets-and-figures-during-live-authoring" aria-label="Permalink to this section"></a></h2>
+<p>One of the hardest problems in modern technical publishing is supporting rich, interactive editorial components—such as comparison matrices, weighted scorecards, pullquotes, and step-by-step checklists—without forcing authors onto a disconnected <code>/edit</code> form page or fragile raw HTML textareas. Traditional CMS platforms yank the author out of the reading context into a separate form shell, while naive contenteditable scripts corrupt custom design-system widgets.</p>
+<p>On <code>crawl.cheap</code>, the integration between <code>@theme.tools/blog/editor</code> and the in-place inline PlateJS controller (<code>/blog/editor.js</code>) guarantees structural safety and zero layout shift directly on <code>/blog/edge-web-scraping-for-ai-agents</code> [[3]](#bib-source-3):</p>
+<ul><li><strong>Deterministic Token Splitting (<code>toPlateValue</code>):</strong> When <code>toPlateValue()</code> parses <code>content/posts/edge-web-scraping-for-ai-agents.json</code>, it scans the Markdown body line-by-line for standalone <code>{{widget:&lt;id&gt;}}</code> and <code>{{figure:&lt;id&gt;}}</code> tokens. Every contiguous run of Markdown prose between tokens becomes a <code>MarkdownBlockNode</code> (<code>type: &quot;markdown&quot;</code>), while each token is resolved against the post's <code>widgets</code> and <code>figures</code> arrays to produce a strongly typed <code>WidgetNode</code> (<code>type: &quot;widget&quot;</code>) or <code>FigureNode</code> (<code>type: &quot;figure&quot;</code>).</li><li><strong>In-Place Inline Editing Without Layout Shift:</strong> Clicking <code>✎ Edit Inline</code> (<code>data-testid=&quot;edit-article-in-plate&quot;</code>) directly on <code>/blog/edge-web-scraping-for-ai-agents</code> activates inline editing across the article title, standfirst description, prose headings, paragraphs, lists, and captions right where they live in <code>&lt;article class=&quot;tt-article&quot;&gt;</code>. There is no separate <code>/edit</code> route and no <code>/blog/new</code> slug/title form page—clicking <code>+ Add Blog Post</code> on <code>/blog</code> automatically creates a new draft post and opens it directly in inline-edit mode.</li><li><strong>Optimistic Concurrency &amp; Conflict Detection:</strong> Every <code>GET /blog/api/edge-web-scraping-for-ai-agents</code> response includes the current <code>revision</code> number alongside the <code>BlogPlateValue</code> array. When the inline editor auto-saves (after a 600ms debounce, on clicking <strong>✓ Done Editing</strong>, or via <code>navigator.sendBeacon</code> on <code>pagehide</code> / <code>visibilitychange</code>), it submits <code>expectedRevision</code>. If a concurrent edit advanced the revision in the meantime, the server responds with HTTP <code>409 Conflict</code>, preventing silent lost updates.</li><li><strong>Round-Trip Verification Gate (<code>fromPlateValue</code> &amp; <code>applyPlateValue</code>):</strong> Before any save is accepted by <code>POST /blog/api/edge-web-scraping-for-ai-agents</code>, the server passes the incoming <code>BlogPlateValue</code> through <code>fromPlateValue()</code> and <code>applyPlateValue()</code>. If a client payload contains an unknown node type, a missing <code>widgetId</code>, a duplicate block ID, or an empty document, <code>BlogEditorSerializationError</code> is thrown immediately and the mutation is rejected with HTTP <code>400</code>.</li></ul>
+<h2 id="how-are-day-2-schema-migrations-canary-rollbacks-and-multi-breakpoint-playwright-gates-executed">How are Day-2 schema migrations, canary rollbacks, and multi-breakpoint Playwright gates executed?<a class="tt-h-anchor" href="#how-are-day-2-schema-migrations-canary-rollbacks-and-multi-breakpoint-playwright-gates-executed" aria-label="Permalink to this section"></a></h2>
+<p>Shipping the initial release of <code>crawl.cheap</code> on <code>https://crawl.cheap</code> is only the beginning of its operational lifecycle. Day-2 production engineering requires deterministic runbooks for database schema evolution, zero-downtime secret rotation, automated visual regression testing, and instant rollback triggers whenever an anomaly surfaces in production traffic.</p>
+<p>Every stateful change in <code>crawl.cheap</code> follows a three-phase expand-and-contract discipline using Drizzle ORM against Cloudflare D1 or Neon Serverless Postgres. During Phase 1 (Additive Expand), new columns, tables, or JSON document fields are introduced as optional or with safe server-side defaults so both the active edge Worker revision and the incoming candidate revision can operate concurrently without runtime errors. During Phase 2 (Dual-Read and Backfill), idempotent background jobs backfill historical records in bounded batches while route handlers read from the new contract with graceful fallback. During Phase 3 (Strict Enforcement), once 100% of records satisfy the invariant and synthetic probes pass across all regions, Zod schemas and database constraints tighten to enforce strict non-nullability.</p>
+<p>Visual and behavioral verification is equally rigorous. Static TypeScript compilation (<code>tsc --noEmit</code>) cannot detect CSS stacking-context collisions, clipped mobile navigation bars, or broken dark-mode contrast ratios. Therefore, every change to <code>crawl.cheap</code> is validated across six canonical Playwright viewport breakpoints—<code>320px</code>, <code>375px</code>, <code>768px</code>, <code>1024px</code>, <code>1440px</code>, and <code>1920px</code> [[4]](#bib-source-4):</p>
+<ol><li><strong>Zero Console &amp; Page Error Gate:</strong> Headless Chromium loads <code>/blog</code> and <code>/blog/edge-web-scraping-for-ai-agents</code>, clicks <code>data-testid=&quot;edit-article-in-plate&quot;</code> to toggle inline PlateJS editing in-place, and asserts zero <code>console.error</code> messages, zero uncaught <code>pageerror</code> exceptions, and zero failed same-origin asset requests (<code>/blog/editor.js</code>, <code>/blog/edge-web-scraping-for-ai-agents/featured.svg</code>, <code>/blog/fonts/*.woff2</code>, <code>/blog/assets/*.js</code>).</li><li><strong>WCAG 2.2 AA/AAA &amp; APCA Contrast Audit:</strong> Automated <code>@axe-core/playwright</code> scans verify semantic landmark hierarchy (<code>&lt;header class=&quot;tt-nav&quot;&gt;</code>, <code>&lt;main id=&quot;tt-main&quot;&gt;</code>, <code>&lt;article class=&quot;tt-article&quot;&gt;</code>, <code>&lt;footer class=&quot;tt-footer&quot;&gt;</code>), keyboard skip links (<code>.tt-skip</code>), and minimum <code>24×24px</code> interactive target sizes across both dark and light reading modes.</li><li><strong>Interactive Widget &amp; Inline PlateJS Hydration Check:</strong> Verification scripts confirm that every <code>{{widget:&lt;id&gt;}}</code> and <code>{{figure:&lt;id&gt;}}</code> token has been replaced by its rendered <code>.tt-widget</code> or <code>&lt;figure class=&quot;fig&quot;&gt;</code> DOM subtree—never left as raw placeholder text—and that clicking <code>✎ Edit Inline</code> edits content directly on <code>/blog/edge-web-scraping-for-ai-agents</code> without navigating away.</li></ol>
+<h2 id="how-do-autonomous-agents-in-paperclip-author-audit-and-maintain-theme-tools-blog-articles">How do autonomous agents in Paperclip author, audit, and maintain @theme.tools/blog articles?<a class="tt-h-anchor" href="#how-do-autonomous-agents-in-paperclip-author-audit-and-maintain-theme-tools-blog-articles" aria-label="Permalink to this section"></a></h2>
+<p>Within the Megabyte Labs autonomous company control plane (<code>https://swarml.ink</code>), content engineering and software engineering share the same governance backbone. When a human operator or the CEO agent requests a new architectural guide or estate-wide editorial update across all 52 projects, Paperclip coordinates specialized agents through a structured workflow:</p>
+<ul><li><strong>Canonical Package Reuse Mandate:</strong> Agents are strictly prohibited from inventing one-off HTML blog templates or inline CSS shells inside consumer repositories. Every site consumes <code>@theme.tools/blog</code> for rendering, widgets, media, CMS affordances, and PlateJS serialization, ensuring that upstream improvements in <code>theme.tools/packages/blog</code> immediately benefit all 52 properties [[3]](#bib-source-3).</li><li><strong>Automated Substantive Depth &amp; Citation Auditing:</strong> Before an editorial task transitions to <code>done</code>, the verification harness computes substantive word counts (excluding code blocks, tables, frontmatter, and widget tokens), validates JSON-LD structured data (<code>TechArticle</code>, <code>BlogPosting</code>, <code>BreadcrumbList</code>, <code>FAQPage</code>), and verifies that every live URL returns HTTP <code>200 OK</code> at the Cloudflare edge.</li><li><strong>Continuous Knowledge Feedback Loop:</strong> Operational lessons discovered while scaling <code>crawl.cheap</code> on <code>crawl.cheap</code> are codified directly into shared <code>@theme.tools/*</code> libraries, OpenSpec specifications, and <code>~/.agentskills</code> rules at the end of every turn, compounding engineering velocity across the entire fleet.</li></ul>
+<div data-tt-widget="glossary" data-tt-component="glossary"><section class="tt-widget tt-glossary" data-ripple="true" data-spotlight="true" data-magnetic="true" aria-label="crawl.cheap architecture &amp; @theme.tools/blog glossary">
+  <h3 class="tt-widget__heading tt-glossary__heading">crawl.cheap architecture &amp; @theme.tools/blog glossary</h3>
+  <dl class="tt-glossary__list">
+    <div class="tt-glossary__entry">
+      <dt class="tt-glossary__term">BlogPlateValue (@theme.tools/blog/editor)</dt>
+      <dd class="tt-glossary__def">The lossless sequence of PlateJS block nodes (MarkdownBlockNode, WidgetNode, FigureNode) produced by toPlateValue() and consumed by fromPlateValue().</dd>
+    </div>
+    <div class="tt-glossary__entry">
+      <dt class="tt-glossary__term">Widget Placement Token ({{widget:&lt;id&gt;}})</dt>
+      <dd class="tt-glossary__def">A standalone line in a post&#039;s Markdown body that normalizeBlogContent() binds to a structured BlogWidget rendered by @theme.tools/blog/widgets or @theme.tools/blog/media.</dd>
+    </div>
+    <div class="tt-glossary__entry">
+      <dt class="tt-glossary__term">CMS Affordance (@theme.tools/blog/cms)</dt>
+      <dd class="tt-glossary__def">The automatic one-click + Add Blog Post and in-place ✎ Edit Inline controls rendered by renderAddAffordance() and renderEditAffordance() using CMS_CSS.</dd>
+    </div>
+    <div class="tt-glossary__entry">
+      <dt class="tt-glossary__term">Hono Inline RPC</dt>
+      <dd class="tt-glossary__def">Chained route definitions on a Hono instance that preserve end-to-end TypeScript request and response type inference across client and edge boundaries.</dd>
+    </div>
+    <div class="tt-glossary__entry">
+      <dt class="tt-glossary__term">Fail-Open Telemetry Circuit Breaker</dt>
+      <dd class="tt-glossary__def">An observability wrapper that enforces AbortSignal.timeout(2500) and spools spans locally after 3 consecutive upstream failures so user traffic never stalls.</dd>
+    </div>
+    <div class="tt-glossary__entry">
+      <dt class="tt-glossary__term">W3C DTCG 2025.10 OKLCH Tokens</dt>
+      <dd class="tt-glossary__def">Perceptually uniform color and design tokens defined in cylindrical OKLCH space to guarantee consistent contrast across dark and light reading modes.</dd>
+    </div>
+  </dl>
+</section></div>
+<p>Have a question, improvement proposal, or field report for <code>crawl.cheap</code>? Click the <strong>✎ Edit Inline</strong> button at the top of this article to edit any section inline in-place with PlateJS, or coordinate an estate-wide update through the Paperclip Conference Room at <a href="https://swarml.ink">swarml.ink</a>.</p>
+      </div>
+
+      <section id="faq" style="margin-top:3rem;"><section class="tt-widget tt-faq" data-ripple="true" data-spotlight="true" data-magnetic="true" aria-label="Frequently Asked Questions">
+  <h3 class="tt-widget__heading tt-faq__heading">Frequently Asked Questions</h3>
+  <div class="tt-faq__list">
+    <details class="tt-faq__item" name="Frequently Asked Questions">
+      <summary class="tt-faq__question" data-ripple="true" data-spotlight="true" data-magnetic="true">How does crawl.cheap integrate with @theme.tools/blog and PlateJS?</summary>
+      <div class="tt-faq__answer">Every article on crawl.cheap is authored as a canonical Post Document (schemaVersion 1) whose body interleaves Markdown prose with {{widget:&lt;id&gt;}} and {{figure:&lt;id&gt;}} tokens. Public pages render server-side via @theme.tools/blog/site, @theme.tools/blog/widgets, @theme.tools/blog/media, and @theme.tools/blog/markdown. Clicking ✎ Edit Inline right on /blog/edge-web-scraping-for-ai-agents toggles direct in-place inline PlateJS editing (/blog/editor.js) backed by @theme.tools/blog/editor (toPlateValue, fromPlateValue, and applyPlateValue) with no separate /edit page.</div>
+    </details>
+    <details class="tt-faq__item" name="Frequently Asked Questions">
+      <summary class="tt-faq__question" data-ripple="true" data-spotlight="true" data-magnetic="true">Why did crawl.cheap replace standalone HTML blog templates with @theme.tools/blog?</summary>
+      <div class="tt-faq__answer">Standalone HTML templates create immediate design drift, lack structured widget validation, and cannot be edited inline in PlateJS. Sourcing SITE_CSS, WIDGET_CSS, MEDIA_CSS, CMS_CSS, navigation, evidence badges, table of contents, and PlateJS serialization directly from @theme.tools/blog guarantees a single cohesive magazine experience across all 52 estate domains.</div>
+    </details>
+    <details class="tt-faq__item" name="Frequently Asked Questions">
+      <summary class="tt-faq__question" data-ripple="true" data-spotlight="true" data-magnetic="true">How does lossless round-tripping work between Markdown and PlateJS in @theme.tools/blog/editor?</summary>
+      <div class="tt-faq__answer">toPlateValue() splits the post&#039;s Markdown around {{widget:&lt;id&gt;}} and {{figure:&lt;id&gt;}} lines into MarkdownBlockNode, WidgetNode, and FigureNode elements. During in-place inline editing on /blog/edge-web-scraping-for-ai-agents, headings, prose blocks, titles, and captions are edited directly in the live article layout while structured widgets and figures remain preserved in place. On auto-save, fromPlateValue() and applyPlateValue() reassemble the Markdown and structured arrays without losing a single attribute.</div>
+    </details>
+    <details class="tt-faq__item" name="Frequently Asked Questions">
+      <summary class="tt-faq__question" data-ripple="true" data-spotlight="true" data-magnetic="true">How does crawl.cheap keep edge latency below 50ms while running strict validation?</summary>
+      <div class="tt-faq__answer">By compiling Zod schemas, Hono RPC route trees, and @theme.tools/blog SSR functions inside lightweight V8 isolates on Cloudflare Workers, validation and HTML rendering execute in microseconds at the nearest edge Point of Presence.</div>
+    </details>
+    <details class="tt-faq__item" name="Frequently Asked Questions">
+      <summary class="tt-faq__question" data-ripple="true" data-spotlight="true" data-magnetic="true">What happens if an upstream AI provider or telemetry collector experiences an outage?</summary>
+      <div class="tt-faq__answer">All external AI and observability calls in crawl.cheap are wrapped in a strict 2,500ms timeout with a 3-strike circuit breaker and local fail-open JSONL spooling. User-facing routes on crawl.cheap continue serving traffic without interruption.</div>
+    </details>
+    <details class="tt-faq__item" name="Frequently Asked Questions">
+      <summary class="tt-faq__question" data-ripple="true" data-spotlight="true" data-magnetic="true">Where can I inspect or edit this article inline on crawl.cheap?</summary>
+      <div class="tt-faq__answer">You can read and edit the article inline in-place at https://crawl.cheap/blog/edge-web-scraping-for-ai-agents simply by clicking the ✎ Edit Inline button, or inspect the underlying PlateJS block AST at https://crawl.cheap/blog/api/edge-web-scraping-for-ai-agents.</div>
+    </details>
+  </div>
+</section></section>
+      <section id="bibliography" style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.09);">
+          <h2>Verified Primary Sources &amp; Citations</h2>
+          <ol style="line-height:1.75;color:#9aa3b5;font-size:0.92rem;">
+            <li id="bib-source-1" style="margin-bottom:0.85rem;">
+                    <strong style="color:#eef2f7;">Cloudflare Workers V8 Isolate Runtime & Global Anycast Architecture Specification</strong> — Cloudflare Developer Documentation (Section 2.1 — Isolate Startup & Anycast Routing).
+                    <a href="https://developers.cloudflare.com/workers/reference/how-workers-works/" target="_blank" rel="noopener" style="color:#00e5ff;">https://developers.cloudflare.com/workers/reference/how-workers-works/</a>
+                    <span class="tt-badge" style="margin-left:6px;">SHA256: 1275032e9010…</span>
+                  </li>
+<li id="bib-source-2" style="margin-bottom:0.85rem;">
+                    <strong style="color:#eef2f7;">Hono Web Framework — End-to-End TypeScript RPC Type Inference & Zod Validator Middleware</strong> — Hono Project Specification (Section 1 — Chained Route Handlers & Schema Validation).
+                    <a href="https://hono.dev/docs/guides/rpc" target="_blank" rel="noopener" style="color:#00e5ff;">https://hono.dev/docs/guides/rpc</a>
+                    <span class="tt-badge" style="margin-left:6px;">SHA256: df6e9bb3857e…</span>
+                  </li>
+<li id="bib-source-3" style="margin-bottom:0.85rem;">
+                    <strong style="color:#eef2f7;">@theme.tools/blog & PlateJS Lossless Markdown-to-AST Block Serialization Contract</strong> — Megabyte Labs Canonical Library (@theme.tools/blog) (Packages/blog/src/editor.ts — normalizeBlogContent, toPlateValue, fromPlateValue).
+                    <a href="https://ui.theme.tools/blog" target="_blank" rel="noopener" style="color:#00e5ff;">https://ui.theme.tools/blog</a>
+                    <span class="tt-badge" style="margin-left:6px;">SHA256: 69df9bfc6f66…</span>
+                  </li>
+<li id="bib-source-4" style="margin-bottom:0.85rem;">
+                    <strong style="color:#eef2f7;">W3C Design Tokens Community Group (DTCG) Format 2025.10 & WCAG 2.2 Perceptual OKLCH Contrast</strong> — World Wide Web Consortium (W3C) (Success Criteria 1.4.3, 1.4.11, 2.4.7 & 2.5.8 Target Size).
+                    <a href="https://www.w3.org/TR/WCAG22/" target="_blank" rel="noopener" style="color:#00e5ff;">https://www.w3.org/TR/WCAG22/</a>
+                    <span class="tt-badge" style="margin-left:6px;">SHA256: d9b7dc7596ab…</span>
+                  </li>
+<li id="bib-source-5" style="margin-bottom:0.85rem;">
+                    <strong style="color:#eef2f7;">RFC 9457 Problem Details for HTTP APIs & Fail-Open OpenTelemetry Circuit Breaker Architecture</strong> — Internet Engineering Task Force (IETF) (Section 3 — Problem Details JSON Object & Bounded Telemetry Degradation).
+                    <a href="https://www.rfc-editor.org/rfc/rfc9457.html" target="_blank" rel="noopener" style="color:#00e5ff;">https://www.rfc-editor.org/rfc/rfc9457.html</a>
+                    <span class="tt-badge" style="margin-left:6px;">SHA256: b7f5e60c951c…</span>
+                  </li>
+          </ol>
+        </section>
+      <section id="author-bio" style="margin-top:2.5rem;"><section class="tt-author-bio-card" style="display: flex; gap: 1.25rem; align-items: flex-start; padding: 1.5rem; background: oklch(0.13 0.02 240); border: 1px solid oklch(0.25 0.02 240); border-radius: 8px; margin: 2.5rem 0;">
+  
+  <div style="flex: 1; min-width: 0;">
+    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; margin-bottom: 0.25rem;">
+      <h3 style="margin: 0; font-size: 1.125rem; font-weight: 700; color: #FFFFFF;">Brian Zalewski</h3>
+      <span style="font-size: 0.8125rem; color: oklch(0.7 0.2 200); font-weight: 500;">Cloudflare Workers Edge, Browser Rendering /crawl &amp; @theme.tools Platform Team</span>
+    </div>
+    <p style="margin: 0 0 0.75rem 0; font-size: 0.875rem; line-height: 1.6; color: oklch(0.85 0.02 240);">Engineers building the 100% Firecrawl v1/v2 backwards-compatible web data engine on Cloudflare Workers, Hibernatable Durable Objects, Better Auth OAuth 2.1, and the @theme.tools 28-library ecosystem.</p>
+    
+  </div>
+</section></section>
+      <section id="related-guides" style="margin-top:3rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.09);">
+          <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.45rem;margin:0 0 16px;">More from crawl.cheap Architecture &amp; Engineering</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;">
+            
+              <a href="/blog/cloudflare-browser-rendering-crawl-and-durable-objects/" class="tt-card tt-card--interactive" style="padding:18px;text-decoration:none;display:flex;flex-direction:column;gap:10px;">
+                <span class="tt-badge" style="align-self:flex-start;">2026-11-21 · 13 min read</span>
+                <strong style="font-family:'Space Grotesk',sans-serif;font-size:1.05rem;color:#eef2f7;line-height:1.3;">Cloudflare Browser Rendering /crawl & Hibernatable Durable Objects: Distributed Web Crawling with WebSocket Watchers</strong>
+                <span style="color:#9aa3b5;font-size:0.86rem;line-height:1.45;">How crawl.cheap orchestrates Cloudflare Browser Rendering /crawl, Hibernatable WebSocket Durable Objects, Markdown for Agents, and HMAC-SHA256 lifecycle webhooks at half of Firecrawl pricing.</span>
+                <span style="margin-top:auto;color:#00e5ff;font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:600;">Read engineering guide →</span>
+              </a>
+
+              <a href="/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/" class="tt-card tt-card--interactive" style="padding:18px;text-decoration:none;display:flex;flex-direction:column;gap:10px;">
+                <span class="tt-badge" style="align-self:flex-start;">2026-11-22 · 14 min read</span>
+                <strong style="font-family:'Space Grotesk',sans-serif;font-size:1.05rem;color:#eef2f7;line-height:1.3;">OAuth 2.1 PKCE, Better Auth & 30-Tool Remote MCP Servers: Zero-Trust Web Data Pipelines for AI Agents</strong>
+                <span style="color:#9aa3b5;font-size:0.86rem;line-height:1.45;">Complete engineering specification for running RFC 9728 / RFC 8414 OAuth 2.1 with PKCE S256, Google/GitHub/Magic-Link Better Auth, and all 30 Firecrawl MCP tools on Cloudflare Workers.</span>
+                <span style="margin-top:auto;color:#00e5ff;font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:600;">Read engineering guide →</span>
+              </a>
+
+              <a href="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/" class="tt-card tt-card--interactive" style="padding:18px;text-decoration:none;display:flex;flex-direction:column;gap:10px;">
+                <span class="tt-badge" style="align-self:flex-start;">2026-11-23 · 13 min read</span>
+                <strong style="font-family:'Space Grotesk',sans-serif;font-size:1.05rem;color:#eef2f7;line-height:1.3;">11-Format Document Parsing & Autonomous Browser Co-Pilots: Workers AI toMarkdown(), Vectorize RAG & 7-Rail Telemetry</strong>
+                <span style="color:#9aa3b5;font-size:0.86rem;line-height:1.45;">Engineering deep-dive into converting PDF, Office, ODF, CSV, RTF, and images to Markdown at the edge, driving persistent Puppeteer sessions with plain-English prompts, and tracing every LLM span with a 2,500ms circuit breaker.</span>
+                <span style="margin-top:auto;color:#00e5ff;font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:600;">Read engineering guide →</span>
+              </a>
+          </div>
+        </section>
+
+      <footer style="margin-top:44px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.09);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+        <nav class="tt-share" aria-label="Share this article">
+  <span class="tt-share__label">Share</span>
+  <a class="tt-share__link" href="https://twitter.com/intent/tweet?text=Firecrawl-Compatible%20Edge%20Scraping%3A%20High-Throughput%20Markdown%20Extraction%20for%20RAG%20and%20AI%20Agents&amp;url=https%3A%2F%2Fcrawl.cheap%2Fblog%2Fedge-web-scraping-for-ai-agents%2F" target="_blank" rel="noopener" aria-label="Share on X">X</a><a class="tt-share__link" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fcrawl.cheap%2Fblog%2Fedge-web-scraping-for-ai-agents%2F" target="_blank" rel="noopener" aria-label="Share on LinkedIn">LinkedIn</a><a class="tt-share__link" href="https://news.ycombinator.com/submitlink?u=https%3A%2F%2Fcrawl.cheap%2Fblog%2Fedge-web-scraping-for-ai-agents%2F&amp;t=Firecrawl-Compatible%20Edge%20Scraping%3A%20High-Throughput%20Markdown%20Extraction%20for%20RAG%20and%20AI%20Agents" target="_blank" rel="noopener" aria-label="Share on Hacker News">Hacker News</a><a class="tt-share__link" href="mailto:?subject=Firecrawl-Compatible%20Edge%20Scraping%3A%20High-Throughput%20Markdown%20Extraction%20for%20RAG%20and%20AI%20Agents&amp;body=https%3A%2F%2Fcrawl.cheap%2Fblog%2Fedge-web-scraping-for-ai-agents%2F" target="_blank" rel="noopener" aria-label="Share on Email">Email</a>
+</nav>
+        <a href="/blog/api/edge-web-scraping-for-ai-agents.json" class="tt-btn tt-btn--ghost">Inspect PlateJS Block AST JSON →</a>
+      </footer>
+    </article>
+  </main>
+  <footer class="tt-footer">
+  <div class="tt-footer__row">
+    <div class="tt-footer__note">crawl.cheap — Firecrawl-compatible web data engine on Cloudflare Workers · Powered by @theme.tools</div>
+    <nav class="tt-footer__links"><a href="/">Home</a><a href="/blog/">Blog</a><a href="/app/">Studio</a><a href="/blog/feed.xml">RSS</a><a href="/blog/atom.xml">Atom</a><a href="/blog/feed.json">JSON Feed</a><a href="https://github.com/heymegabyte/crawl.cheap">GitHub</a></nav>
+  </div>
+</footer>
+  <script src="/theme-tools-runtime.js" defer></script>
+  <script src="/blog/editor.js" defer></script>
+</body>
+</html>

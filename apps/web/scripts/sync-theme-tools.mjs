@@ -92,7 +92,7 @@ export const CRAWL_CHEAP_MEGA_MENU_DATA = {
       },
       items: [
         {
-          label: 'Engineering Blog & Reference Guides',
+          label: 'Engineering Blog & Reference Guides (All 4 Articles)',
           href: '/blog/',
           preview: {
             src: '/blog/edge-web-scraping-for-ai-agents/featured.svg',
@@ -102,7 +102,7 @@ export const CRAWL_CHEAP_MEGA_MENU_DATA = {
           },
         },
         {
-          label: 'Edge Web Scraping for AI Agents (PlateJS Guide)',
+          label: '1. Edge Web Scraping for AI Agents (PlateJS Guide)',
           href: '/blog/edge-web-scraping-for-ai-agents/',
           preview: {
             src: '/blog/edge-web-scraping-for-ai-agents/featured.svg',
@@ -112,23 +112,33 @@ export const CRAWL_CHEAP_MEGA_MENU_DATA = {
           },
         },
         {
-          label: '1-Line Firecrawl SDK Migration',
-          href: '/#migrate',
+          label: '2. Cloudflare Browser Rendering /crawl & Durable Objects',
+          href: '/blog/cloudflare-browser-rendering-crawl-and-durable-objects/',
           preview: {
-            src: '/assets/crawl-cheap-logo.png',
-            alt: 'Drop-in Firecrawl v1 and v2 SDK replacement',
-            href: '/#migrate',
-            title: 'Keep @mendable/firecrawl-js — Just Point apiUrl at crawl.cheap',
+            src: '/blog/cloudflare-browser-rendering-crawl-and-durable-objects/featured.svg',
+            alt: 'Cloudflare Browser Rendering /crawl and Hibernatable Durable Objects',
+            href: '/blog/cloudflare-browser-rendering-crawl-and-durable-objects/',
+            title: 'Hibernatable WebSocket Watchers · Markdown for Agents · Signed Webhooks',
           },
         },
         {
-          label: '50% Cost & Unit Economics Calculator',
-          href: '/#pricing',
+          label: '3. OAuth 2.1 PKCE, Better Auth & 30-Tool Remote MCP',
+          href: '/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/',
           preview: {
-            src: '/assets/crawl-cheap-logo.png',
-            alt: '50% of Firecrawl pricing across every plan',
-            href: '/#pricing',
-            title: 'Half the Price of Firecrawl ($9.50 Hobby · $49.50 Standard)',
+            src: '/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/featured.svg',
+            alt: 'OAuth 2.1 PKCE and 30-Tool MCP Server on Cloudflare Workers',
+            href: '/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/',
+            title: 'Google + GitHub + Magic Link Auth · RFC 9728/7591/7636 · 30 MCP Tools',
+          },
+        },
+        {
+          label: '4. 11-Format Document Parsing & AI Browser Co-Pilots',
+          href: '/blog/multimodal-document-parsing-and-autonomous-browser-copilots/',
+          preview: {
+            src: '/blog/multimodal-document-parsing-and-autonomous-browser-copilots/featured.svg',
+            alt: '11-Format Document Parsing and Autonomous Browser Co-Pilots',
+            href: '/blog/multimodal-document-parsing-and-autonomous-browser-copilots/',
+            title: 'Workers AI toMarkdown() · Presigned R2 · 7-Rail Telemetry',
           },
         },
       ],
@@ -798,6 +808,41 @@ for (const post of posts) {
     'data-tt-cms="edit" data-testid="edit-article-in-plate" id="btn-plate-edit"',
   );
 
+  const authorBioHtml = `<section id="author-bio" style="margin-top:2.5rem;">${renderComponent(
+    'author-bio',
+    {
+      name: post.author || 'crawl.cheap Systems Architecture Team',
+      role: 'Cloudflare Workers Edge, Browser Rendering /crawl & @theme.tools Platform Team',
+      bio: 'Engineers building the 100% Firecrawl v1/v2 backwards-compatible web data engine on Cloudflare Workers, Hibernatable Durable Objects, Better Auth OAuth 2.1, and the @theme.tools 28-library ecosystem.',
+      links: [
+        { label: 'Firecrawl Admin Dashboard', href: '/app/' },
+        { label: 'Engineering Blog', href: '/blog/' },
+        { label: 'GitHub Repository', href: 'https://github.com/heymegabyte/crawl.cheap' },
+      ],
+    },
+  )}</section>`;
+
+  const relatedPosts = posts.filter((p) => p.slug !== post.slug);
+  const relatedPostsHtml =
+    relatedPosts.length > 0
+      ? `<section id="related-guides" style="margin-top:3rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.09);">
+          <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.45rem;margin:0 0 16px;">More from crawl.cheap Architecture &amp; Engineering</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;">
+            ${relatedPosts
+              .map(
+                (rp) => `
+              <a href="/blog/${rp.slug}/" class="tt-card tt-card--interactive" style="padding:18px;text-decoration:none;display:flex;flex-direction:column;gap:10px;">
+                <span class="tt-badge" style="align-self:flex-start;">${rp.date} · ${readingMinutes(rp.body)} min read</span>
+                <strong style="font-family:'Space Grotesk',sans-serif;font-size:1.05rem;color:#eef2f7;line-height:1.3;">${rp.title}</strong>
+                <span style="color:#9aa3b5;font-size:0.86rem;line-height:1.45;">${rp.description}</span>
+                <span style="margin-top:auto;color:#00e5ff;font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:600;">Read engineering guide →</span>
+              </a>`,
+              )
+              .join('\n')}
+          </div>
+        </section>`
+      : '';
+
   const articlePageHtml = `<!doctype html>
 <html lang="en" data-theme="dark">
 <head>
@@ -865,6 +910,8 @@ for (const post of posts) {
 
       ${faqWidgetHtml}
       ${bibHtml}
+      ${authorBioHtml}
+      ${relatedPostsHtml}
 
       <footer style="margin-top:44px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.09);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
         ${renderShareRow({
@@ -893,6 +940,7 @@ for (const post of posts) {
 </html>`;
 
   writeFileSync(resolve(postDir, 'index.html'), articlePageHtml);
+  writeFileSync(resolve(publicDir, 'blog', `${post.slug}.html`), articlePageHtml);
 }
 
 // ---------------------------------------------------------------------------

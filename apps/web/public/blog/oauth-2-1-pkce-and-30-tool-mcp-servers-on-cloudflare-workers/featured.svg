@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#060610" />
+      <stop offset="60%" stop-color="#0B0C1E" />
+      <stop offset="100%" stop-color="#020208" />
+    </linearGradient>
+    <radialGradient id="cyanGlow" cx="90%" cy="10%" r="50%">
+      <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="violetGlow" cx="10%" cy="90%" r="50%">
+      <stop offset="0%" stop-color="#7928CA" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="1200" height="630" fill="url(#bgGrad)" />
+  <rect width="1200" height="630" fill="url(#cyanGlow)" />
+  <rect width="1200" height="630" fill="url(#violetGlow)" />
+
+  <!-- Outer Border -->
+  <rect x="20" y="20" width="1160" height="590" rx="16" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2" />
+
+  <!-- Top Metadata Bar -->
+  <g transform="translate(80, 90)">
+    <!-- Category Badge -->
+    <rect x="0" y="0" width="199" height="32" rx="16" fill="rgba(0, 229, 255, 0.12)" stroke="#00E5FF" stroke-width="1.5" />
+    <text x="14" y="21" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#00E5FF" letter-spacing="1.5">TECHNICAL EDITORIAL</text>
+
+    <!-- Reading Time -->
+    <text x="219" y="21" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" fill="#94A3B8" letter-spacing="1">5 MIN READ</text>
+  </g>
+
+  <!-- Title Text -->
+  <text font-family="system-ui, -apple-system, sans-serif" font-size="48" font-weight="800" fill="#FFFFFF" letter-spacing="-0.5">
+    <tspan x="80" y="260">OAuth 2.1 PKCE, Better Auth &amp;</tspan><tspan x="80" y="318">30-Tool Remote MCP Servers:</tspan><tspan x="80" y="376">Zero-Trust Web Data Pipelines</tspan>
+  </text>
+
+  <!-- Subtitle -->
+  
+  <text x="80" y="454" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="400" fill="#94A3B8">
+    Complete engineering specification for running RFC 9728 / RFC 8414 OAuth 2.1 with PKCE S25
+  </text>
+
+  <!-- Footer Info Bar -->
+  <g transform="translate(80, 530)">
+    <circle cx="20" cy="20" r="20" fill="#00E5FF" />
+    <text x="20" y="26" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="800" fill="#060610" text-anchor="middle">B</text>
+    <text x="54" y="18" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">Brian Zalewski</text>
+    <text x="54" y="36" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="500" fill="#64748B">Megabyte Labs</text>
+
+    <!-- Right Brand Badge -->
+    <text x="1040" y="27" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="800" fill="#00E5FF" text-anchor="end" letter-spacing="1">MEGABYTE LABS</text>
+  </g>
+</svg>

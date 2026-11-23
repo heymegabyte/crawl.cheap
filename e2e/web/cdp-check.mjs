@@ -263,6 +263,20 @@ async function main() {
   ok('@theme.tools/blog Universal Mega-Menu rendered in navbar', hasMegaMenu);
   const hasAvatarCircle = await ev15("Boolean(document.querySelector('.tt-avatar-circle'))");
   ok('@theme.tools/ui Avatar Circle rendered in navbar', hasAvatarCircle);
+  const hasAuthProviders = await ev15(
+    'Boolean(document.querySelector(\'[data-testid="login-google"]\') && document.querySelector(\'[data-testid="login-github"]\') && document.querySelector(\'[data-testid="send-magic-link"]\'))',
+  );
+  ok(
+    'Google OAuth, GitHub OAuth, and Magic Email Link login buttons rendered in Firecrawl Admin Dashboard',
+    hasAuthProviders,
+  );
+  const hasFirecrawlSections = await ev15(
+    "Boolean(document.getElementById('overviewMetrics') && document.getElementById('playground') && document.getElementById('activitySection') && document.getElementById('usageSection') && document.getElementById('apiKeysSection'))",
+  );
+  ok(
+    'Complete Firecrawl Admin Dashboard sections (Overview, 7-Mode Playground, Activity Logs, Usage & Plan Switcher, API Keys, Co-Pilot, Monitors) rendered',
+    hasFirecrawlSections,
+  );
   const telemetryRailsReady = await ev15(
     'Boolean(window.__TT_TRACE__ && window.posthog && window.gtag && Array.isArray(window.dataLayer) && window.Sentry && window.LangfuseSafe && window.LangfuseSafe.timeoutMs === 2500)',
   );
@@ -307,35 +321,59 @@ async function main() {
   } catch {}
 
   // ───────────────────────────────────────────────────────────────────────────
-  // @theme.tools/blog + PlateJS Inline Editor Audit (/blog/edge-web-scraping-for-ai-agents)
+  // @theme.tools/blog Magazine Index (/blog/) + 4 Flagship 2,000+ Word Articles
   // ───────────────────────────────────────────────────────────────────────────
-  console.log(
-    `\n@theme.tools/blog + PlateJS Inline Editor Audit → ${URL_}/blog/edge-web-scraping-for-ai-agents\n`,
-  );
+  console.log(`\n@theme.tools/blog Magazine (/blog/) & 4 Flagship 2,000+ Word Articles Audit\n`);
   const blogErrStart = consoleErrors.length;
-  const loadedBlog = waitFor(
+  const loadedBlogIndex = waitFor(
     (m) => m.method === 'Page.loadEventFired' && m.sessionId === sessionId,
     20000,
   );
-  await S('Page.navigate', { url: `${URL_}/blog/edge-web-scraping-for-ai-agents` });
-  await loadedBlog;
-  await sleep(1500);
+  await S('Page.navigate', { url: `${URL_}/blog/` });
+  await loadedBlogIndex;
+  await sleep(1200);
 
-  const blogWidgetCount = await ev15(
-    "document.querySelectorAll('.tt-widget, [data-tt-widget]').length",
-  );
+  const blogCardCount = await ev15("document.querySelectorAll('.tt-post, article.tt-card').length");
   ok(
-    '@theme.tools/blog article rendered all 10+ structured catalog widgets',
-    blogWidgetCount >= 10,
-    `widgets=${blogWidgetCount}`,
+    '@theme.tools/blog magazine index renders all 4 flagship engineering articles',
+    blogCardCount >= 4,
+    `cards=${blogCardCount}`,
   );
-  const rawTokensLeft = await ev15(
-    "Array.from(document.querySelectorAll('p')).some(p => /^\\{\\{(widget|figure):[A-Za-z0-9_-]+\\}\\}$/.test((p.textContent || '').trim()))",
-  );
-  ok('Zero unreplaced standalone {{widget:*}} or {{figure:*}} token paragraphs', !rawTokensLeft);
+
+  for (const slug of [
+    'edge-web-scraping-for-ai-agents',
+    'cloudflare-browser-rendering-crawl-and-durable-objects',
+    'oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers',
+    'multimodal-document-parsing-and-autonomous-browser-copilots',
+  ]) {
+    const loadedBlog = waitFor(
+      (m) => m.method === 'Page.loadEventFired' && m.sessionId === sessionId,
+      20000,
+    );
+    await S('Page.navigate', { url: `${URL_}/blog/${slug}/` });
+    await loadedBlog;
+    await sleep(1000);
+
+    const blogWidgetCount = await ev15(
+      "document.querySelectorAll('.tt-widget, [data-tt-widget], figure.fig').length",
+    );
+    ok(
+      `/blog/${slug}/ rendered 14+ structured @theme.tools/blog widgets & SVG diagrams`,
+      blogWidgetCount >= 14,
+      `widgets=${blogWidgetCount}`,
+    );
+    const wordCount = await ev15(
+      "(document.querySelector('article')?.innerText || '').split(/\\s+/).filter(Boolean).length",
+    );
+    ok(`/blog/${slug}/ exceeds 2,000+ rendered words`, wordCount >= 2000, `words=${wordCount}`);
+    const rawTokensLeft = await ev15(
+      "Array.from(document.querySelectorAll('p')).some(p => /^\\{\\{(widget|figure):[A-Za-z0-9_-]+\\}\\}$/.test((p.textContent || '').trim()))",
+    );
+    ok(`/blog/${slug}/ has zero unreplaced {{widget:*}} or {{figure:*}} tokens`, !rawTokensLeft);
+  }
 
   await ev15('document.querySelector(\'[data-testid="edit-article-in-plate"]\')?.click()');
-  await sleep(600);
+  await sleep(500);
   const isInlineEditable = await ev15(
     'Boolean(document.querySelector(\'[data-testid="edit-article-in-plate"][aria-pressed="true"]\') || document.querySelector(\'[contenteditable="true"]\'))',
   );
@@ -343,7 +381,7 @@ async function main() {
 
   const blogErrors = consoleErrors.slice(blogErrStart);
   ok(
-    '0 console errors / CSP violations on /blog/edge-web-scraping-for-ai-agents',
+    '0 console errors / CSP violations across all 4 @theme.tools/blog articles',
     blogErrors.length === 0,
     '\n   - ' + blogErrors.join('\n   - '),
   );

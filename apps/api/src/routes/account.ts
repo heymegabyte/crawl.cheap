@@ -9,11 +9,14 @@ import { getActiveConcurrencyForTeam } from '../crawl-do';
 import {
   deleteThreatPolicy,
   getThreatPolicy,
+  listAgentJobs,
+  listInteractSessions,
   saveThreatPolicy,
   tokensUsedThisPeriod,
   tokenUsageHistory,
   type ThreatProtectionPolicy,
 } from '../lib/durable-state';
+import { PLAN_CREDITS } from '../lib/keys';
 
 const route = new Hono<{ Bindings: Env; Variables: Vars }>();
 
@@ -169,27 +172,100 @@ route.get('/team/queue-status', (c) => {
 route.get('/team/activity', async (c) => {
   const p = c.get('principal');
   if (p.invalidCredentials) return requireAuth(c)!;
-  if (p.authed && p.keyId && c.env.DB) {
-    const rows = await usageHistory(c.env.DB, p.keyId, 50);
-    return c.json({
-      success: true as const,
-      data: rows.map((r) => ({
-        endpoint: r.operation,
-        credits: r.credits,
-        url: r.url,
-        jobId: r.job_id,
-        success: Boolean(r.success),
-        createdAt: r.created_at,
-      })),
-      cursor: null,
-      has_more: false,
-    });
-  }
+  const teamId = p.teamId ?? p.keyId ?? 'default';
+  const [usageRows, agentRows, interactRows] = await Promise.all([
+    p.authed && p.keyId && c.env.DB ? usageHistory(c.env.DB, p.keyId, 50) : Promise.resolve([]),
+    listAgentJobs(c.env.DB, teamId),
+    listInteractSessions(c.env.DB, teamId),
+  ]);
+
+  const items = [
+    ...usageRows.map((r) => ({
+      id: r.job_id ?? `usg_${r.created_at}`,
+      endpoint: r.operation,
+      credits: r.credits,
+      creditsUsed: r.credits,
+      url: r.url ?? 'https://example.com',
+      jobId: r.job_id,
+      status: r.success ? 'completed' : 'failed',
+      success: Boolean(r.success),
+      createdAt: r.created_at,
+    })),
+    ...agentRows.map((a) => ({
+      id: a.id,
+      endpoint: 'agent',
+      credits: a.creditsUsed,
+      creditsUsed: a.creditsUsed,
+      url: a.prompt.slice(0, 120),
+      jobId: a.id,
+      status: a.cancelled ? 'cancelled' : a.status,
+      success: a.status !== 'failed',
+      createdAt: a.createdAt,
+    })),
+    ...interactRows.map((s) => ({
+      id: s.id,
+      endpoint: 'interact',
+      credits: 2,
+      creditsUsed: 2,
+      url: s.url,
+      jobId: s.id,
+      status: s.status,
+      success: true,
+      createdAt: new Date(s.createdAt).toISOString(),
+    })),
+  ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+
+  const slice = items.slice(0, 60);
   return c.json({
     success: true as const,
-    data: [],
+    data: slice,
+    activity: slice,
     cursor: null,
     has_more: false,
+  });
+});
+
+route.post('/team/plan', async (c) => {
+  const p = c.get('principal');
+  if (!p.authed || !p.keyId) {
+    return fail(
+      c,
+      401,
+      'Changing plan requires an authenticated API key or session.',
+      'BAD_REQUEST',
+    );
+  }
+  const parsed = await parseBody(
+    c,
+    z.object({
+      plan: z.enum(['free', 'hobby', 'standard', 'growth', 'scale']),
+    }),
+  );
+  if (!parsed.ok) return parsed.response;
+  const credits = PLAN_CREDITS[parsed.data.plan] ?? 1000;
+  if (c.env.DB) {
+    try {
+      await c.env.DB.prepare('UPDATE api_keys SET plan = ?, monthly_credits = ? WHERE id = ?')
+        .bind(parsed.data.plan, credits, p.keyId)
+        .run();
+    } catch {
+      /* ignore */
+    }
+  }
+  const PLAN_PRICES: Record<string, number> = {
+    free: 0,
+    hobby: 9.5,
+    standard: 49.5,
+    growth: 199.5,
+    scale: 374.5,
+  };
+  return c.json({
+    success: true as const,
+    data: {
+      plan: parsed.data.plan,
+      monthlyCredits: credits,
+      priceMonthly: PLAN_PRICES[parsed.data.plan] ?? 0,
+    },
   });
 });
 

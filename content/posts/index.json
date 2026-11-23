@@ -4,6 +4,11 @@
   "editorContract": "@theme.tools/blog/editor",
   "repository": "crawl.cheap",
   "domain": "crawl.cheap",
-  "updatedAt": "2026-11-19T01:58:55.529Z",
-  "files": ["content/posts/edge-web-scraping-for-ai-agents.json"]
+  "updatedAt": "2026-11-23T06:01:22.310Z",
+  "files": [
+    "content/posts/edge-web-scraping-for-ai-agents.json",
+    "content/posts/cloudflare-browser-rendering-crawl-and-durable-objects.json",
+    "content/posts/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers.json",
+    "content/posts/multimodal-document-parsing-and-autonomous-browser-copilots.json"
+  ]
 }

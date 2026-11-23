@@ -22,4 +22,55 @@
     <category term="platejs" />
     <summary type="text">OpenAPI contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic HTML-to-Markdown distillation.</summary>
   </entry>
+  <entry>
+    <id>https://crawl.cheap/blog/cloudflare-browser-rendering-crawl-and-durable-objects/</id>
+    <title>Cloudflare Browser Rendering /crawl &amp; Hibernatable Durable Objects: Distributed Web Crawling with WebSocket Watchers</title>
+    <link href="https://crawl.cheap/blog/cloudflare-browser-rendering-crawl-and-durable-objects/" rel="alternate" type="text/html" />
+    <published>2026-11-21T14:00:00Z</published>
+    <updated>2026-11-23T14:00:00Z</updated>
+    <author>
+      <name>Brian Zalewski</name>
+    </author>
+    <category term="saas-platform" />
+    <category term="architecture" />
+    <category term="cloudflare-workers" />
+    <category term="theme-tools" />
+    <category term="platejs" />
+    <category term="firecrawl" />
+    <summary type="text">How crawl.cheap orchestrates Cloudflare Browser Rendering /crawl, Hibernatable WebSocket Durable Objects, Markdown for Agents, and HMAC-SHA256 lifecycle webhooks at half of Firecrawl pricing.</summary>
+  </entry>
+  <entry>
+    <id>https://crawl.cheap/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/</id>
+    <title>OAuth 2.1 PKCE, Better Auth &amp; 30-Tool Remote MCP Servers: Zero-Trust Web Data Pipelines for AI Agents</title>
+    <link href="https://crawl.cheap/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/" rel="alternate" type="text/html" />
+    <published>2026-11-22T14:00:00Z</published>
+    <updated>2026-11-23T14:00:00Z</updated>
+    <author>
+      <name>Brian Zalewski</name>
+    </author>
+    <category term="saas-platform" />
+    <category term="architecture" />
+    <category term="cloudflare-workers" />
+    <category term="theme-tools" />
+    <category term="platejs" />
+    <category term="firecrawl" />
+    <summary type="text">Complete engineering specification for running RFC 9728 / RFC 8414 OAuth 2.1 with PKCE S256, Google/GitHub/Magic-Link Better Auth, and all 30 Firecrawl MCP tools on Cloudflare Workers.</summary>
+  </entry>
+  <entry>
+    <id>https://crawl.cheap/blog/multimodal-document-parsing-and-autonomous-browser-copilots/</id>
+    <title>11-Format Document Parsing &amp; Autonomous Browser Co-Pilots: Workers AI toMarkdown(), Vectorize RAG &amp; 7-Rail Telemetry</title>
+    <link href="https://crawl.cheap/blog/multimodal-document-parsing-and-autonomous-browser-copilots/" rel="alternate" type="text/html" />
+    <published>2026-11-23T14:00:00Z</published>
+    <updated>2026-11-23T14:00:00Z</updated>
+    <author>
+      <name>Brian Zalewski</name>
+    </author>
+    <category term="saas-platform" />
+    <category term="architecture" />
+    <category term="cloudflare-workers" />
+    <category term="theme-tools" />
+    <category term="platejs" />
+    <category term="firecrawl" />
+    <summary type="text">Engineering deep-dive into converting PDF, Office, ODF, CSV, RTF, and images to Markdown at the edge, driving persistent Puppeteer sessions with plain-English prompts, and tracing every LLM span with a 2,500ms circuit breaker.</summary>
+  </entry>
 </feed>

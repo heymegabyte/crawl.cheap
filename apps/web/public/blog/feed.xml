@@ -19,5 +19,44 @@
       <category>theme-tools</category>
       <category>platejs</category>
     </item>
+    <item>
+      <title>Cloudflare Browser Rendering /crawl &amp; Hibernatable Durable Objects: Distributed Web Crawling with WebSocket Watchers</title>
+      <link>https://crawl.cheap/blog/cloudflare-browser-rendering-crawl-and-durable-objects/</link>
+      <guid isPermaLink="true">https://crawl.cheap/blog/cloudflare-browser-rendering-crawl-and-durable-objects/</guid>
+      <pubDate>Sat, 21 Nov 2026 14:00:00 GMT</pubDate>
+      <description>How crawl.cheap orchestrates Cloudflare Browser Rendering /crawl, Hibernatable WebSocket Durable Objects, Markdown for Agents, and HMAC-SHA256 lifecycle webhooks at half of Firecrawl pricing.</description>
+      <category>saas-platform</category>
+      <category>architecture</category>
+      <category>cloudflare-workers</category>
+      <category>theme-tools</category>
+      <category>platejs</category>
+      <category>firecrawl</category>
+    </item>
+    <item>
+      <title>OAuth 2.1 PKCE, Better Auth &amp; 30-Tool Remote MCP Servers: Zero-Trust Web Data Pipelines for AI Agents</title>
+      <link>https://crawl.cheap/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/</link>
+      <guid isPermaLink="true">https://crawl.cheap/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/</guid>
+      <pubDate>Sun, 22 Nov 2026 14:00:00 GMT</pubDate>
+      <description>Complete engineering specification for running RFC 9728 / RFC 8414 OAuth 2.1 with PKCE S256, Google/GitHub/Magic-Link Better Auth, and all 30 Firecrawl MCP tools on Cloudflare Workers.</description>
+      <category>saas-platform</category>
+      <category>architecture</category>
+      <category>cloudflare-workers</category>
+      <category>theme-tools</category>
+      <category>platejs</category>
+      <category>firecrawl</category>
+    </item>
+    <item>
+      <title>11-Format Document Parsing &amp; Autonomous Browser Co-Pilots: Workers AI toMarkdown(), Vectorize RAG &amp; 7-Rail Telemetry</title>
+      <link>https://crawl.cheap/blog/multimodal-document-parsing-and-autonomous-browser-copilots/</link>
+      <guid isPermaLink="true">https://crawl.cheap/blog/multimodal-document-parsing-and-autonomous-browser-copilots/</guid>
+      <pubDate>Mon, 23 Nov 2026 14:00:00 GMT</pubDate>
+      <description>Engineering deep-dive into converting PDF, Office, ODF, CSV, RTF, and images to Markdown at the edge, driving persistent Puppeteer sessions with plain-English prompts, and tracing every LLM span with a 2,500ms circuit breaker.</description>
+      <category>saas-platform</category>
+      <category>architecture</category>
+      <category>cloudflare-workers</category>
+      <category>theme-tools</category>
+      <category>platejs</category>
+      <category>firecrawl</category>
+    </item>
   </channel>
 </rss>
