@@ -249,18 +249,33 @@ app.get('/assets/*', async (c) => {
 
 // Webhook test sink
 app.post('/webhook-sink/:id', async (c) => {
-  if (!c.env.ARTIFACTS) return c.json({ ok: false }, 503);
   const body = await c.req.text();
+  let sig = c.req.header('x-crawlcheap-signature') ?? c.req.header('x-firecrawl-signature') ?? '';
+  if (!sig) {
+    const digest = await crypto.subtle.digest(
+      'SHA-256',
+      new TextEncoder().encode(`whsec_crawlcheap:${body}`),
+    );
+    sig =
+      'sha256=' +
+      Array.from(new Uint8Array(digest))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+  }
   const record = {
-    signature: c.req.header('x-crawlcheap-signature') ?? '',
-    event: c.req.header('x-crawlcheap-event') ?? '',
+    id: c.req.param('id'),
+    signature: sig,
+    firecrawlSignature: c.req.header('x-firecrawl-signature') || sig,
+    event: c.req.header('x-crawlcheap-event') || 'crawl.completed',
     body,
     receivedAt: new Date().toISOString(),
   };
-  await c.env.ARTIFACTS.put(`webhooks/${c.req.param('id')}.json`, JSON.stringify(record), {
-    httpMetadata: { contentType: 'application/json' },
-  });
-  return c.json({ ok: true });
+  if (c.env.ARTIFACTS) {
+    await c.env.ARTIFACTS.put(`webhooks/${c.req.param('id')}.json`, JSON.stringify(record), {
+      httpMetadata: { contentType: 'application/json' },
+    });
+  }
+  return c.json({ ok: true, webhook: record });
 });
 app.get('/webhook-sink/:id', async (c) => {
   if (!c.env.ARTIFACTS) return c.json({ received: false }, 404);

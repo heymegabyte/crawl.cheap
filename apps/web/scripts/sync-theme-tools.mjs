@@ -1636,11 +1636,16 @@ const blogIndexHtml = `<!doctype html>
 
     ${catalogShowcaseHtml}
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-top:32px;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:26px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);">
+      <input id="blogSearchInput" type="search" placeholder="Search architecture guides (e.g. Durable Objects, OAuth 2.1, PKCE, toMarkdown)…" aria-label="Search engineering blog articles" class="tt-input" style="flex:1 1 260px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;" />
+      <span id="blogMatchCount" class="tt-badge">${posts.length} guides</span>
+    </div>
+
+    <div id="blogArticlesGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-top:24px;">
       ${posts
         .map(
           (p) => `
-        <article class="tt-card tt-card--interactive" style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+        <article class="tt-card tt-card--interactive" data-blog-card data-blog-search="${(p.title + ' ' + p.description + ' ' + (p.tags || []).join(' ')).toLowerCase().replace(/"/g, '&quot;')}" style="padding:24px;display:flex;flex-direction:column;gap:14px;">
           <a href="/blog/${p.slug}/" style="display:block;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);aspect-ratio:1200/630;background:#0a0e17;">
             <img src="${p.heroImage.src}" alt="${p.heroImage.alt}" width="1200" height="630" style="width:100%;height:100%;object-fit:cover;display:block;" />
           </a>
@@ -1674,6 +1679,25 @@ const blogIndexHtml = `<!doctype html>
       { label: 'GitHub', href: 'https://github.com/heymegabyte/crawl.cheap' },
     ],
   })}
+  <script>
+    (function () {
+      var input = document.getElementById('blogSearchInput');
+      var countEl = document.getElementById('blogMatchCount');
+      var cards = document.querySelectorAll('[data-blog-card]');
+      if (!input || !cards.length) return;
+      input.addEventListener('input', function () {
+        var q = (input.value || '').trim().toLowerCase();
+        var shown = 0;
+        cards.forEach(function (c) {
+          var hay = c.getAttribute('data-blog-search') || '';
+          var match = !q || hay.indexOf(q) !== -1;
+          c.style.display = match ? 'flex' : 'none';
+          if (match) shown++;
+        });
+        if (countEl) countEl.textContent = shown + (shown === 1 ? ' guide' : ' guides');
+      });
+    })();
+  </script>
   <script src="/theme-tools-runtime.js?v=2" defer></script>
 </body>
 </html>`;

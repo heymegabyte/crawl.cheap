@@ -934,6 +934,83 @@ export async function findOrCreatePasswordlessUser(
 }
 
 /**
+ * Update a user's profile (`name` and/or `image` avatar URL) in D1 + memory.
+ */
+export async function updateUserProfile(
+  db: D1Database | undefined,
+  input: {
+    userId?: string;
+    email?: string;
+    name?: string;
+    image?: string | null;
+  },
+): Promise<{
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl: string | null;
+  initials: string;
+}> {
+  await ensureAuthSchema(db);
+  const cleanEmail = (input.email ?? '').trim().toLowerCase();
+  let user =
+    (input.userId ? memUsersById.get(input.userId) : undefined) ??
+    (cleanEmail ? memUsersByEmail.get(cleanEmail) : undefined);
+
+  const now = Date.now();
+  const nextName = input.name?.trim() || user?.name || cleanEmail.split('@')[0] || 'Developer';
+  const nextImage = input.image !== undefined ? input.image?.trim() || null : (user?.image ?? null);
+
+  if (user) {
+    user.name = nextName;
+    user.image = nextImage;
+    user.updatedAtMs = now;
+  } else if (cleanEmail) {
+    const created = await findOrCreatePasswordlessUser(db, {
+      email: cleanEmail,
+      name: nextName,
+      image: nextImage,
+      provider: 'profile',
+    });
+    user = created.user;
+    user.name = nextName;
+    user.image = nextImage;
+  }
+
+  if (db && (user?.id || cleanEmail)) {
+    try {
+      if (user?.id) {
+        await db
+          .prepare('UPDATE auth_users SET name = ?, image = ?, updated_at_ms = ? WHERE id = ?')
+          .bind(nextName, nextImage, now, user.id)
+          .run();
+      } else {
+        await db
+          .prepare('UPDATE auth_users SET name = ?, image = ?, updated_at_ms = ? WHERE email = ?')
+          .bind(nextName, nextImage, now, cleanEmail)
+          .run();
+      }
+    } catch {
+      /* in-memory updated */
+    }
+  }
+
+  const parts = nextName.split(/\s+/).filter(Boolean);
+  const initials =
+    parts.length >= 2
+      ? (parts[0]![0]! + parts[1]![0]!).toUpperCase()
+      : nextName.slice(0, 2).toUpperCase();
+
+  return {
+    id: user?.id ?? input.userId ?? `usr_profile`,
+    email: user?.email ?? (cleanEmail || 'developer@crawl.cheap'),
+    name: nextName,
+    avatarUrl: nextImage,
+    initials,
+  };
+}
+
+/**
  * Issue a SHA-256 hashed single-use Magic Email Link token (15-minute TTL).
  */
 export async function issueMagicLinkToken(

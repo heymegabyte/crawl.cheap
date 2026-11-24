@@ -29,6 +29,7 @@ import {
   revokeOAuthToken,
   signInEmailUser,
   signUpEmailUser,
+  updateUserProfile,
   verifyMagicLinkToken,
   verifySignedEdgeSessionToken,
 } from '../lib/better-auth';
@@ -394,6 +395,128 @@ const healthHandler = (c: Ctx) =>
 
 route.get('/api/auth/health', healthHandler);
 route.get('/api/health/auth', healthHandler);
+
+const providersHandler = (c: Ctx) => {
+  const issuer = getIssuer(c);
+  return c.json({
+    success: true,
+    issuer,
+    providers: [
+      {
+        id: 'google',
+        name: 'Google OAuth 2.0',
+        type: 'social',
+        enabled: true,
+        signInEndpoint: `${issuer}/api/auth/sign-in/social`,
+        callbackEndpoint: `${issuer}/api/auth/callback/google`,
+        supportsAvatar: true,
+      },
+      {
+        id: 'github',
+        name: 'GitHub OAuth 2.0',
+        type: 'social',
+        enabled: true,
+        signInEndpoint: `${issuer}/api/auth/sign-in/social`,
+        callbackEndpoint: `${issuer}/api/auth/callback/github`,
+        supportsAvatar: true,
+      },
+      {
+        id: 'magic-link',
+        name: 'Passwordless Magic Email Link',
+        type: 'passwordless',
+        enabled: true,
+        sendEndpoint: `${issuer}/api/auth/sign-in/magic-link`,
+        verifyEndpoint: `${issuer}/api/auth/magic-link/verify`,
+        ttlSeconds: 900,
+      },
+      {
+        id: 'email-password',
+        name: 'Better Auth Email & Password',
+        type: 'credentials',
+        enabled: true,
+        signUpEndpoint: `${issuer}/api/auth/sign-up/email`,
+        signInEndpoint: `${issuer}/api/auth/sign-in/email`,
+      },
+      {
+        id: 'oauth21-pkce-s256',
+        name: 'OAuth 2.1 Authorization Server (PKCE S256 & Dynamic Client Registration)',
+        type: 'oauth21',
+        enabled: true,
+        discoveryEndpoint: `${issuer}/.well-known/oauth-authorization-server`,
+        protectedResourceEndpoint: `${issuer}/.well-known/oauth-protected-resource`,
+        registrationEndpoint: `${issuer}/register`,
+        authorizeEndpoint: `${issuer}/authorize`,
+        tokenEndpoint: `${issuer}/token`,
+      },
+      {
+        id: 'api-key',
+        name: 'Firecrawl & crawl.cheap Bearer API Keys (fc- / cc_live_)',
+        type: 'bearer',
+        enabled: true,
+        prefixes: ['fc-', 'cc_live_'],
+        createEndpoint: `${issuer}/v2/keys`,
+      },
+    ],
+  });
+};
+
+route.get('/api/auth/providers', providersHandler);
+route.get('/api/auth/oauth/providers', providersHandler);
+
+route.get('/api/auth/profile', async (c) => {
+  const p = c.get('principal');
+  const token = extractBearerOrCookieSessionToken(c.req.raw);
+  const verified = token
+    ? await verifySignedEdgeSessionToken(token, getSigningSecret(c))
+    : { valid: false };
+  const email = verified.serverClaims?.email ?? 'developer@crawl.cheap';
+  const name = verified.serverClaims?.name ?? 'Developer';
+  const profile = await updateUserProfile(c.env.DB, {
+    userId: verified.serverClaims?.userId ?? p.userId,
+    email,
+    name,
+  });
+  return c.json({
+    success: true,
+    profile,
+  });
+});
+
+route.post('/api/auth/profile', async (c) => {
+  const raw = await c.req.json().catch(() => null);
+  const parsed = z
+    .object({
+      name: z.string().min(1).max(120).optional(),
+      email: z.string().email().optional(),
+      avatarUrl: z.string().max(1024).nullable().optional(),
+    })
+    .safeParse(raw);
+  if (!parsed.success) {
+    return c.json(
+      {
+        success: false,
+        error: parsed.error.issues[0]?.message ?? 'Invalid profile payload',
+        code: 'BAD_REQUEST',
+      },
+      400,
+    );
+  }
+  const p = c.get('principal');
+  const token = extractBearerOrCookieSessionToken(c.req.raw);
+  const verified = token
+    ? await verifySignedEdgeSessionToken(token, getSigningSecret(c))
+    : { valid: false };
+  const profile = await updateUserProfile(c.env.DB, {
+    userId: verified.serverClaims?.userId ?? p.userId,
+    email: parsed.data.email ?? verified.serverClaims?.email ?? 'developer@crawl.cheap',
+    name: parsed.data.name ?? verified.serverClaims?.name ?? 'Developer',
+    image: parsed.data.avatarUrl,
+  });
+  return c.json({
+    success: true,
+    profile,
+  });
+});
 
 route.post('/api/auth/sign-up/email', async (c) => {
   const raw = await c.req.json().catch(() => null);
@@ -854,9 +977,9 @@ route.get('/api/auth/api-key/list', async (c) => {
 route.post('/api/auth/api-key/revoke', async (c) => {
   const body = (await c.req.json().catch(() => ({}))) as { keyId?: string; id?: string };
   const targetId = body.keyId ?? body.id ?? '';
-  if (!targetId) return c.json({ success: false, error: 'keyId is required' }, 400);
+  if (!targetId) return c.json({ success: false, revoked: false, error: 'keyId is required' }, 400);
   const ok = await revokeKeyById(c.env.DB, targetId);
-  return c.json({ success: ok });
+  return c.json({ success: ok, revoked: ok, keyId: targetId });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

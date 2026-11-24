@@ -125,6 +125,11 @@ route.get('/concurrency-check', (c) => {
     success: true as const,
     concurrency,
     maxConcurrency,
+    data: {
+      active: concurrency,
+      concurrency,
+      maxConcurrency,
+    },
   });
 });
 

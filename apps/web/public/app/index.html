@@ -618,6 +618,8 @@
       </ul>
     </nav>
     <span class="sp"></span>
+    <span class="pill emerald" id="ovHealthPill" title="Cloudflare Workers API Edge Status">API Online</span>
+    <button type="button" class="btn btn-g" id="btnOpenCmdPalette" title="Quick Command Palette (Cmd+K / Ctrl+K)" style="padding:6px 11px;font-size:12px;font-family:var(--mono);">⌘K</button>
     <button type="button" class="btn btn-g" id="btnTopSignIn" style="padding:7px 13px;font-size:12.5px;">Sign in</button>
     <button type="button" class="tt-avatar-circle" id="navAvatarCircle" title="Sign in with Google or GitHub" aria-label="Account">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
@@ -735,6 +737,13 @@
               </tbody>
             </table>
           </div>
+          <div id="ovUsageBreakdown" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font:11.5px var(--mono);color:var(--mut);display:flex;gap:12px;flex-wrap:wrap;">
+            <span>scrape: <b id="ovCountScrape" style="color:var(--ink)">0</b></span>
+            <span>crawl: <b id="ovCountCrawl" style="color:var(--ink)">0</b></span>
+            <span>extract: <b id="ovCountExtract" style="color:var(--ink)">0</b></span>
+            <span>search: <b id="ovCountSearch" style="color:var(--ink)">0</b></span>
+            <span>agent: <b id="ovCountAgent" style="color:var(--ink)">0</b></span>
+          </div>
         </div>
       </div>
     </div>
@@ -753,6 +762,14 @@
         <div class="tab" data-ep="parse">Parse</div>
       </div>
       <div class="row">
+        <select id="pgPresetSelect" aria-label="Playground preset templates" style="width:185px;">
+          <option value="">Preset templates…</option>
+          <option value="example">Example Domain (Scrape)</option>
+          <option value="quotes">Quotes Sandbox (Scrape + Links)</option>
+          <option value="cfdocs">Cloudflare Docs (Map / Crawl)</option>
+          <option value="aisearch">Workers AI &amp; Durable Objects (Search)</option>
+          <option value="extractjson">Schema Entity Extraction (Extract)</option>
+        </select>
         <input class="grow" id="pgInput" aria-label="URL or search query to run" value="https://example.com" />
         <input id="pgPrompt" aria-label="Optional prompt or filter" placeholder="Optional prompt or crawl filter" style="flex:1 1 200px" />
         <button class="btn btn-g" id="btnParamsPreview" style="display:none">Preview Params</button>
@@ -776,7 +793,16 @@
         <button type="button" class="insp-btn on" data-pane="markdown">Output</button>
         <button type="button" class="insp-btn" data-pane="json">JSON</button>
         <button type="button" class="insp-btn" data-pane="code">Code</button>
-        <button type="button" class="getcode" id="getCode" style="margin-left:auto">Get code</button>
+        <select id="codeLangSelect" aria-label="SDK snippet language" style="padding:4px 9px;font-size:11.5px;border-radius:7px;margin-left:4px;">
+          <option value="all">All Languages</option>
+          <option value="curl">cURL</option>
+          <option value="ts">TypeScript SDK</option>
+          <option value="py">Python SDK</option>
+        </select>
+        <span class="pill" id="pgMetricsPill" style="display:none"></span>
+        <button type="button" class="btn btn-g" id="btnCopyInspector" style="padding:4px 10px;font-size:11.5px;margin-left:auto;">Copy</button>
+        <button type="button" class="btn btn-g" id="btnDownloadInspector" style="padding:4px 10px;font-size:11.5px;">Download</button>
+        <button type="button" class="getcode" id="getCode">Get code</button>
       </div>
 
       <pre class="out" id="pgOut"><span class="muted">Results appear here…</span></pre>
@@ -848,6 +874,7 @@
       <div class="row" style="justify-content:space-between;margin-bottom:6px;">
         <h2>Activity Logs</h2>
         <div class="row">
+          <input id="activitySearch" placeholder="Filter by URL or job ID…" aria-label="Search activity logs" style="width:190px;padding:7px 10px;font-size:12px;" />
           <select id="activityFilter" aria-label="Filter activity by operation">
             <option value="all">All operations</option>
             <option value="scrape">scrape</option>
@@ -856,10 +883,12 @@
             <option value="agent">agent</option>
             <option value="interact">interact</option>
           </select>
+          <button type="button" class="btn btn-g" id="btnExportActivityJson" style="padding:7px 11px;font-size:12px;">Export JSON</button>
+          <button type="button" class="btn btn-g" id="btnExportActivityCsv" style="padding:7px 11px;font-size:12px;">Export CSV</button>
           <button type="button" class="btn btn-g" id="btnRefreshActivity">Refresh</button>
         </div>
       </div>
-      <div class="hint">History of scrapes, crawls, batch jobs, extractions, and browser sessions.</div>
+      <div class="hint">History of scrapes, crawls, batch jobs, extractions, and browser sessions. Click any job row to inspect its payload.</div>
       <div class="table-wrap" id="activityTableWrap">
         <table>
           <thead><tr><th>Job ID</th><th>Endpoint</th><th>Status</th><th>Credits</th><th>Timestamp</th></tr></thead>
@@ -868,6 +897,7 @@
           </tbody>
         </table>
       </div>
+      <pre class="out" id="activityDetailOut" style="display:none;max-height:220px;"></pre>
     </div>
 
     <!-- 6. USAGE & BILLING VIEW -->
@@ -1024,6 +1054,15 @@
           </div>
           <div class="stat" id="credStat" style="margin-top:14px"></div>
         </div>
+
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);">
+          <div style="font:600 12px var(--mono);color:var(--mut);margin-bottom:8px;">Profile &amp; Avatar Customization</div>
+          <div class="row">
+            <input id="profileNameInput" placeholder="Display Name (e.g. Brian Zalewski)" aria-label="Profile display name" style="flex:1 1 180px" />
+            <input id="profileAvatarInput" placeholder="Optional Avatar Image URL (https://…)" aria-label="Profile avatar image URL" style="flex:1 1 220px" />
+            <button type="button" class="btn btn-g" id="btnSaveProfile">Save Profile</button>
+          </div>
+        </div>
       </div>
 
       <div class="grid-2">
@@ -1034,10 +1073,19 @@
             <input class="grow" id="monUrl" aria-label="URL to monitor for changes" value="https://example.com" />
             <button class="btn btn-g" id="monDiffBtn">Run Diff</button>
             <button class="btn btn-p" id="btnCreateMonitor">Create Monitor</button>
+            <button class="btn btn-g" id="btnTestWebhook">Test Webhook</button>
           </div>
           <div class="row" style="margin-top:10px">
             <input class="grow" id="ragQuestion" aria-label="Ask documentation assistant" value="How do WebSocket crawl watchers work?" />
             <button class="btn btn-g" id="ragAskBtn">Ask Docs</button>
+          </div>
+          <div class="table-wrap" id="monitorsTableWrap" style="margin-top:10px;">
+            <table>
+              <thead><tr><th>URL</th><th>Interval</th><th>Action</th></tr></thead>
+              <tbody id="monitorsTableBody">
+                <tr><td colspan="3" style="color:var(--faint)">No scheduled monitors yet.</td></tr>
+              </tbody>
+            </table>
           </div>
           <pre class="out" id="radarOut"><span class="muted">Monitor status or diff output will appear here…</span></pre>
         </div>
@@ -1091,6 +1139,18 @@
         <button type="button" class="btn btn-p" id="btnModalMagic">Send Magic Link</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- KEYBOARD COMMAND PALETTE MODAL (⌘K / Ctrl+K) -->
+<div class="modal-backdrop" id="cmdPaletteModal" role="dialog" aria-modal="true" aria-labelledby="cmdPaletteTitle">
+  <div class="modal-sheet" style="max-width:520px;">
+    <div class="row" style="justify-content:space-between;margin-bottom:10px;">
+      <h2 id="cmdPaletteTitle" style="font-size:1.05rem;">Quick Command Palette</h2>
+      <button type="button" class="btn btn-g" id="btnCloseCmdPalette" style="padding:4px 10px;">Esc</button>
+    </div>
+    <input id="cmdPaletteInput" placeholder="Jump to view or run action (e.g. Playground, API Keys, Generate Key)…" aria-label="Filter commands" style="width:100%;margin-bottom:10px;" />
+    <div id="cmdPaletteList" style="display:flex;flex-direction:column;gap:4px;max-height:280px;overflow-y:auto;"></div>
   </div>
 </div>
 
@@ -1277,9 +1337,12 @@ async function api(path, opts = {}) {
   return { status: r.status, json };
 }
 
-function switchWorkspaceView(ws) {
+const VALID_VIEWS = ['overview', 'playground', 'research', 'copilot', 'activity', 'usage', 'keys', 'settings'];
+
+function switchWorkspaceView(ws, updateHash = true) {
+  const target = VALID_VIEWS.includes(ws) ? ws : 'overview';
   document.querySelectorAll('.studio-tab').forEach((b) => {
-    const match = b.dataset.ws === ws;
+    const match = b.dataset.ws === target;
     b.classList.toggle('active', match);
     b.setAttribute('aria-selected', match ? 'true' : 'false');
     if (match) {
@@ -1288,18 +1351,91 @@ function switchWorkspaceView(ws) {
     }
   });
   document.querySelectorAll('.ws-section').forEach((sec) => {
-    sec.style.display = sec.dataset.section === ws ? '' : 'none';
+    sec.style.display = sec.dataset.section === target ? '' : 'none';
   });
+  if (updateHash && location.hash !== '#' + target) {
+    history.replaceState({}, document.title, location.pathname + location.search + '#' + target);
+  }
 }
 
 document.querySelectorAll('.studio-tab').forEach((btn) => {
   btn.addEventListener('click', () => switchWorkspaceView(btn.dataset.ws));
 });
 
+function syncWorkspaceViewFromHash() {
+  const rawHash = (location.hash || '').replace(/^#/, '').trim().toLowerCase();
+  if (VALID_VIEWS.includes(rawHash)) {
+    switchWorkspaceView(rawHash, false);
+  }
+}
+window.addEventListener('hashchange', syncWorkspaceViewFromHash);
+syncWorkspaceViewFromHash();
+
 $('btnHeaderPlayground').onclick = () => switchWorkspaceView('playground');
 $('btnHeaderKeys').onclick = () => switchWorkspaceView('keys');
 $('ovManageKeysBtn').onclick = () => switchWorkspaceView('keys');
 $('ovViewAllActivity').onclick = () => switchWorkspaceView('activity');
+
+// Command Palette (⌘K / Ctrl+K)
+const CMD_PALETTE_ITEMS = [
+  { id: 'ws-overview', label: 'Go to Overview', hint: '#overview', run: () => switchWorkspaceView('overview') },
+  { id: 'ws-playground', label: 'Go to Playground', hint: '#playground', run: () => switchWorkspaceView('playground') },
+  { id: 'ws-research', label: 'Go to Extract & Research', hint: '#research', run: () => switchWorkspaceView('research') },
+  { id: 'ws-copilot', label: 'Go to Browser Sandbox', hint: '#copilot', run: () => switchWorkspaceView('copilot') },
+  { id: 'ws-activity', label: 'Go to Activity Logs', hint: '#activity', run: () => switchWorkspaceView('activity') },
+  { id: 'ws-usage', label: 'Go to Usage & Billing', hint: '#usage', run: () => switchWorkspaceView('usage') },
+  { id: 'ws-keys', label: 'Go to API Keys', hint: '#keys', run: () => switchWorkspaceView('keys') },
+  { id: 'ws-settings', label: 'Go to Settings', hint: '#settings', run: () => switchWorkspaceView('settings') },
+  { id: 'act-new-fc', label: 'Action: Generate New fc- API Key', hint: 'POST /v2/keys', run: () => mintKeyWithPrefix('fc-', 'cmd-palette-fc') },
+  { id: 'act-copy-key', label: 'Action: Copy Active API Key', hint: 'Clipboard', run: () => $('ovCopyKeyBtn').click() },
+  { id: 'act-copy-mcp', label: 'Action: Copy Remote MCP Client Config', hint: 'JSON', run: () => { switchWorkspaceView('settings'); $('btnCopyMcpConfig').click(); } },
+];
+
+function renderCmdPaletteList(query = '') {
+  const q = query.trim().toLowerCase();
+  const matches = CMD_PALETTE_ITEMS.filter((item) => !q || item.label.toLowerCase().includes(q) || item.hint.toLowerCase().includes(q));
+  const listEl = $('cmdPaletteList');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+  matches.forEach((item) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'studio-tab';
+    btn.style.justifyContent = 'space-between';
+    btn.innerHTML = `<span>${item.label}</span><code style="font-size:11px;color:var(--faint)">${item.hint}</code>`;
+    btn.onclick = () => {
+      $('cmdPaletteModal').classList.remove('open');
+      item.run();
+    };
+    listEl.appendChild(btn);
+  });
+}
+
+function openCmdPalette() {
+  $('cmdPaletteModal').classList.add('open');
+  $('cmdPaletteInput').value = '';
+  renderCmdPaletteList('');
+  setTimeout(() => $('cmdPaletteInput').focus(), 40);
+}
+$('btnOpenCmdPalette').onclick = openCmdPalette;
+$('btnCloseCmdPalette').onclick = () => $('cmdPaletteModal').classList.remove('open');
+$('cmdPaletteModal').addEventListener('click', (e) => {
+  if (e.target === $('cmdPaletteModal')) $('cmdPaletteModal').classList.remove('open');
+});
+$('cmdPaletteInput').addEventListener('input', (e) => renderCmdPaletteList(e.target.value));
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    if ($('cmdPaletteModal').classList.contains('open')) {
+      $('cmdPaletteModal').classList.remove('open');
+    } else {
+      openCmdPalette();
+    }
+  } else if (e.key === 'Escape') {
+    $('cmdPaletteModal')?.classList.remove('open');
+    $('authModal')?.classList.remove('open');
+  }
+});
 
 // Sign-In Modal Controls
 function openOrNavigateAuth() {
@@ -1336,6 +1472,8 @@ document.querySelectorAll('#inspectorTabs .insp-btn').forEach((btn) => {
 
 function renderKey() {
   updateNavbarAvatar();
+  if ($('profileNameInput')) $('profileNameInput').value = userName || '';
+  if ($('profileAvatarInput')) $('profileAvatarInput').value = userAvatar || '';
   if (key) {
     $('noKey').style.display = 'none';
     $('hasKey').style.display = '';
@@ -1354,22 +1492,48 @@ function renderKey() {
   }
 }
 
+window.inspectActivityJob = (jobId) => {
+  const item = cachedActivityItems.find((it) => String(it.id || it.jobId || '') === String(jobId));
+  const detailEl = $('activityDetailOut');
+  if (!detailEl || !item) return;
+  detailEl.style.display = '';
+  detailEl.textContent = JSON.stringify(item, null, 2);
+};
+
 function renderActivityRows(items) {
   const filter = $('activityFilter') ? $('activityFilter').value : 'all';
-  const filtered = filter === 'all' ? items : items.filter((it) => String(it.endpoint || it.kind || '').includes(filter));
+  const search = ($('activitySearch') ? $('activitySearch').value : '').trim().toLowerCase();
+  const counts = { scrape: 0, crawl: 0, extract: 0, search: 0, agent: 0 };
+  items.forEach((it) => {
+    const op = String(it.endpoint || it.kind || 'scrape').toLowerCase();
+    if (op in counts) counts[op] += 1;
+  });
+  if ($('ovCountScrape')) $('ovCountScrape').textContent = String(counts.scrape);
+  if ($('ovCountCrawl')) $('ovCountCrawl').textContent = String(counts.crawl);
+  if ($('ovCountExtract')) $('ovCountExtract').textContent = String(counts.extract);
+  if ($('ovCountSearch')) $('ovCountSearch').textContent = String(counts.search);
+  if ($('ovCountAgent')) $('ovCountAgent').textContent = String(counts.agent);
+
+  const filtered = items.filter((it) => {
+    const opMatch = filter === 'all' || String(it.endpoint || it.kind || '').includes(filter);
+    const qMatch = !search || JSON.stringify(it).toLowerCase().includes(search);
+    return opMatch && qMatch;
+  });
   if (!filtered.length) {
     $('activityTableBody').innerHTML = '<tr><td colspan="5" style="color:var(--faint)">No matching jobs yet.</td></tr>';
     return;
   }
-  $('activityTableBody').innerHTML = filtered.slice(0, 20).map((it) => `
-    <tr>
-      <td><code>${String(it.id || '').slice(0, 12)}</code></td>
+  $('activityTableBody').innerHTML = filtered.slice(0, 20).map((it) => {
+    const jid = String(it.id || it.jobId || '');
+    return `
+    <tr style="cursor:pointer" onclick="inspectActivityJob('${jid.replace(/'/g, '')}')">
+      <td><code>${jid.slice(0, 12)}</code></td>
       <td><code>${it.endpoint || it.kind || 'scrape'}</code></td>
       <td><span class="pill emerald">${it.status || 'completed'}</span></td>
       <td>${it.creditsUsed ?? 1}</td>
       <td>${it.createdAt ? new Date(it.createdAt).toLocaleTimeString() : 'just now'}</td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 
   $('ovRecentTableBody').innerHTML = items.slice(0, 5).map((it) => `
     <tr>
@@ -1381,7 +1545,52 @@ function renderActivityRows(items) {
   `).join('');
 }
 
+async function refreshMonitors() {
+  const res = await api('/v2/monitor');
+  const monitors = (res.json && (res.json.monitors || res.json.data)) || [];
+  const tbody = $('monitorsTableBody');
+  if (!tbody) return;
+  if (!Array.isArray(monitors) || !monitors.length) {
+    tbody.innerHTML = '<tr><td colspan="3" style="color:var(--faint)">No scheduled monitors yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = monitors.slice(0, 10).map((m) => `
+    <tr>
+      <td><code>${String(m.url || '').slice(0, 38)}</code></td>
+      <td>${m.intervalMinutes || 60}m</td>
+      <td class="row" style="gap:4px;">
+        <button type="button" class="btn btn-g" onclick="runMonitorCheck('${m.id}')" style="padding:3px 8px;font-size:11px;">Check</button>
+        <button type="button" class="btn btn-g" onclick="deleteMonitorItem('${m.id}')" style="padding:3px 8px;font-size:11px;">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+window.runMonitorCheck = async (monId) => {
+  const res = await api('/v2/monitor/' + monId + '/run', { method: 'POST' });
+  $('radarOut').textContent = JSON.stringify(res.json, null, 2);
+  toast('Monitor check completed');
+};
+
+window.deleteMonitorItem = async (monId) => {
+  await api('/v2/monitor/' + monId, { method: 'DELETE' });
+  toast('Monitor deleted');
+  refreshMonitors();
+};
+
+async function checkApiHealth() {
+  const t0 = performance.now();
+  try {
+    const res = await api('/health');
+    const ms = Math.max(1, Math.round(performance.now() - t0));
+    if (res.status === 200 && $('ovHealthPill')) {
+      $('ovHealthPill').textContent = `API Online · ${ms}ms`;
+    }
+  } catch {}
+}
+
 async function refreshAccount() {
+  checkApiHealth();
   if (!key) return;
   const [cu, tu, cc, act, keyList] = await Promise.all([
     api('/v2/team/credit-usage'),
@@ -1392,7 +1601,7 @@ async function refreshAccount() {
   ]);
   const d = cu.json && cu.json.data;
   const td = tu.json && tu.json.data;
-  const cd = cc.json && cc.json.data;
+  const cd = (cc.json && cc.json.data) || cc.json;
   if (d) {
     const rem = d.remainingCredits ?? 500;
     const plan = d.planCredits || 500;
@@ -1409,7 +1618,9 @@ async function refreshAccount() {
     $('ovTokensSub').textContent = `${tokUsed.toLocaleString()} tokens used this cycle`;
 
     if (cd) {
-      $('ovConcurrency').textContent = `${cd.active ?? 0} / ${cd.maxConcurrency ?? 10}`;
+      const actCount = cd.active ?? cd.concurrency ?? 0;
+      const maxCount = cd.maxConcurrency ?? 10;
+      $('ovConcurrency').textContent = `${actCount} / ${maxCount}`;
     }
 
     $('credStat').innerHTML =
@@ -1445,6 +1656,8 @@ async function refreshAccount() {
       </tr>`;
   }
 
+  refreshMonitors();
+
   const h = await api('/v2/team/credit-usage/historical');
   const rows = (h.json && h.json.data) || [];
   if (rows.length) {
@@ -1458,14 +1671,14 @@ async function refreshAccount() {
 window.revokeApiKey = async (keyId) => {
   const res = await api('/api/auth/api-key/revoke', {
     method: 'POST',
-    useSession: true,
+    useSession: Boolean(sessionToken),
     body: JSON.stringify({ keyId }),
   });
-  if (res.json && res.json.revoked) {
+  if (res.json && (res.json.revoked || res.json.success)) {
     toast('API key revoked');
     refreshAccount();
   } else {
-    toast('Sign in to revoke keys');
+    toast('Could not revoke key');
   }
 };
 
@@ -1519,10 +1732,18 @@ async function run() {
   $('runBtn').disabled = true;
   activateInspectorPane('markdown');
   $('pgOut').textContent = 'Running ' + ep + ' …';
+  const t0 = performance.now();
   try {
     const { status, json } = await api(path, { method: 'POST', body: JSON.stringify(body) });
+    const elapsedMs = Math.max(1, Math.round(performance.now() - t0));
     lastRawJson = json;
     $('pgJsonOut').textContent = JSON.stringify(json, null, 2);
+    const pill = $('pgMetricsPill');
+    if (pill) {
+      const cr = (json && (json.creditsUsed || (json.data && json.data.metadata && json.data.metadata.creditsUsed))) || (ep === 'extract' ? 5 : 1);
+      pill.style.display = '';
+      pill.textContent = `${status} · ${elapsedMs}ms · ${cr} cr`;
+    }
 
     if (status === 402) {
       $('pgOut').innerHTML = '<span class="muted">' + (json.error || 'Insufficient credits') + '</span>';
@@ -1568,8 +1789,33 @@ function renderResult(kind, json) {
 }
 
 async function pollCrawl(id, seedUrl, prefix = '/v2/crawl/') {
+  let wsResolved = false;
+  try {
+    const wsUrl = API.replace(/^http/, 'ws') + prefix + id;
+    const ws = new WebSocket(wsUrl);
+    const streamedDocs = [];
+    ws.onmessage = (ev) => {
+      try {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === 'catchup' && Array.isArray(msg.data)) {
+          streamedDocs.push(...msg.data);
+        } else if (msg.type === 'document' && msg.data) {
+          streamedDocs.push(msg.data);
+        }
+        if (msg.type === 'done' || msg.status === 'completed') {
+          wsResolved = true;
+          const docs = (msg.data && Array.isArray(msg.data) ? msg.data : streamedDocs);
+          const pages = docs.map((d, idx) => `### ${idx + 1}. ${(d.metadata && d.metadata.sourceURL) || d.url || ''}\n${(d.markdown || '').slice(0, 400)}`).join('\n\n');
+          $('pgOut').textContent = `Completed via WebSocket Watcher (${docs.length} pages)\n\n${pages}`;
+          ws.close();
+        }
+      } catch {}
+    };
+  } catch {}
+
   for (let i = 0; i < 20; i++) {
     await new Promise((r) => setTimeout(r, 1200));
+    if (wsResolved) return;
     const { json } = await api(prefix + id);
     if (!json) continue;
     lastRawJson = json;
@@ -1591,20 +1837,25 @@ function curl() {
 
 function generateSdkCode() {
   const { body } = buildReq();
-  return [
-    '# 1. cURL',
-    curl(),
-    '',
+  const lang = $('codeLangSelect') ? $('codeLangSelect').value : 'all';
+  const curlBlock = ['# 1. cURL', curl()].join('\n');
+  const tsBlock = [
     '# 2. Firecrawl TypeScript SDK (@mendable/firecrawl-js)',
     `import { Firecrawl } from '@mendable/firecrawl-js';`,
     `const app = new Firecrawl({ apiKey: '${key ? key.slice(0, 14) + '…' : 'fc-YOUR_API_KEY'}', apiUrl: '${API}' });`,
     `const res = await app.${ep === 'batch' ? 'startBatchScrape' : ep}(${JSON.stringify(body.url || body.query || body.urls || 'https://example.com')});`,
-    '',
+  ].join('\n');
+  const pyBlock = [
     '# 3. Firecrawl Python SDK (firecrawl-py)',
     `from firecrawl import Firecrawl`,
     `app = Firecrawl(api_key="${key ? key.slice(0, 14) + '…' : 'fc-YOUR_API_KEY'}", api_url="${API}")`,
     `res = app.${ep}(${JSON.stringify(body.url || body.query || 'https://example.com')})`,
   ].join('\n');
+
+  if (lang === 'curl') return curlBlock;
+  if (lang === 'ts') return tsBlock;
+  if (lang === 'py') return pyBlock;
+  return [curlBlock, '', tsBlock, '', pyBlock].join('\n');
 }
 
 // ---- Google OAuth, GitHub OAuth, Magic Email Link, Email/Password & API Key Handlers ----
@@ -1770,6 +2021,84 @@ $('btnParamsPreview').onclick = async () => {
 
 $('btnRefreshActivity').onclick = () => refreshAccount();
 $('activityFilter').onchange = () => renderActivityRows(cachedActivityItems);
+$('activitySearch').oninput = () => renderActivityRows(cachedActivityItems);
+
+function downloadBlobFile(filename, content, mime = 'text/plain;charset=utf-8') {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 500);
+}
+
+$('btnExportActivityJson').onclick = () => {
+  downloadBlobFile('crawl-cheap-activity.json', JSON.stringify(cachedActivityItems, null, 2), 'application/json');
+  toast('Exported activity JSON');
+};
+
+$('btnExportActivityCsv').onclick = () => {
+  const header = 'id,endpoint,status,creditsUsed,createdAt';
+  const rows = cachedActivityItems.map((it) =>
+    [it.id || it.jobId || '', it.endpoint || it.kind || 'scrape', it.status || 'completed', it.creditsUsed ?? 1, it.createdAt || ''].join(','),
+  );
+  downloadBlobFile('crawl-cheap-activity.csv', [header, ...rows].join('\n'), 'text/csv');
+  toast('Exported activity CSV');
+};
+
+$('codeLangSelect').onchange = () => {
+  if (activePane === 'code') {
+    $('pgCodeOut').textContent = generateSdkCode();
+  }
+};
+
+$('btnCopyInspector').onclick = () => {
+  const text =
+    activePane === 'code'
+      ? generateSdkCode()
+      : activePane === 'json'
+        ? $('pgJsonOut').textContent
+        : $('pgOut').textContent;
+  navigator.clipboard.writeText(text).catch(() => {});
+  toast(`Copied ${activePane} to clipboard`);
+};
+
+$('btnDownloadInspector').onclick = () => {
+  const ext = activePane === 'json' ? 'json' : activePane === 'code' ? 'txt' : 'md';
+  const text =
+    activePane === 'code'
+      ? generateSdkCode()
+      : activePane === 'json'
+        ? $('pgJsonOut').textContent
+        : $('pgOut').textContent;
+  downloadBlobFile(`crawl-cheap-${ep}.${ext}`, text);
+  toast(`Downloaded crawl-cheap-${ep}.${ext}`);
+};
+
+$('btnSaveProfile').onclick = async () => {
+  const nextName = $('profileNameInput').value.trim();
+  const nextAvatar = $('profileAvatarInput').value.trim();
+  userName = nextName;
+  userAvatar = nextAvatar;
+  if (nextName) localStorage.setItem('crawlcheap_name', nextName);
+  else localStorage.removeItem('crawlcheap_name');
+  if (nextAvatar) localStorage.setItem('crawlcheap_avatar', nextAvatar);
+  else localStorage.removeItem('crawlcheap_avatar');
+  await api('/api/auth/profile', {
+    method: 'POST',
+    useSession: Boolean(sessionToken),
+    body: JSON.stringify({
+      email: userEmail || 'developer@crawl.cheap',
+      name: nextName || undefined,
+      avatarUrl: nextAvatar || null,
+    }),
+  });
+  renderKey();
+  toast('Profile & avatar updated');
+};
 
 document.querySelectorAll('.btn-plan-select').forEach((btn) => {
   btn.addEventListener('click', async () => {
@@ -1983,7 +2312,48 @@ $('btnCreateMonitor').onclick = async () => {
     body: JSON.stringify({ url, intervalMinutes: 60 }),
   });
   $('radarOut').textContent = JSON.stringify(res.json, null, 2);
+  refreshMonitors();
   toast('Monitor created');
+};
+
+$('btnTestWebhook').onclick = async () => {
+  const sinkId = 'studio-' + Date.now();
+  $('radarOut').textContent = 'Delivering signed HMAC-SHA256 webhook to /webhook-sink/' + sinkId + ' …';
+  const res = await api('/webhook-sink/' + sinkId, {
+    method: 'POST',
+    headers: {
+      'x-crawlcheap-event': 'crawl.completed',
+    },
+    body: JSON.stringify({
+      success: true,
+      type: 'crawl.completed',
+      id: sinkId,
+      url: $('monUrl').value.trim() || 'https://example.com',
+      data: [{ markdown: '# Signed Webhook Verified' }],
+    }),
+  });
+  $('radarOut').textContent = JSON.stringify(res.json, null, 2);
+  toast('Signed HMAC-SHA256 webhook verified');
+};
+
+$('pgPresetSelect').onchange = (e) => {
+  const preset = e.target.value;
+  if (!preset) return;
+  const presets = {
+    example: { ep: 'scrape', input: 'https://example.com', prompt: '' },
+    quotes: { ep: 'scrape', input: 'https://quotes.toscrape.com/', prompt: 'Extract famous quotes and authors' },
+    cfdocs: { ep: 'map', input: 'https://developers.cloudflare.com/workers/', prompt: 'durable objects' },
+    aisearch: { ep: 'search', input: 'cloudflare browser rendering crawl markdown for agents', prompt: '' },
+    extractjson: { ep: 'extract', input: 'https://example.com', prompt: 'Extract primary heading, domain purpose, andiana link' },
+  };
+  const cfg = presets[preset];
+  if (!cfg) return;
+  const tab = document.querySelector(`#tabs .tab[data-ep="${cfg.ep}"]`);
+  if (tab) tab.click();
+  $('pgInput').value = cfg.input;
+  $('pgPrompt').value = cfg.prompt;
+  if (activePane === 'code') $('pgCodeOut').textContent = generateSdkCode();
+  toast('Loaded preset: ' + e.target.options[e.target.selectedIndex].text);
 };
 
 $('ragAskBtn').onclick = async () => {
@@ -2107,6 +2477,7 @@ $('btnInspectCatalog').onclick = async () => {
 };
 
 renderKey();
+checkApiHealth();
 if (key) refreshAccount();
 </script>
 <script src="/theme-tools-runtime.js?v=2" defer></script>

@@ -159,15 +159,22 @@ async function main() {
     const featuredTitle = document.querySelector('.tt-mm__panel-featured-title');
     const titlePos = featuredTitle ? getComputedStyle(featuredTitle).position : '';
     const mmCount = document.querySelectorAll('.tt-mm__item').length;
-    return { topLinks, hasOldClutter, titlePos, mmCount };
+    const hasEstimatorAnchor = Boolean(document.getElementById('estimator'));
+    const bentoSvgCount = document.querySelectorAll('.bento .tile .ic svg').length;
+    const statsText = document.querySelector('.stats')?.innerText || '';
+    return { topLinks, hasOldClutter, titlePos, mmCount, hasEstimatorAnchor, bentoSvgCount, statsText };
   })()`);
   ok(
-    'Navbar simplified to Explore & Guides Mega-Menu (11 items, non-overlapping static preview caption) + Studio + Avatar Circle',
+    'Navbar simplified to Explore & Guides Mega-Menu (11 items, non-overlapping static preview caption) + Studio + Avatar Circle, #estimator anchor & 14 monochrome SVG bento icons',
     Boolean(
       navOrderCheck &&
       !navOrderCheck.hasOldClutter &&
       navOrderCheck.titlePos === 'static' &&
-      navOrderCheck.mmCount >= 10,
+      navOrderCheck.mmCount >= 10 &&
+      navOrderCheck.hasEstimatorAnchor &&
+      navOrderCheck.bentoSvgCount >= 14 &&
+      /57/.test(navOrderCheck.statsText) &&
+      /30/.test(navOrderCheck.statsText),
     ),
     JSON.stringify(navOrderCheck),
   );
@@ -314,6 +321,22 @@ async function main() {
     localStorage.removeItem('crawlcheap_name');
     localStorage.removeItem('crawlcheap_provider');
     if (window.__TT_HYDRATE_AVATAR__) window.__TT_HYDRATE_AVATAR__();
+
+    // Test Command Palette, Hash Routing, Language Selector, Activity Search/Export, Profile Editor, and Monitors Table
+    document.getElementById('btnOpenCmdPalette')?.click();
+    const cmdOpen = document.getElementById('cmdPaletteModal')?.classList.contains('open');
+    document.getElementById('btnCloseCmdPalette')?.click();
+    location.hash = '#playground';
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    const hashSwitchedTitle = document.getElementById('viewTitle')?.textContent?.trim() || '';
+    location.hash = '#overview';
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    const hasLangSelector = Boolean(document.getElementById('codeLangSelect'));
+    const hasActivityExports = Boolean(document.getElementById('btnExportActivityJson') && document.getElementById('btnExportActivityCsv') && document.getElementById('activitySearch'));
+    const hasProfileEditor = Boolean(document.getElementById('profileNameInput') && document.getElementById('btnSaveProfile'));
+    const hasMonitorsTable = Boolean(document.getElementById('monitorsTableBody'));
+    const hasHealthPill = Boolean(document.getElementById('ovHealthPill'));
+
     return {
       sidebarText,
       hasSettingsTab,
@@ -322,17 +345,31 @@ async function main() {
       hasBrandOrGraphTab,
       codeWorks: codeVisible && codeText.includes('curl -X POST'),
       avatarInitials,
+      cmdOpen,
+      hashSwitchedTitle,
+      hasLangSelector,
+      hasActivityExports,
+      hasProfileEditor,
+      hasMonitorsTable,
+      hasHealthPill,
     };
   })()`);
   ok(
-    'Dashboard simplified: Settings menu present, Playground cleaned (no Brand Kit / Crawl Graph tabs), Get code works, and Avatar Circle derives initials from account user',
+    'Dashboard simplified & Top-15 features active: Settings menu, clean Playground, working Get code, Avatar initials, Cmd+K palette, URL hash routing, language filter, Activity exports, Profile editor, and Monitors table',
     Boolean(
       dashboardSimplificationCheck &&
       dashboardSimplificationCheck.hasSettingsTab &&
       dashboardSimplificationCheck.pgTitle === 'Playground' &&
       !dashboardSimplificationCheck.hasBrandOrGraphTab &&
       dashboardSimplificationCheck.codeWorks &&
-      dashboardSimplificationCheck.avatarInitials === 'BZ',
+      dashboardSimplificationCheck.avatarInitials === 'BZ' &&
+      dashboardSimplificationCheck.cmdOpen &&
+      /Playground/.test(dashboardSimplificationCheck.hashSwitchedTitle) &&
+      dashboardSimplificationCheck.hasLangSelector &&
+      dashboardSimplificationCheck.hasActivityExports &&
+      dashboardSimplificationCheck.hasProfileEditor &&
+      dashboardSimplificationCheck.hasMonitorsTable &&
+      dashboardSimplificationCheck.hasHealthPill,
     ),
     JSON.stringify(dashboardSimplificationCheck),
   );

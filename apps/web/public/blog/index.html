@@ -111,9 +111,14 @@
   </ul>
 </section>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-top:32px;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:26px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);">
+      <input id="blogSearchInput" type="search" placeholder="Search architecture guides (e.g. Durable Objects, OAuth 2.1, PKCE, toMarkdown)…" aria-label="Search engineering blog articles" class="tt-input" style="flex:1 1 260px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;" />
+      <span id="blogMatchCount" class="tt-badge">4 guides</span>
+    </div>
+
+    <div id="blogArticlesGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-top:24px;">
       
-        <article class="tt-card tt-card--interactive" style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+        <article class="tt-card tt-card--interactive" data-blog-card data-blog-search="firecrawl-compatible edge scraping: high-throughput markdown extraction for rag and ai agents openapi contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic html-to-markdown distillation. saas-platform architecture cloudflare-workers theme-tools platejs" style="padding:24px;display:flex;flex-direction:column;gap:14px;">
           <a href="/blog/edge-web-scraping-for-ai-agents/" style="display:block;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);aspect-ratio:1200/630;background:#0a0e17;">
             <img src="/blog/edge-web-scraping-for-ai-agents/featured.svg" alt="Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents — canonical @theme.tools/blog reference architecture for crawl.cheap." width="1200" height="630" style="width:100%;height:100%;object-fit:cover;display:block;" />
           </a>
@@ -132,7 +137,7 @@
           </div>
         </article>
 
-        <article class="tt-card tt-card--interactive" style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+        <article class="tt-card tt-card--interactive" data-blog-card data-blog-search="cloudflare browser rendering /crawl & hibernatable durable objects: distributed web crawling with websocket watchers how crawl.cheap orchestrates cloudflare browser rendering /crawl, hibernatable websocket durable objects, markdown for agents, and hmac-sha256 lifecycle webhooks at half of firecrawl pricing. saas-platform architecture cloudflare-workers theme-tools platejs firecrawl" style="padding:24px;display:flex;flex-direction:column;gap:14px;">
           <a href="/blog/cloudflare-browser-rendering-crawl-and-durable-objects/" style="display:block;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);aspect-ratio:1200/630;background:#0a0e17;">
             <img src="/blog/cloudflare-browser-rendering-crawl-and-durable-objects/featured.svg" alt="Cloudflare Browser Rendering /crawl & Hibernatable Durable Objects: Distributed Web Crawling with WebSocket Watchers — canonical @theme.tools/blog reference architecture for crawl.cheap." width="1200" height="630" style="width:100%;height:100%;object-fit:cover;display:block;" />
           </a>
@@ -151,7 +156,7 @@
           </div>
         </article>
 
-        <article class="tt-card tt-card--interactive" style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+        <article class="tt-card tt-card--interactive" data-blog-card data-blog-search="oauth 2.1 pkce, better auth & 30-tool remote mcp servers: zero-trust web data pipelines for ai agents complete engineering specification for running rfc 9728 / rfc 8414 oauth 2.1 with pkce s256, google/github/magic-link better auth, and all 30 firecrawl mcp tools on cloudflare workers. saas-platform architecture cloudflare-workers theme-tools platejs firecrawl" style="padding:24px;display:flex;flex-direction:column;gap:14px;">
           <a href="/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/" style="display:block;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);aspect-ratio:1200/630;background:#0a0e17;">
             <img src="/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/featured.svg" alt="OAuth 2.1 PKCE, Better Auth & 30-Tool Remote MCP Servers: Zero-Trust Web Data Pipelines for AI Agents — canonical @theme.tools/blog reference architecture for crawl.cheap." width="1200" height="630" style="width:100%;height:100%;object-fit:cover;display:block;" />
           </a>
@@ -170,7 +175,7 @@
           </div>
         </article>
 
-        <article class="tt-card tt-card--interactive" style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+        <article class="tt-card tt-card--interactive" data-blog-card data-blog-search="11-format document parsing & autonomous browser co-pilots: workers ai tomarkdown(), vectorize rag & 7-rail telemetry engineering deep-dive into converting pdf, office, odf, csv, rtf, and images to markdown at the edge, driving persistent puppeteer sessions with plain-english prompts, and tracing every llm span with a 2,500ms circuit breaker. saas-platform architecture cloudflare-workers theme-tools platejs firecrawl" style="padding:24px;display:flex;flex-direction:column;gap:14px;">
           <a href="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/" style="display:block;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);aspect-ratio:1200/630;background:#0a0e17;">
             <img src="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/featured.svg" alt="11-Format Document Parsing & Autonomous Browser Co-Pilots: Workers AI toMarkdown(), Vectorize RAG & 7-Rail Telemetry — canonical @theme.tools/blog reference architecture for crawl.cheap." width="1200" height="630" style="width:100%;height:100%;object-fit:cover;display:block;" />
           </a>
@@ -196,6 +201,25 @@
     <nav class="tt-footer__links"><a href="/">Home</a><a href="/blog/">Blog</a><a href="/app/">Studio</a><a href="/blog/feed.xml">RSS</a><a href="/blog/atom.xml">Atom</a><a href="/blog/feed.json">JSON Feed</a><a href="https://github.com/heymegabyte/crawl.cheap">GitHub</a></nav>
   </div>
 </footer>
+  <script>
+    (function () {
+      var input = document.getElementById('blogSearchInput');
+      var countEl = document.getElementById('blogMatchCount');
+      var cards = document.querySelectorAll('[data-blog-card]');
+      if (!input || !cards.length) return;
+      input.addEventListener('input', function () {
+        var q = (input.value || '').trim().toLowerCase();
+        var shown = 0;
+        cards.forEach(function (c) {
+          var hay = c.getAttribute('data-blog-search') || '';
+          var match = !q || hay.indexOf(q) !== -1;
+          c.style.display = match ? 'flex' : 'none';
+          if (match) shown++;
+        });
+        if (countEl) countEl.textContent = shown + (shown === 1 ? ' guide' : ' guides');
+      });
+    })();
+  </script>
   <script src="/theme-tools-runtime.js?v=2" defer></script>
 </body>
 </html>

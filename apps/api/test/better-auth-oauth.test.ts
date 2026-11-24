@@ -385,4 +385,53 @@ describe('Better Auth + OAuth 2.1 Cloudflare-native Authentication & Firecrawl C
     expect(magicReplay.status).toBe(401);
     expect(magicReplay.body.success).toBe(false);
   });
+
+  it('exposes /api/auth/providers, /api/auth/profile updates, key revocation envelope, and concurrency-check data', async () => {
+    const prov = await req('/api/auth/providers');
+    expect(prov.status).toBe(200);
+    expect(prov.body.success).toBe(true);
+    expect(Array.isArray(prov.body.providers)).toBe(true);
+    expect(prov.body.providers.map((p: { id: string }) => p.id)).toEqual(
+      expect.arrayContaining(['google', 'github', 'magic-link', 'oauth21-pkce-s256']),
+    );
+
+    const oauthProv = await req('/api/auth/oauth/providers');
+    expect(oauthProv.status).toBe(200);
+    expect(oauthProv.body.success).toBe(true);
+
+    const prof = await req('/api/auth/profile', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        email: 'brian.zalewski@crawl.cheap',
+        name: 'Brian Zalewski',
+        avatarUrl: 'https://avatars.githubusercontent.com/u/1?v=4',
+      }),
+    });
+    expect(prof.status).toBe(200);
+    expect(prof.body.success).toBe(true);
+    expect(prof.body.profile.initials).toBe('BZ');
+    expect(prof.body.profile.avatarUrl).toBe('https://avatars.githubusercontent.com/u/1?v=4');
+
+    const createdKey = await req('/api/auth/api-key/create', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'revocable-key', prefix: 'fc-' }),
+    });
+    expect(createdKey.status).toBe(200);
+    const revokeRes = await req('/api/auth/api-key/revoke', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ keyId: createdKey.body.id }),
+    });
+    expect(revokeRes.status).toBe(200);
+    expect(revokeRes.body.success).toBe(true);
+    expect(revokeRes.body.revoked).toBe(true);
+
+    const conc = await req('/v2/concurrency-check');
+    expect(conc.status).toBe(200);
+    expect(conc.body.success).toBe(true);
+    expect(conc.body.data).toBeDefined();
+    expect(typeof conc.body.data.active).toBe('number');
+  });
 });
