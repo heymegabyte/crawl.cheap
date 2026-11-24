@@ -19,3 +19,6 @@ ignoredBuiltDependencies:
 
 allowBuilds:
   esbuild: set this to true or false
+
+overrides:
+  "@theme-tools/shared-utils": "file:vendor/theme-tools/theme-tools-shared-utils-1.0.21.tgz"
