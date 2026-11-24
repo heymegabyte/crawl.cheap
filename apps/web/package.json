@@ -14,6 +14,7 @@
     "wrangler": "^4"
   },
   "dependencies": {
+    "@theme-tools/ui": "file:vendor/theme-tools/theme-tools-ui-1.0.74.tgz",
     "@theme.tools/seo-geo": "file:vendor/theme-tools/theme.tools-seo-geo-1.0.3.tgz"
   }
 }

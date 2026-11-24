@@ -72,6 +72,10 @@ import {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, '../../..');
 const publicDir = resolve(__dirname, '../public');
+const UI_PACKAGE_CSS = readFileSync(
+  resolve(__dirname, '../node_modules/@theme-tools/ui/dist/styles.css'),
+  'utf8',
+);
 
 // ---------------------------------------------------------------------------
 // 1. Generate Text-Free Graphic Preview SVGs & Canonical Explore & Guides Mega-Menu
@@ -350,94 +354,9 @@ const CRAWL_CHEAP_OKLCH_TOKENS = `
 }
 `;
 
-const UI_COMPONENT_AND_TACTILE_CSS = `
-@layer theme-tools-components, theme-tools-tactile;
+const CRAWL_CHEAP_UI_ADAPTER_CSS = `
 @layer theme-tools-components {
-  .tt-surface {
-    background-color: var(--card, #0b0c1c);
-    color: var(--card-foreground, #eef2f7);
-    border: 1px solid var(--tt-line, rgba(255,255,255,0.09));
-    border-radius: var(--radius, 0.75rem);
-    transition: all var(--tt-transition-oklch, 0.333s cubic-bezier(0.22, 1, 0.36, 1));
-  }
-  .tt-interactive {
-    transition: all var(--tt-transition-oklch, 0.333s cubic-bezier(0.22, 1, 0.36, 1));
-  }
-  .tt-interactive:focus-visible {
-    outline: 2px solid var(--tt-cyan, #00e5ff);
-    outline-offset: 2px;
-  }
-  .tt-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    min-height: 24px;
-    padding: 0.65rem 1.15rem;
-    border-radius: 11px;
-    border: 1px solid transparent;
-    font-weight: 600;
-    font-size: 0.875rem;
-    line-height: 1.2;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all var(--tt-transition-oklch, 0.333s cubic-bezier(0.22, 1, 0.36, 1));
-  }
-  .tt-btn--primary {
-    background: linear-gradient(100deg, var(--tt-cyan, #00e5ff), var(--tt-cyan-2, #50aae3));
-    color: #04141c;
-    box-shadow: 0 8px 30px -8px rgba(0, 229, 255, 0.45);
-  }
-  .tt-btn--primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 14px 36px -8px rgba(0, 229, 255, 0.6);
-  }
-  .tt-btn--ghost {
-    background: rgba(255, 255, 255, 0.035);
-    color: var(--tt-text, #eef2f7);
-    border-color: var(--tt-line, rgba(255, 255, 255, 0.09));
-  }
-  .tt-btn--ghost:hover {
-    border-color: var(--tt-cyan, #00e5ff);
-    background: rgba(0, 229, 255, 0.08);
-    transform: translateY(-1px);
-  }
-  .tt-card {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.03));
-    color: var(--tt-text, #eef2f7);
-    border: 1px solid var(--tt-line, rgba(255, 255, 255, 0.09));
-    border-radius: 16px;
-    transition: border-color var(--tt-transition-oklch), box-shadow var(--tt-transition-oklch), transform var(--tt-transition-oklch);
-  }
-  .tt-card--interactive:hover {
-    border-color: rgba(0, 229, 255, 0.38);
-    box-shadow: 0 12px 34px -16px rgba(0, 229, 255, 0.35);
-  }
-  .tt-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.25rem 0.7rem;
-    border-radius: 999px;
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border: 1px solid rgba(0, 229, 255, 0.3);
-    color: var(--tt-cyan, #00e5ff);
-    background: rgba(0, 229, 255, 0.08);
-  }
-  .tt-input {
-    background: #0a0a16;
-    border: 1px solid var(--tt-line, rgba(255, 255, 255, 0.09));
-    border-radius: 10px;
-    color: var(--tt-text, #eef2f7);
-    transition: border-color var(--tt-transition-oklch), box-shadow var(--tt-transition-oklch);
-  }
-  .tt-input:focus-visible {
-    outline: none;
-    border-color: var(--tt-cyan, #00e5ff);
-    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.16);
-  }
+
   /* Avatar Circle account indicator in Universal Mega-Menu Navbar */
   .tt-avatar-circle {
     display: inline-flex;
@@ -832,23 +751,6 @@ const UI_COMPONENT_AND_TACTILE_CSS = `
     color: #04141c;
   }
 }
-@layer theme-tools-tactile {
-  @keyframes tt-ripple-wave { 0% { transform: scale(0); opacity: 0.42; } 100% { transform: scale(1); opacity: 0; } }
-  [data-cursor-ripple] {
-    position: absolute;
-    pointer-events: none;
-    border-radius: 9999px;
-    background: radial-gradient(circle, color-mix(in oklch, currentColor 28%, var(--primary, #00e5ff) 72%) 0%, transparent 72%);
-    animation: tt-ripple-wave 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  }
-  [data-spotlight="true"] {
-    background-image: radial-gradient(240px circle at var(--tt-spot-x, 50%) var(--tt-spot-y, 50%), rgba(0, 229, 255, 0.09) 0%, transparent 100%);
-  }
-  .tt-spring-press:active, [data-pressed="true"] {
-    transition-duration: 80ms;
-    transform: scale(0.975);
-  }
-}
 `;
 
 const combinedCss = [
@@ -860,7 +762,8 @@ const combinedCss = [
   MEDIA_CSS.trim(),
   CMS_CSS.trim(),
   MEGA_MENU_CSS.trim(),
-  UI_COMPONENT_AND_TACTILE_CSS.trim(),
+  UI_PACKAGE_CSS.trim(),
+  CRAWL_CHEAP_UI_ADAPTER_CSS.trim(),
 ].join('\n\n');
 
 writeFileSync(resolve(publicDir, 'theme-tools.css'), `${combinedCss}\n`);
