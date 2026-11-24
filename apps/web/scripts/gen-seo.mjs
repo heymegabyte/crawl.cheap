@@ -1,12 +1,12 @@
 // Generate the AI-discovery corpus (llms-full.txt) for crawl.cheap by CONSUMING the
-// @theme.tools/seo-geo engine (vendored, zero workspace deps — see ../vendor/theme-tools-seo-geo).
+// Canonical standalone-safe @theme.tools/seo-geo engine.
 //
 // `buildLlmsDiscoveryCorpus` emits the structured llms.txt / llms-full.txt spec. The existing
 // hand-written public/llms.txt is kept as the canonical short index; this script adds the
 // long-form public/llms-full.txt (full markdown bodies) that the short index points at.
 //
 // Run: node scripts/gen-seo.mjs   (no network, no AI, no secrets — deterministic)
-import { buildLlmsDiscoveryCorpus } from '../vendor/theme-tools-seo-geo/builders.js';
+import { buildLlmsDiscoveryCorpus } from '@theme.tools/seo-geo/builders';
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';

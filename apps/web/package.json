@@ -12,5 +12,8 @@
   },
   "devDependencies": {
     "wrangler": "^4"
+  },
+  "dependencies": {
+    "@theme.tools/seo-geo": "file:vendor/theme-tools/theme.tools-seo-geo-1.0.3.tgz"
   }
 }
