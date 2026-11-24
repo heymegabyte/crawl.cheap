@@ -5,6 +5,15 @@
  */
 export { scrape, redactPiiText, synthesizeDeterministicJson, type ScrapeResult } from './scrape';
 export {
+  chunkMarkdown,
+  computeTokenStats,
+  estimateTokens,
+  extractJsonLd,
+  type RagChunk,
+  type TokenStats,
+  type ChunkMarkdownOptions,
+} from './chunker';
+export {
   mapSite,
   mapSiteWithMeta,
   assertSupportedSite,

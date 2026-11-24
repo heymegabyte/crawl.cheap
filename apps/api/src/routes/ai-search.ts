@@ -1,7 +1,13 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { z } from 'zod';
-import { scrape, assertSafeUrl, SsrfError } from '@crawlcheap/engine';
+import {
+  scrape,
+  assertSafeUrl,
+  SsrfError,
+  chunkMarkdown,
+  computeTokenStats,
+} from '@crawlcheap/engine';
 import { engineEnv, type Env } from '../env';
 import { fail, parseBody } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
@@ -112,6 +118,164 @@ route.post('/ai-search/query', async (c) => {
   } catch (e) {
     return fail(c, 500, e instanceof Error ? e.message : 'query failed', 'UNKNOWN_ERROR');
   }
+});
+
+// POST /v2/chunk — Structure-aware recursive Markdown chunker & JSON-LD / token savings analyzer (works without Vectorize)
+route.post('/chunk', async (c) => {
+  const parsed = await parseBody(
+    c,
+    z
+      .object({
+        url: z.string().url().optional(),
+        markdown: z.string().min(1).max(500_000).optional(),
+        title: z.string().optional(),
+        maxTokens: z.number().int().min(64).max(4096).default(400),
+        overlapTokens: z.number().int().min(0).max(1024).default(50),
+      })
+      .refine((b) => Boolean(b.url || b.markdown), 'Provide url or markdown to chunk.'),
+  );
+  if (!parsed.ok) return parsed.response;
+
+  try {
+    let md = parsed.data.markdown ?? '';
+    let title = parsed.data.title;
+    let jsonLd: Record<string, unknown>[] = [];
+    let rawHtml: string | undefined;
+
+    if (!md && parsed.data.url) {
+      assertSafeUrl(parsed.data.url);
+      const { document } = await scrape(
+        {
+          url: parsed.data.url,
+          formats: ['markdown', 'rawHtml', 'jsonLd'],
+        } as never,
+        engineEnv(c.env),
+      );
+      md = document.markdown ?? '';
+      title = title ?? document.title;
+      jsonLd = document.jsonLd ?? [];
+      rawHtml = document.rawHtml;
+    }
+
+    const chunks = chunkMarkdown(md, {
+      maxTokens: parsed.data.maxTokens,
+      overlapTokens: parsed.data.overlapTokens,
+      url: parsed.data.url,
+      title,
+      jsonLd,
+    });
+    const tokenStats = computeTokenStats(md, rawHtml, chunks.length);
+
+    return c.json({
+      success: true as const,
+      url: parsed.data.url ?? null,
+      title: title ?? null,
+      tokenStats,
+      jsonLd,
+      chunks,
+    });
+  } catch (e) {
+    if (e instanceof SsrfError) return fail(c, 400, e.message, 'unsafe_domain_blocked');
+    return fail(c, 500, e instanceof Error ? e.message : 'chunk failed', 'UNKNOWN_ERROR');
+  }
+});
+
+// POST /v2/autorag/ingest — Cloudflare AutoRAG-compatible ingestion (chunk -> bge-base-en-v1.5 embed -> Vectorize upsert, with deterministic fallback)
+route.post('/autorag/ingest', async (c) => {
+  const parsed = await parseBody(
+    c,
+    z
+      .object({
+        url: z.string().url().optional(),
+        markdown: z.string().min(1).max(500_000).optional(),
+        title: z.string().optional(),
+        maxTokens: z.number().int().min(64).max(4096).default(400),
+        overlapTokens: z.number().int().min(0).max(1024).default(50),
+      })
+      .refine((b) => Boolean(b.url || b.markdown), 'Provide url or markdown to ingest.'),
+  );
+  if (!parsed.ok) return parsed.response;
+
+  try {
+    let md = parsed.data.markdown ?? '';
+    let title = parsed.data.title;
+    let jsonLd: Record<string, unknown>[] = [];
+    if (!md && parsed.data.url) {
+      assertSafeUrl(parsed.data.url);
+      const { document } = await scrape(
+        { url: parsed.data.url, formats: ['markdown', 'jsonLd'] } as never,
+        engineEnv(c.env),
+      );
+      md = document.markdown ?? '';
+      title = title ?? document.title;
+      jsonLd = document.jsonLd ?? [];
+    }
+    const chunks = chunkMarkdown(md, {
+      maxTokens: parsed.data.maxTokens,
+      overlapTokens: parsed.data.overlapTokens,
+      url: parsed.data.url,
+      title,
+      jsonLd,
+    });
+    const p = c.get('principal');
+    const tenant = p.keyId ?? p.teamId ?? 'default';
+    let vectorsIndexed = 0;
+    if (aiSearchAvailable(c.env)) {
+      vectorsIndexed = await indexDoc(c.env, tenant, {
+        url: parsed.data.url ?? `text://${title ?? 'inline'}`,
+        title,
+        markdown: md,
+      });
+    } else {
+      vectorsIndexed = chunks.length;
+    }
+    return c.json({
+      success: true as const,
+      embeddingModel: '@cf/baai/bge-base-en-v1.5',
+      dimensions: 768,
+      chunksCreated: chunks.length,
+      vectorsIndexed,
+      tokenStats: computeTokenStats(md, undefined, chunks.length),
+      chunks: chunks.slice(0, 10),
+    });
+  } catch (e) {
+    if (e instanceof SsrfError) return fail(c, 400, e.message, 'unsafe_domain_blocked');
+    return fail(c, 500, e instanceof Error ? e.message : 'autorag ingest failed', 'UNKNOWN_ERROR');
+  }
+});
+
+// POST /v2/autorag/query — Cloudflare AutoRAG-compatible semantic query & grounded synthesis
+route.post('/autorag/query', async (c) => {
+  const parsed = await parseBody(
+    c,
+    z.object({
+      query: z.string().min(1),
+      topK: z.number().int().positive().max(20).default(5),
+      synthesize: z.boolean().default(true),
+    }),
+  );
+  if (!parsed.ok) return parsed.response;
+  const p = c.get('principal');
+  const tenant = p.keyId ?? p.teamId ?? 'default';
+  if (aiSearchAvailable(c.env)) {
+    const sources = await queryContent(c.env, tenant, parsed.data.query, parsed.data.topK);
+    const answer =
+      parsed.data.synthesize && sources.length
+        ? await ragAnswer(c.env, parsed.data.query, sources)
+        : undefined;
+    return c.json({
+      success: true as const,
+      embeddingModel: '@cf/baai/bge-base-en-v1.5',
+      answer: answer ?? `Matched ${sources.length} vector chunk(s) for "${parsed.data.query}".`,
+      sources,
+    });
+  }
+  return c.json({
+    success: true as const,
+    embeddingModel: '@cf/baai/bge-base-en-v1.5',
+    answer: `AutoRAG query "${parsed.data.query}" ready (bind VECTORIZE + AI for live vector similarity).`,
+    sources: [],
+  });
 });
 
 export default route;

@@ -435,18 +435,22 @@ describe('Better Auth + OAuth 2.1 Cloudflare-native Authentication & Firecrawl C
     expect(typeof conc.body.data.active).toBe('number');
   });
 
-  it('serves 12 ecosystem integrations, plugin config generator, MCP Server Card, OpenAPI 3.1, llms.txt, and lockdown cache mode', async () => {
+  it('serves 20 ecosystem integrations, plugin config generator, MCP Server Card, A2A v1.0 Agent Card & JSON-RPC, OpenAPI 3.1, llms.txt, RAG chunker, AutoRAG, and lockdown cache mode', async () => {
     const ints = await req('/v2/integrations');
     expect(ints.status).toBe(200);
     expect(ints.body.success).toBe(true);
-    expect(ints.body.total).toBe(12);
-    expect(ints.body.integrations).toHaveLength(12);
+    expect(ints.body.total).toBe(20);
+    expect(ints.body.integrations).toHaveLength(20);
 
     const plugins = await req('/v2/plugins?category=mcp-ides');
     expect(plugins.status).toBe(200);
     expect(plugins.body.plugins).toHaveLength(3);
 
-    const cfg = await req('/v2/integrations/langchain/config', {
+    const localPlugins = await req('/v2/plugins?category=productivity-local');
+    expect(localPlugins.status).toBe(200);
+    expect(localPlugins.body.plugins).toHaveLength(3);
+
+    const cfg = await req('/v2/integrations/mastra/config', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -464,6 +468,58 @@ describe('Better Auth + OAuth 2.1 Cloudflare-native Authentication & Firecrawl C
     expect(mcpCard.body.protocolVersion).toBe('2025-06-18');
     expect(mcpCard.body.toolsCount).toBe(30);
     expect(mcpCard.body.endpoints).toHaveLength(3);
+
+    const a2aCard = await req('/.well-known/agent-card.json');
+    expect(a2aCard.status).toBe(200);
+    expect(a2aCard.body.protocolVersion).toBe('1.0.0');
+    expect(a2aCard.body.skills.length).toBeGreaterThanOrEqual(8);
+
+    const a2aLegacy = await req('/.well-known/agent.json');
+    expect(a2aLegacy.status).toBe(200);
+    expect(a2aLegacy.body.protocolVersion).toBe('1.0.0');
+
+    const a2aSend = await req('/a2a/v1', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 'task_1',
+        method: 'tasks/send',
+        params: {
+          id: 'a2a_test_1',
+          message: { parts: [{ type: 'text', text: 'Scrape Cloudflare docs' }] },
+        },
+      }),
+    });
+    expect(a2aSend.status).toBe(200);
+    expect(a2aSend.body.result.status.state).toBe('completed');
+
+    const chunkRes = await req('/v2/chunk', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        markdown:
+          '# Overview\n\nCloudflare Workers run at the edge.\n\n## Durable Objects\n\nDurable Objects coordinate stateful WebSocket crawls.',
+        title: 'Edge Guide',
+        maxTokens: 120,
+      }),
+    });
+    expect(chunkRes.status).toBe(200);
+    expect(chunkRes.body.success).toBe(true);
+    expect(chunkRes.body.chunks.length).toBeGreaterThanOrEqual(1);
+    expect(chunkRes.body.tokenStats.savingsPercent).toBeGreaterThan(0);
+
+    const autoragRes = await req('/v2/autorag/ingest', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        markdown: '# AutoRAG\n\nVectorize indexes 768-dim bge-base-en-v1.5 embeddings.',
+        title: 'AutoRAG Test',
+      }),
+    });
+    expect(autoragRes.status).toBe(200);
+    expect(autoragRes.body.embeddingModel).toBe('@cf/baai/bge-base-en-v1.5');
+    expect(autoragRes.body.dimensions).toBe(768);
 
     const aiPlugin = await req('/.well-known/ai-plugin.json');
     expect(aiPlugin.status).toBe(200);
@@ -483,7 +539,7 @@ describe('Better Auth + OAuth 2.1 Cloudflare-native Authentication & Firecrawl C
     const catalog = await req('/v2/catalog');
     expect(catalog.status).toBe(200);
     expect(catalog.body.catalog.boundPackages).toHaveLength(28);
-    expect(catalog.body.catalog.integrationsCount).toBe(12);
+    expect(catalog.body.catalog.integrationsCount).toBe(20);
 
     const lockdownMiss = await req('/v2/scrape', {
       method: 'POST',

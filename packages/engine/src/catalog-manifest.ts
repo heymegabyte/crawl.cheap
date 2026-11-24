@@ -61,9 +61,11 @@ export const THEME_TOOLS_CATALOG_MANIFEST = {
     { id: 'ui.plugin-card', className: 'tt-plugin-card', customElement: 'tt-plugin-card' },
     { id: 'ui.mcp-deeplink', className: 'tt-mcp-deeplink', customElement: 'tt-mcp-deeplink' },
     { id: 'ui.latency-badge', className: 'tt-latency-badge', customElement: 'tt-latency-badge' },
+    { id: 'ui.chunk-viewer', className: 'tt-chunk-viewer', customElement: 'tt-chunk-viewer' },
+    { id: 'ui.a2a-badge', className: 'tt-a2a-badge', customElement: 'tt-a2a-badge' },
   ],
-  integrationsCount: 12,
-  pluginsCount: 12,
+  integrationsCount: 20,
+  pluginsCount: 20,
   blogComponentTypes: [
     'callout',
     'takeaways',

@@ -12,6 +12,7 @@ import {
 } from './extract-content';
 import { extractMetadata } from './metadata';
 import { htmlToMarkdown, stripBase64Images } from './html-to-markdown';
+import { chunkMarkdown, computeTokenStats, extractJsonLd } from './chunker';
 import { browserAvailable, browserQuickAction, browserScreenshot } from './browser';
 import { scrapeWithActions, puppeteerAvailable } from './interact';
 import { extractWithAI, extractAvailable } from './extract-ai';
@@ -397,6 +398,32 @@ async function scrapeInner(request: ScrapeRequest, env: EngineEnv): Promise<Scra
   if (formats.has('images')) doc.images = images;
   if (attributes) doc.attributes = attributes;
   if (branding) doc.branding = branding;
+
+  // Structured JSON-LD & Recursive Structure-Aware Markdown Chunks + Token Savings Stats
+  const jsonLdList = extractJsonLd(root);
+  if (formats.has('jsonLd') || formats.has('chunks') || jsonLdList.length > 0) {
+    if (formats.has('jsonLd') || jsonLdList.length > 0) {
+      doc.jsonLd = jsonLdList;
+    }
+  }
+  const chunksFmt = (options.formats ?? []).find(
+    (f) =>
+      f === 'chunks' || (typeof f === 'object' && f !== null && 'type' in f && f.type === 'chunks'),
+  ) as { maxTokens?: number; overlapTokens?: number } | string | undefined;
+  if (formats.has('chunks') || chunksFmt) {
+    const cfg = typeof chunksFmt === 'object' ? chunksFmt : {};
+    const chunks = chunkMarkdown(doc.markdown ?? markdown, {
+      maxTokens: cfg.maxTokens ?? 400,
+      overlapTokens: cfg.overlapTokens ?? 50,
+      url: finalUrl,
+      title: metadata.title,
+      jsonLd: jsonLdList,
+    });
+    doc.chunks = chunks;
+    doc.tokenStats = computeTokenStats(doc.markdown ?? markdown, html, chunks.length);
+  } else {
+    doc.tokenStats = computeTokenStats(doc.markdown ?? markdown, html);
+  }
 
   // Audio & Video media discovery formats
   if (formats.has('audio')) {

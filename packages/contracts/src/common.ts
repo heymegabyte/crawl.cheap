@@ -100,6 +100,30 @@ export const DocumentSchema = z.object({
   menu: z.unknown().optional(),
   audio: z.array(z.string()).optional(),
   video: z.array(z.string()).optional(),
+  jsonLd: z.array(z.record(z.string(), z.unknown())).optional(),
+  chunks: z
+    .array(
+      z.object({
+        index: z.number().int(),
+        id: z.string(),
+        sectionPath: z.array(z.string()),
+        heading: z.string().nullable(),
+        text: z.string(),
+        approxTokens: z.number().int(),
+        charCount: z.number().int(),
+        metadata: z.record(z.string(), z.unknown()).optional(),
+      }),
+    )
+    .optional(),
+  tokenStats: z
+    .object({
+      rawHtmlTokens: z.number().int(),
+      markdownTokens: z.number().int(),
+      savingsTokens: z.number().int(),
+      savingsPercent: z.number().int(),
+      chunkCount: z.number().int().optional(),
+    })
+    .optional(),
   pages: z.array(z.object({ pageNumber: z.number().int(), markdown: z.string() })).optional(),
   attributes: z
     .array(z.object({ selector: z.string(), attribute: z.string(), values: z.array(z.string()) }))

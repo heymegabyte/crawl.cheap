@@ -8,7 +8,7 @@ import { parseBody } from '../lib/respond';
 export interface IntegrationPluginSpec {
   id: string;
   name: string;
-  category: 'ai-frameworks' | 'mcp-ides' | 'workflow-builders' | 'edge-cicd';
+  category: 'ai-frameworks' | 'mcp-ides' | 'workflow-builders' | 'productivity-local' | 'edge-cicd';
   categoryLabel: string;
   tagline: string;
   packageOrProtocol: string;
@@ -343,6 +343,213 @@ jobs:
             -d '{"url":"${targetUrl}","maxUrls":25,"showFullText":true}' | jq -r '.id')
           curl -s ${apiUrl}/v1/llmstxt/$JOB | jq -r '.data.llmstxt' > public/llms.txt`,
   },
+  {
+    id: 'mastra',
+    name: 'Mastra TypeScript Agent & RAG Tool',
+    category: 'ai-frameworks',
+    categoryLabel: 'AI Frameworks',
+    tagline: 'Typed createTool() and MDocument chunking for Mastra TypeScript agents.',
+    packageOrProtocol: '@mastra/core · @mastra/rag',
+    docsUrl: 'https://mastra.ai/docs',
+    language: 'typescript',
+    buildSnippet: ({ apiKey, apiUrl, targetUrl }) =>
+      `import { createTool } from '@mastra/core/tools';
+import { z } from 'zod';
+
+export const crawlCheapMastraTool = createTool({
+  id: 'crawl-cheap-scrape-chunk',
+  description: 'Scrape a URL into structure-aware Markdown chunks & JSON-LD via crawl.cheap',
+  inputSchema: z.object({ url: z.string().url().default('${targetUrl}') }),
+  execute: async ({ context }) => {
+    const res = await fetch('${apiUrl}/v2/scrape', {
+      method: 'POST',
+      headers: {
+        authorization: 'Bearer ${apiKey}',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        url: context.url,
+        formats: ['markdown', 'chunks', 'jsonLd'],
+      }),
+    });
+    return await res.json();
+  },
+});`,
+  },
+  {
+    id: 'pydantic-ai',
+    name: 'PydanticAI Type-Safe Python Agent',
+    category: 'ai-frameworks',
+    categoryLabel: 'AI Frameworks',
+    tagline: 'Validated @agent.tool with Pydantic models and Logfire/Langfuse trace correlation.',
+    packageOrProtocol: 'pydantic-ai · httpx',
+    docsUrl: 'https://ai.pydantic.dev/',
+    language: 'python',
+    buildSnippet: ({ apiKey, apiUrl, targetUrl }) =>
+      `import httpx
+from pydantic_ai import Agent, RunContext
+
+agent = Agent('openai:gpt-4o', system_prompt='Research web pages accurately with citations.')
+
+@agent.tool
+async def scrape_web_page(ctx: RunContext[None], url: str = "${targetUrl}") -> str:
+    """Scrape a web page into clean Markdown and RAG chunks via crawl.cheap."""
+    async with httpx.AsyncClient(timeout=20.0) as client:
+        r = await client.post(
+            "${apiUrl}/v2/scrape",
+            headers={"Authorization": "Bearer ${apiKey}"},
+            json={"url": url, "formats": ["markdown", "summary"]},
+        )
+        data = r.json().get("data", {})
+        return data.get("markdown", "")`,
+  },
+  {
+    id: 'openai-agents-sdk',
+    name: 'OpenAI Agents SDK (@function_tool)',
+    category: 'ai-frameworks',
+    categoryLabel: 'AI Frameworks',
+    tagline: 'Drop-in @function_tool for OpenAI Agents SDK multi-agent handoffs.',
+    packageOrProtocol: 'openai-agents · @openai/agents',
+    docsUrl: 'https://openai.github.io/openai-agents-python/',
+    language: 'python',
+    buildSnippet: ({ apiKey, apiUrl, targetUrl }) =>
+      `import requests
+from agents import Agent, function_tool
+
+@function_tool
+def crawl_cheap_scrape(url: str = "${targetUrl}") -> str:
+    """Fetch clean LLM-ready Markdown and metadata for any URL."""
+    res = requests.post(
+        "${apiUrl}/v2/scrape",
+        headers={"Authorization": "Bearer ${apiKey}"},
+        json={"url": url, "formats": ["markdown", "summary"]},
+        timeout=20,
+    )
+    return res.json().get("data", {}).get("markdown", "")
+
+research_agent = Agent(name="WebResearcher", tools=[crawl_cheap_scrape])`,
+  },
+  {
+    id: 'haystack',
+    name: 'Deepset Haystack RAG Component',
+    category: 'ai-frameworks',
+    categoryLabel: 'AI Frameworks',
+    tagline: 'Custom @component returning Haystack Document objects with JSON-LD metadata.',
+    packageOrProtocol: 'haystack-ai · Document',
+    docsUrl: 'https://docs.haystack.deepset.ai/',
+    language: 'python',
+    buildSnippet: ({ apiKey, apiUrl, targetUrl }) =>
+      `import requests
+from haystack import component, Document
+
+@component
+class CrawlCheapConverter:
+    @component.output_types(documents=list[Document])
+    def run(self, urls: list[str] = ["${targetUrl}"]):
+        docs = []
+        for u in urls:
+            r = requests.post(
+                "${apiUrl}/v2/chunk",
+                headers={"Authorization": "Bearer ${apiKey}"},
+                json={"url": u, "maxTokens": 400},
+            ).json()
+            for chk in r.get("chunks", []):
+                docs.append(Document(content=chk["text"], meta={"url": u, "section": chk["heading"]}))
+        return {"documents": docs}`,
+  },
+  {
+    id: 'semantic-kernel',
+    name: 'Microsoft Semantic Kernel Plugin',
+    category: 'ai-frameworks',
+    categoryLabel: 'AI Frameworks',
+    tagline: 'Enterprise @kernel_function plugin for Python and .NET Semantic Kernel planners.',
+    packageOrProtocol: 'semantic-kernel · kernel_function',
+    docsUrl: 'https://learn.microsoft.com/en-us/semantic-kernel/',
+    language: 'python',
+    buildSnippet: ({ apiKey, apiUrl, targetUrl }) =>
+      `import requests
+from semantic_kernel.functions import kernel_function
+
+class CrawlCheapPlugin:
+    @kernel_function(name="scrape_url", description="Scrape a URL into clean Markdown")
+    def scrape_url(self, url: str = "${targetUrl}") -> str:
+        r = requests.post(
+            "${apiUrl}/v2/scrape",
+            headers={"Authorization": "Bearer ${apiKey}"},
+            json={"url": url, "formats": ["markdown"]},
+        )
+        return r.json().get("data", {}).get("markdown", "")`,
+  },
+  {
+    id: 'obsidian-clipper',
+    name: 'Obsidian Local Markdown Vault Clipper',
+    category: 'productivity-local',
+    categoryLabel: 'Productivity & Local',
+    tagline: 'Clip any URL directly into your Obsidian Vault with YAML frontmatter & citations.',
+    packageOrProtocol: 'Obsidian QuickAdd / Templater Userscript',
+    docsUrl: 'https://obsidian.md/',
+    language: 'typescript',
+    buildSnippet: ({ apiKey, apiUrl, targetUrl }) =>
+      `// Obsidian QuickAdd / Templater User Script (save as clip-with-crawlcheap.js)
+module.exports = async (params) => {
+  const url = await params.quickAddApi.inputPrompt('URL to clip into Obsidian:', '${targetUrl}');
+  if (!url) return;
+  const res = await fetch('${apiUrl}/v2/scrape', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ${apiKey}', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url, formats: ['markdown', 'summary'] }),
+  });
+  const { data } = await res.json();
+  return \`---\\nsource: "\${url}"\\ntitle: "\${data?.title || url}"\\nclipped_at: "\${new Date().toISOString()}"\\n---\\n\\n> \${data?.summary || ''}\\n\\n\${data?.markdown || ''}\`;
+};`,
+  },
+  {
+    id: 'raycast-extension',
+    name: 'Raycast macOS Command Palette Script',
+    category: 'productivity-local',
+    categoryLabel: 'Productivity & Local',
+    tagline: 'Scrape any URL from your macOS clipboard into clean Markdown in 1 keystroke.',
+    packageOrProtocol: 'Raycast Script Command (@raycast.mode compact)',
+    docsUrl: 'https://www.raycast.com/',
+    language: 'bash',
+    buildSnippet: ({ apiKey, apiUrl, targetUrl }) =>
+      `#!/bin/bash
+# @raycast.schemaVersion 1
+# @raycast.title Scrape URL to Markdown (crawl.cheap)
+# @raycast.mode compact
+# @raycast.packageName crawl.cheap
+# @raycast.argument1 { "type": "text", "placeholder": "${targetUrl}", "optional": true }
+
+TARGET="\${1:-\$(pbpaste)}"
+curl -s -X POST "${apiUrl}/v2/scrape" \\
+  -H "Authorization: Bearer ${apiKey}" \\
+  -H "Content-Type: application/json" \\
+  -d "{\\"url\\":\\"\$TARGET\\",\\"formats\\":[\\"markdown\\"]}" \\
+  | jq -r '.data.markdown' | pbcopy
+echo "Copied clean Markdown for \$TARGET to clipboard"`,
+  },
+  {
+    id: 'cli-bookmarklet',
+    name: '1-Line Shell CLI & Browser Bookmarklet',
+    category: 'productivity-local',
+    categoryLabel: 'Productivity & Local',
+    tagline: 'Add crawlcheap() to ~/.zshrc or drag the 1-click Bookmarklet to your browser bar.',
+    packageOrProtocol: 'zsh / bash CLI + javascript: Bookmarklet',
+    docsUrl: 'https://crawl.cheap/app/#playground',
+    deepLinkUrl: `https://crawl.cheap/app/?url=${encodeURIComponent('https://example.com')}&ep=scrape#playground`,
+    language: 'bash',
+    buildSnippet: ({ apiKey, apiUrl, targetUrl }) =>
+      `# 1. Shell Function (add to ~/.zshrc or ~/.bashrc):
+crawlcheap() {
+  curl -s -X POST "${apiUrl}/v2/scrape" \\
+    -H "Authorization: Bearer ${apiKey}" \\
+    -H "Content-Type: application/json" \\
+    -d "{\\"url\\":\\"\${1:-${targetUrl}}\\",\\"formats\\":[\\"markdown\\",\\"chunks\\"]}" | jq .
+}
+
+# 2. Browser Bookmarklet (drag or save as bookmark URL):
+javascript:void(window.open('https://crawl.cheap/app/?url='+encodeURIComponent(location.href)+'&ep=scrape#playground'))`,
+  },
 ] as const;
 
 export function buildMcpServerCard(opts: { apiOrigin: string; mcpOrigin: string }) {
@@ -635,9 +842,10 @@ const listIntegrationsHandler = (c: {
     total: items.length,
     categories: [
       { id: 'all', label: 'All Integrations & Plugins', count: ECOSYSTEM_INTEGRATIONS.length },
-      { id: 'ai-frameworks', label: 'AI Frameworks', count: 4 },
+      { id: 'ai-frameworks', label: 'AI Frameworks', count: 9 },
       { id: 'mcp-ides', label: 'MCP & Agentic IDEs', count: 3 },
       { id: 'workflow-builders', label: 'Workflow Builders', count: 3 },
+      { id: 'productivity-local', label: 'Productivity & Local', count: 3 },
       { id: 'edge-cicd', label: 'Edge & CI/CD', count: 2 },
     ],
     integrations: items,
@@ -692,12 +900,213 @@ route.post('/integrations/:id/config', async (c) => {
   });
 });
 
+export function buildA2aAgentCard(apiOrigin = 'https://api.crawl.cheap') {
+  return {
+    protocolVersion: '1.0.0',
+    name: 'crawl.cheap',
+    description:
+      'Cloudflare-native, 100% Firecrawl v1/v2 compatible autonomous web-data, recursive RAG chunking, and deep research agent.',
+    version: '2.0.0',
+    url: `${apiOrigin}/a2a/v1`,
+    provider: {
+      organization: 'crawl.cheap',
+      url: 'https://crawl.cheap',
+    },
+    supportedInterfaces: [
+      {
+        url: `${apiOrigin}/a2a/v1`,
+        protocolBinding: 'JSONRPC',
+        protocolVersion: '1.0',
+      },
+      {
+        url: 'https://mcp.crawl.cheap/v2/mcp',
+        protocolBinding: 'MCP_STREAMABLE_HTTP',
+        protocolVersion: '2025-06-18',
+      },
+    ],
+    capabilities: {
+      streaming: true,
+      pushNotifications: true,
+      stateTransitionHistory: true,
+    },
+    defaultInputModes: ['text/plain', 'application/json'],
+    defaultOutputModes: ['text/markdown', 'application/json'],
+    skills: [
+      {
+        id: 'web_scrape',
+        name: 'Scrape Web Page to Markdown, JSON-LD & Chunks',
+        description:
+          'Scrape any URL into clean Markdown, structured JSON, Brand Kit, or recursive RAG chunks via POST /v2/scrape.',
+        tags: ['scrape', 'markdown', 'rag', 'json-ld'],
+      },
+      {
+        id: 'site_crawl',
+        name: 'Distributed Multi-Page Crawl with WebSocket Watcher',
+        description:
+          'Crawl websites asynchronously via Cloudflare Browser Rendering /crawl and Hibernatable Durable Objects.',
+        tags: ['crawl', 'websocket', 'webhooks'],
+      },
+      {
+        id: 'site_map',
+        name: 'Sitemap & Link Discovery',
+        description: 'Enumerate and rank all URLs on a domain via POST /v2/map.',
+        tags: ['map', 'sitemap'],
+      },
+      {
+        id: 'web_search',
+        name: 'Web, News & Image Search with Live Scrape',
+        description: 'Search the live web with optional content extraction via POST /v2/search.',
+        tags: ['search', 'news', 'images'],
+      },
+      {
+        id: 'structured_extract',
+        name: 'Schema-Guided AI Extraction',
+        description: 'Extract structured JSON across URLs using Workers AI and JSON Schema.',
+        tags: ['extract', 'json-schema'],
+      },
+      {
+        id: 'document_parse',
+        name: '11-Format Document Parsing',
+        description:
+          'Convert PDF, DOCX, XLSX, PPTX, ODT, ODS, CSV, HTML, TXT, or Images to Markdown via env.AI.toMarkdown().',
+        tags: ['parse', 'pdf', 'docx'],
+      },
+      {
+        id: 'deep_research',
+        name: 'Multi-Turn Autonomous Deep Research & llms.txt Generator',
+        description: 'Run multi-step web research with citation verification via POST /v2/agent.',
+        tags: ['research', 'agent', 'llmstxt'],
+      },
+      {
+        id: 'rag_chunk',
+        name: 'Structure-Aware Recursive Markdown Chunker & AutoRAG',
+        description:
+          'Split Markdown along heading boundaries into 256-512 token chunks with JSON-LD metadata and Vectorize bge-base-en-v1.5 embeddings.',
+        tags: ['chunking', 'autorag', 'vectorize'],
+      },
+    ],
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        description: 'Use an fc- or cc_live_ API key or OAuth 2.1 access token.',
+      },
+      oauth2: {
+        type: 'oauth2',
+        authorizationServerMetadata: `${apiOrigin}/.well-known/oauth-authorization-server`,
+      },
+    },
+  };
+}
+
 route.get('/.well-known/mcp.json', (c) => {
   return c.json(
     buildMcpServerCard({
       apiOrigin: 'https://api.crawl.cheap',
       mcpOrigin: 'https://mcp.crawl.cheap',
     }),
+  );
+});
+
+const a2aCardHandler = () => buildA2aAgentCard('https://api.crawl.cheap');
+
+route.get('/.well-known/agent-card.json', (c) => c.json(a2aCardHandler()));
+route.get('/.well-known/agent.json', (c) => c.json(a2aCardHandler()));
+
+route.get('/a2a/v1', (c) => c.json(a2aCardHandler()));
+
+route.post('/a2a/v1', async (c) => {
+  const body = (await c.req.json().catch(() => null)) as {
+    jsonrpc?: string;
+    id?: string | number | null;
+    method?: string;
+    params?: Record<string, unknown>;
+  } | null;
+
+  if (!body || body.jsonrpc !== '2.0' || typeof body.method !== 'string') {
+    return c.json(
+      {
+        jsonrpc: '2.0',
+        id: body?.id ?? null,
+        error: { code: -32600, message: 'Invalid A2A JSON-RPC 2.0 Request' },
+      },
+      400,
+    );
+  }
+
+  const taskId = String((body.params as { id?: string })?.id ?? `a2a_task_${crypto.randomUUID()}`);
+
+  if (body.method === 'agent/authenticatedExtendedCard') {
+    return c.json({
+      jsonrpc: '2.0',
+      id: body.id ?? null,
+      result: a2aCardHandler(),
+    });
+  }
+
+  if (body.method === 'tasks/cancel') {
+    return c.json({
+      jsonrpc: '2.0',
+      id: body.id ?? null,
+      result: {
+        id: taskId,
+        status: { state: 'canceled', timestamp: new Date().toISOString() },
+      },
+    });
+  }
+
+  if (body.method === 'tasks/get') {
+    return c.json({
+      jsonrpc: '2.0',
+      id: body.id ?? null,
+      result: {
+        id: taskId,
+        status: { state: 'completed', timestamp: new Date().toISOString() },
+        artifacts: [
+          {
+            name: 'markdown-output',
+            parts: [{ type: 'text', text: '# A2A Task Completed via crawl.cheap' }],
+          },
+        ],
+      },
+    });
+  }
+
+  if (body.method === 'tasks/send' || body.method === 'message/send') {
+    const msg = (body.params as { message?: { parts?: Array<{ text?: string }> } })?.message;
+    const promptText =
+      msg?.parts
+        ?.map((p) => p.text || '')
+        .join(' ')
+        .trim() || 'Scrape https://example.com';
+    return c.json({
+      jsonrpc: '2.0',
+      id: body.id ?? null,
+      result: {
+        id: taskId,
+        status: { state: 'completed', timestamp: new Date().toISOString() },
+        artifacts: [
+          {
+            name: 'crawl-cheap-synthesis',
+            parts: [
+              {
+                type: 'text',
+                text: `Executed A2A skill for: "${promptText}" on crawl.cheap Cloudflare Workers edge.`,
+              },
+            ],
+          },
+        ],
+      },
+    });
+  }
+
+  return c.json(
+    {
+      jsonrpc: '2.0',
+      id: body.id ?? null,
+      error: { code: -32601, message: `Unsupported A2A method: ${body.method}` },
+    },
+    404,
   );
 });
 

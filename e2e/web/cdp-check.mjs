@@ -339,7 +339,8 @@ async function main() {
     const hasMonitorsTable = Boolean(document.getElementById('monitorsTableBody'));
     const hasHealthPill = Boolean(document.getElementById('ovHealthPill'));
     const hasIntegrationsHub = Boolean(document.getElementById('integrationsSection') && document.getElementById('integrationsGrid'));
-    const hasAdvancedFormats = Boolean(document.querySelector('.fmt[value="branding"]') && document.querySelector('.fmt[value="changeTracking"]') && document.getElementById('optRedactPii'));
+    const hasAdvancedFormats = Boolean(document.querySelector('.fmt[value="branding"]') && document.querySelector('.fmt[value="changeTracking"]') && document.querySelector('.fmt[value="chunks"]') && document.getElementById('optRedactPii'));
+    const hasChunkerCard = Boolean(document.getElementById('chunkerCard') && document.getElementById('btnRunChunker') && document.getElementById('btnRunAutorag'));
 
     return {
       sidebarText,
@@ -358,10 +359,11 @@ async function main() {
       hasHealthPill,
       hasIntegrationsHub,
       hasAdvancedFormats,
+      hasChunkerCard,
     };
   })()`);
   ok(
-    'Dashboard simplified & Top-35 features active: Settings menu, Integrations & Plugins Hub, clean Playground with advanced formats, working Get code, Avatar initials, Cmd+K palette, URL hash routing, language filter, Activity exports, Profile editor, and Monitors table',
+    'Dashboard simplified & Top-52 features active: Settings menu, 20-Plugin Integrations Hub, RAG Chunker & AutoRAG Inspector, clean Playground with advanced formats, working Get code, Avatar initials, Cmd+K palette, URL hash routing, language filter, Activity exports, Profile editor, and Monitors table',
     Boolean(
       dashboardSimplificationCheck &&
       dashboardSimplificationCheck.hasSettingsTab &&
@@ -377,7 +379,8 @@ async function main() {
       dashboardSimplificationCheck.hasMonitorsTable &&
       dashboardSimplificationCheck.hasHealthPill &&
       dashboardSimplificationCheck.hasIntegrationsHub &&
-      dashboardSimplificationCheck.hasAdvancedFormats,
+      dashboardSimplificationCheck.hasAdvancedFormats &&
+      dashboardSimplificationCheck.hasChunkerCard,
     ),
     JSON.stringify(dashboardSimplificationCheck),
   );

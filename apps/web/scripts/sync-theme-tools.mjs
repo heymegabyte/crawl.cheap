@@ -1169,6 +1169,26 @@ const RUNTIME_JS = `/**
         }
       );
     }
+    if (!customElements.get('tt-chunk-viewer')) {
+      customElements.define(
+        'tt-chunk-viewer',
+        class extends HTMLElement {
+          connectedCallback() {
+            this.classList.add('tt-card', 'tt-surface');
+          }
+        }
+      );
+    }
+    if (!customElements.get('tt-a2a-badge')) {
+      customElements.define(
+        'tt-a2a-badge',
+        class extends HTMLElement {
+          connectedCallback() {
+            this.classList.add('tt-badge');
+          }
+        }
+      );
+    }
   }
 
   // Auto-enhance blog article code blocks with 1-click Copy & Try in Studio actions
@@ -1903,6 +1923,34 @@ writeFileSync(
     2,
   ),
 );
+const staticA2aAgentCard = JSON.stringify(
+  {
+    protocolVersion: '1.0.0',
+    name: 'crawl.cheap',
+    description:
+      'Cloudflare-native, 100% Firecrawl v1/v2 compatible autonomous web-data, recursive RAG chunking, and deep research agent.',
+    version: '2.0.0',
+    url: 'https://api.crawl.cheap/a2a/v1',
+    provider: { organization: 'crawl.cheap', url: 'https://crawl.cheap' },
+    supportedInterfaces: [
+      {
+        url: 'https://api.crawl.cheap/a2a/v1',
+        protocolBinding: 'JSONRPC',
+        protocolVersion: '1.0',
+      },
+      {
+        url: 'https://mcp.crawl.cheap/v2/mcp',
+        protocolBinding: 'MCP_STREAMABLE_HTTP',
+        protocolVersion: '2025-06-18',
+      },
+    ],
+    capabilities: { streaming: true, pushNotifications: true, stateTransitionHistory: true },
+  },
+  null,
+  2,
+);
+writeFileSync(resolve(wellKnownDir, 'agent-card.json'), staticA2aAgentCard);
+writeFileSync(resolve(wellKnownDir, 'agent.json'), staticA2aAgentCard);
 const staticLlmsTxt = `# crawl.cheap — The Web Data Engine for AI (Firecrawl v1 & v2 Compatible · Cloudflare Workers)
 
 > Open-source, Cloudflare-native web data platform speaking 100% of the Firecrawl v2 (57 operations) and v1 (23 operations) API contract at 50% of Firecrawl's core monthly plan price.

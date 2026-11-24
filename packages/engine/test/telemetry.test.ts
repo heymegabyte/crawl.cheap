@@ -6,7 +6,11 @@ import {
   buildGtmDataLayerEvent,
   buildPostHogBatchPayload,
   buildSentryEnvelopeV7,
+  chunkMarkdown,
   clearTelemetrySpool,
+  computeTokenStats,
+  estimateTokens,
+  extractJsonLd,
   extractWithAI,
   formatFailOpenJsonlSpoolEntry,
   formatTraceparent,
@@ -225,5 +229,26 @@ describe('@theme.tools/telemetry 7-Rail Observability & Langfuse Safe (2500ms)',
     expect(redactPiiText(piiSample, { replaceStyle: 'mask', entities: ['EMAIL'] })).toContain(
       '************',
     );
+
+    const mdDoc =
+      '# Architecture\n\nCloudflare Workers edge runtime.\n\n## Durable Objects\n\nHibernatable WebSockets coordinate crawls.';
+    const chunks = chunkMarkdown(mdDoc, {
+      maxTokens: 100,
+      overlapTokens: 15,
+      url: 'https://crawl.cheap',
+      title: 'Architecture',
+      jsonLd: [{ '@type': 'TechArticle', headline: 'Edge Scraping' }],
+    });
+    expect(chunks.length).toBeGreaterThanOrEqual(2);
+    expect(chunks[1]?.sectionPath).toEqual(['Architecture', 'Durable Objects']);
+    expect(chunks[0]?.metadata.jsonLdTypes).toEqual(['TechArticle']);
+    const stats = computeTokenStats(
+      mdDoc,
+      `<html><body><div>${mdDoc.repeat(4)}</div></body></html>`,
+      chunks.length,
+    );
+    expect(stats.savingsPercent).toBeGreaterThan(50);
+    expect(estimateTokens(mdDoc)).toBeGreaterThan(5);
+    expect(typeof extractJsonLd).toBe('function');
   });
 });

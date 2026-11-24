@@ -326,6 +326,40 @@ app.get('/.well-known/mcp.json', (c) => {
   });
 });
 
+const mcpAgentCardHandler = (c: {
+  req: { url: string };
+  env: Env;
+  json: (b: unknown) => Response;
+}) => {
+  const origin = new URL(c.req.url).origin;
+  const apiOrigin = (c.env.API_BASE || 'https://api.crawl.cheap').replace(/\/+$/, '');
+  return c.json({
+    protocolVersion: '1.0.0',
+    name: 'crawl.cheap-mcp',
+    description:
+      'All 30 Firecrawl-compatible firecrawl_* MCP tools over Streamable-HTTP with OAuth 2.1 PKCE S256.',
+    version: '1.0.0',
+    url: `${origin}/v2/mcp`,
+    provider: { organization: 'crawl.cheap', url: 'https://crawl.cheap' },
+    supportedInterfaces: [
+      {
+        url: `${apiOrigin}/a2a/v1`,
+        protocolBinding: 'JSONRPC',
+        protocolVersion: '1.0',
+      },
+      {
+        url: `${origin}/v2/mcp`,
+        protocolBinding: 'MCP_STREAMABLE_HTTP',
+        protocolVersion: PROTOCOL_VERSION,
+      },
+    ],
+    capabilities: { streaming: true, pushNotifications: false },
+  });
+};
+
+app.get('/.well-known/agent-card.json', mcpAgentCardHandler);
+app.get('/.well-known/agent.json', mcpAgentCardHandler);
+
 app.onError((err, c) => {
   Sentry.captureException(err);
   return c.json(rpcError(null, -32603, 'Internal error'), 500);

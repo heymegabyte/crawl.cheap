@@ -792,6 +792,8 @@
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="changeTracking"> changeTracking</label>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="highlights"> highlights</label>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="question"> question</label>
+        <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="chunks"> chunks</label>
+        <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="jsonLd"> jsonLd</label>
         <span style="color:var(--line)">|</span>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" id="optOnlyMain" checked> onlyMainContent</label>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" id="optRemoveB64" checked> removeBase64Images</label>
@@ -843,6 +845,22 @@
         </div>
         <pre class="out" id="llmsOut"><span class="muted">Generated llms.txt output will appear here…</span></pre>
       </div>
+
+      <div class="card" id="chunkerCard" style="grid-column: 1 / -1;">
+        <h2>RAG Structure-Aware Markdown Chunker &amp; AutoRAG Inspector</h2>
+        <div class="hint">Split any URL into heading-preserving 256–512 token chunks with JSON-LD schema enrichment and HTML-vs-Markdown token savings metrics.</div>
+        <div class="row">
+          <input class="grow" id="chunkUrlInput" aria-label="URL to chunk for RAG" value="https://example.com" />
+          <select id="chunkMaxTokens" aria-label="Max tokens per chunk" style="width:155px">
+            <option value="256">256 max tokens</option>
+            <option value="400" selected>400 max tokens</option>
+            <option value="512">512 max tokens</option>
+          </select>
+          <button type="button" class="btn btn-p" id="btnRunChunker">Chunk URL</button>
+          <button type="button" class="btn btn-g" id="btnRunAutorag">AutoRAG Ingest</button>
+        </div>
+        <pre class="out" id="chunkerOut"><span class="muted">Structure-aware RAG chunks, token savings percentage, and JSON-LD schemas will appear here…</span></pre>
+      </div>
     </div>
 
     <!-- 4. BROWSER SANDBOX VIEW -->
@@ -882,19 +900,21 @@
     <!-- 4B. INTEGRATIONS & PLUGINS HUB VIEW -->
     <div class="card ws-section" data-section="integrations" id="integrationsSection" style="display:none">
       <div class="row" style="justify-content:space-between;margin-bottom:6px;">
-        <h2>Ecosystem Integrations &amp; MCP Plugins</h2>
+        <h2>Ecosystem Integrations &amp; MCP / A2A Plugins</h2>
         <div class="row">
           <a class="btn btn-g" href="/.well-known/mcp.json" target="_blank" rel="noopener" style="padding:6px 10px;font-size:12px;">/.well-known/mcp.json</a>
+          <a class="btn btn-g" href="/.well-known/agent-card.json" target="_blank" rel="noopener" style="padding:6px 10px;font-size:12px;">A2A agent-card.json</a>
           <a class="btn btn-g" href="https://api.crawl.cheap/openapi.json" target="_blank" rel="noopener" style="padding:6px 10px;font-size:12px;">OpenAPI 3.1</a>
           <a class="btn btn-g" href="/llms.txt" target="_blank" rel="noopener" style="padding:6px 10px;font-size:12px;">llms.txt</a>
         </div>
       </div>
       <div class="hint">Click any integration or plugin below to generate a ready-to-paste snippet pre-filled with your active API key.</div>
       <div class="tabs" id="intCatTabs">
-        <div class="tab on" data-int-cat="all">All (12)</div>
-        <div class="tab" data-int-cat="ai-frameworks">AI Frameworks (4)</div>
+        <div class="tab on" data-int-cat="all">All (20)</div>
+        <div class="tab" data-int-cat="ai-frameworks">AI Frameworks (9)</div>
         <div class="tab" data-int-cat="mcp-ides">MCP &amp; Agentic IDEs (3)</div>
         <div class="tab" data-int-cat="workflow-builders">Workflow Builders (3)</div>
+        <div class="tab" data-int-cat="productivity-local">Productivity &amp; Local (3)</div>
         <div class="tab" data-int-cat="edge-cicd">Edge &amp; CI/CD (2)</div>
       </div>
       <div class="grid-2" id="integrationsGrid" style="margin-bottom:14px;"></div>
@@ -1360,6 +1380,18 @@ function updateNavbarAvatar() {
       history.replaceState({}, document.title, location.pathname);
       setTimeout(() => $('authModal')?.classList.add('open'), 150);
     }
+    const qUrl = params.get('url');
+    const qEp = params.get('ep');
+    if (qUrl) {
+      setTimeout(() => {
+        switchWorkspaceView('playground');
+        if (qEp) {
+          const tab = document.querySelector(`#tabs .tab[data-ep="${qEp}"]`);
+          if (tab) tab.click();
+        }
+        if ($('pgInput')) $('pgInput').value = qUrl;
+      }, 80);
+    }
   } catch {}
 })();
 
@@ -1805,8 +1837,10 @@ async function run() {
     const pill = $('pgMetricsPill');
     if (pill) {
       const cr = (json && (json.creditsUsed || (json.data && json.data.metadata && json.data.metadata.creditsUsed))) || (ep === 'extract' ? 5 : 1);
+      const ts = json && json.data && json.data.tokenStats;
+      const tokSuffix = ts && ts.savingsPercent ? ` · -${ts.savingsPercent}% tok` : '';
       pill.style.display = '';
-      pill.textContent = `${status} · ${elapsedMs}ms · ${cr} cr`;
+      pill.textContent = `${status} · ${elapsedMs}ms · ${cr} cr${tokSuffix}`;
     }
 
     if (status === 402) {
@@ -1841,6 +1875,9 @@ function renderResult(kind, json) {
     if (d.highlights && d.highlights.length) s += '\n\n— highlights —\n' + d.highlights.join('\n• ');
     if (d.branding) s += '\n\n— branding —\n' + JSON.stringify(d.branding, null, 2);
     if (d.changeTracking) s += '\n\n— changeTracking —\n' + JSON.stringify(d.changeTracking, null, 2);
+    if (d.tokenStats) s += `\n\n— tokenStats —\nMarkdown: ${d.tokenStats.markdownTokens} tokens vs HTML: ${d.tokenStats.rawHtmlTokens} tokens (${d.tokenStats.savingsPercent}% saved)`;
+    if (d.chunks && d.chunks.length) s += `\n\n— chunks (${d.chunks.length}) —\n` + JSON.stringify(d.chunks.slice(0, 5), null, 2);
+    if (d.jsonLd && d.jsonLd.length) s += `\n\n— jsonLd (${d.jsonLd.length}) —\n` + JSON.stringify(d.jsonLd, null, 2);
     if (d.json) s += '\n\n— json —\n' + JSON.stringify(d.json, null, 2);
     if (d.links && d.links.length) s += '\n\n— links (' + d.links.length + ') —\n' + d.links.slice(0, 25).join('\n');
     if (d.screenshot) s += '\n\n— screenshot —\n' + d.screenshot;
@@ -2345,6 +2382,42 @@ $('llmsRunBtn').onclick = async () => {
     $('llmsOut').textContent = 'Error: ' + e.message;
   }
   $('llmsRunBtn').disabled = false;
+};
+
+$('btnRunChunker').onclick = async () => {
+  const url = $('chunkUrlInput').value.trim() || 'https://example.com';
+  const maxTokens = parseInt($('chunkMaxTokens').value, 10) || 400;
+  $('btnRunChunker').disabled = true;
+  $('chunkerOut').textContent = `Chunking ${url} (maxTokens=${maxTokens})…`;
+  try {
+    const res = await api('/v2/chunk', {
+      method: 'POST',
+      body: JSON.stringify({ url, maxTokens, overlapTokens: 40 }),
+    });
+    $('chunkerOut').textContent = JSON.stringify(res.json, null, 2);
+    toast('Structure-aware RAG chunks ready');
+  } catch (e) {
+    $('chunkerOut').textContent = 'Error: ' + e.message;
+  }
+  $('btnRunChunker').disabled = false;
+};
+
+$('btnRunAutorag').onclick = async () => {
+  const url = $('chunkUrlInput').value.trim() || 'https://example.com';
+  const maxTokens = parseInt($('chunkMaxTokens').value, 10) || 400;
+  $('btnRunAutorag').disabled = true;
+  $('chunkerOut').textContent = `Ingesting ${url} into AutoRAG (bge-base-en-v1.5 768-dim vectors)…`;
+  try {
+    const res = await api('/v2/autorag/ingest', {
+      method: 'POST',
+      body: JSON.stringify({ url, maxTokens, overlapTokens: 40 }),
+    });
+    $('chunkerOut').textContent = JSON.stringify(res.json, null, 2);
+    toast('AutoRAG vector ingestion complete');
+  } catch (e) {
+    $('chunkerOut').textContent = 'Error: ' + e.message;
+  }
+  $('btnRunAutorag').disabled = false;
 };
 
 // Settings: Monitors, Security, MCP & Telemetry

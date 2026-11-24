@@ -27,6 +27,8 @@ export const FormatStringSchema = z.enum([
   'question',
   'highlights',
   'query',
+  'chunks',
+  'jsonLd',
 ]);
 
 /** Structured (object) format descriptors. */
@@ -86,6 +88,12 @@ export const BrandingFormatSchema = z.object({
   mode: z.enum(['auto', 'fast', 'standard']).optional(),
 });
 
+export const ChunksFormatSchema = z.object({
+  type: z.literal('chunks'),
+  maxTokens: z.number().int().min(64).max(4096).optional(),
+  overlapTokens: z.number().int().min(0).max(1024).optional(),
+});
+
 /** A single requested output format — string shorthand or object descriptor. */
 export const FormatSchema = z.union([
   FormatStringSchema,
@@ -98,6 +106,7 @@ export const FormatSchema = z.union([
   HighlightsFormatSchema,
   QueryFormatSchema,
   BrandingFormatSchema,
+  ChunksFormatSchema,
 ]);
 export type Format = z.infer<typeof FormatSchema>;
 

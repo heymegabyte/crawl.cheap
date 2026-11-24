@@ -1,0 +1,28 @@
+{
+  "protocolVersion": "1.0.0",
+  "name": "crawl.cheap",
+  "description": "Cloudflare-native, 100% Firecrawl v1/v2 compatible autonomous web-data, recursive RAG chunking, and deep research agent.",
+  "version": "2.0.0",
+  "url": "https://api.crawl.cheap/a2a/v1",
+  "provider": {
+    "organization": "crawl.cheap",
+    "url": "https://crawl.cheap"
+  },
+  "supportedInterfaces": [
+    {
+      "url": "https://api.crawl.cheap/a2a/v1",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    },
+    {
+      "url": "https://mcp.crawl.cheap/v2/mcp",
+      "protocolBinding": "MCP_STREAMABLE_HTTP",
+      "protocolVersion": "2025-06-18"
+    }
+  ],
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": true,
+    "stateTransitionHistory": true
+  }
+}

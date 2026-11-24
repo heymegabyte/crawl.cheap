@@ -298,6 +298,26 @@
         }
       );
     }
+    if (!customElements.get('tt-chunk-viewer')) {
+      customElements.define(
+        'tt-chunk-viewer',
+        class extends HTMLElement {
+          connectedCallback() {
+            this.classList.add('tt-card', 'tt-surface');
+          }
+        }
+      );
+    }
+    if (!customElements.get('tt-a2a-badge')) {
+      customElements.define(
+        'tt-a2a-badge',
+        class extends HTMLElement {
+          connectedCallback() {
+            this.classList.add('tt-badge');
+          }
+        }
+      );
+    }
   }
 
   // Auto-enhance blog article code blocks with 1-click Copy & Try in Studio actions

@@ -429,15 +429,19 @@
 </div></section>
 
 <section id="integrations"><div class="wrap reveal">
-  <span class="eyebrow">12 Ecosystem Integrations &amp; MCP Plugins</span>
+  <span class="eyebrow">20 Ecosystem Integrations &amp; MCP / A2A Plugins</span>
   <h2 class="sec">Works with your entire AI &amp; MCP stack.</h2>
-  <p class="lead">Because crawl.cheap speaks the exact Firecrawl v1/v2 contract and exposes <code>/.well-known/mcp.json</code> + <code>/openapi.json</code>, every official framework loader, agent tool, and IDE plugin works out of the box.</p>
+  <p class="lead">Because crawl.cheap speaks the exact Firecrawl v1/v2 contract and exposes <code>/.well-known/mcp.json</code>, <code>/.well-known/agent-card.json</code> (A2A v1.0), and <code>/openapi.json</code>, every framework loader, agent tool, and IDE plugin works out of the box.</p>
   <div class="tabs" id="intTabs">
     <button class="on" data-int="langchain">LangChain</button>
     <button data-int="llamaindex">LlamaIndex</button>
     <button data-int="vercel">Vercel AI SDK</button>
+    <button data-int="mastra">Mastra</button>
+    <button data-int="pydantic">PydanticAI</button>
+    <button data-int="openai">OpenAI Agents</button>
     <button data-int="crewai">CrewAI</button>
     <button data-int="mcp">Cursor &amp; Claude MCP</button>
+    <button data-int="local">Raycast &amp; Obsidian</button>
     <button data-int="dify">Dify &amp; n8n</button>
   </div>
   <div style="position:relative">
@@ -454,9 +458,10 @@ const loader = new FirecrawlLoader({
 const docs = await loader.load();</pre>
   </div>
   <div class="cta" style="margin-top:18px">
-    <a class="btn btn-primary tt-btn tt-btn--primary" href="/app/#integrations">Open 12-Plugin Integrations Hub →</a>
-    <a class="btn btn-ghost tt-btn tt-btn--ghost" href="/.well-known/mcp.json">Inspect /.well-known/mcp.json</a>
-    <a class="btn btn-ghost tt-btn tt-btn--ghost" href="https://api.crawl.cheap/openapi.json">OpenAPI 3.1 Schema</a>
+    <a class="btn btn-primary tt-btn tt-btn--primary" href="/app/#integrations">Open 20-Plugin Integrations Hub →</a>
+    <a class="btn btn-ghost tt-btn tt-btn--ghost" href="/.well-known/mcp.json">/.well-known/mcp.json</a>
+    <a class="btn btn-ghost tt-btn tt-btn--ghost" href="/.well-known/agent-card.json">A2A agent-card.json</a>
+    <a class="btn btn-ghost tt-btn tt-btn--ghost" href="https://api.crawl.cheap/openapi.json">OpenAPI 3.1</a>
     <a class="btn btn-ghost tt-btn tt-btn--ghost" href="/llms.txt">llms.txt</a>
   </div>
 </div></section>
@@ -666,9 +671,13 @@ const docs = await loader.load();</pre>
     langchain: `import { FirecrawlLoader } from '@langchain/community/document_loaders/web/firecrawl';\n\nconst loader = new FirecrawlLoader({\n  url: 'https://example.com',\n  apiKey: 'fc-YOUR_API_KEY',\n  apiUrl: 'https://api.crawl.cheap',\n  mode: 'scrape',\n  params: { formats: ['markdown', 'summary'] },\n});\nconst docs = await loader.load();`,
     llamaindex: `from llama_index.readers.web import FirecrawlWebReader\nfrom llama_index.core import VectorStoreIndex\n\nreader = FirecrawlWebReader(api_key="fc-YOUR_API_KEY", api_url="https://api.crawl.cheap", mode="scrape")\ndocuments = reader.load_data(url="https://example.com")\nindex = VectorStoreIndex.from_documents(documents)`,
     vercel: `import { tool } from 'ai';\nimport { z } from 'zod';\n\nexport const scrapeWebTool = tool({\n  description: 'Scrape any URL to clean Markdown via crawl.cheap on Cloudflare Workers',\n  parameters: z.object({ url: z.string().url() }),\n  execute: async ({ url }) => {\n    const r = await fetch('https://api.crawl.cheap/v2/scrape', {\n      method: 'POST',\n      headers: { authorization: 'Bearer fc-YOUR_API_KEY', 'content-type': 'application/json' },\n      body: JSON.stringify({ url, formats: ['markdown', 'summary'] }),\n    });\n    return await r.json();\n  },\n});`,
+    mastra: `import { createTool } from '@mastra/core/tools';\nimport { z } from 'zod';\n\nexport const crawlCheapMastraTool = createTool({\n  id: 'crawl-cheap-scrape-chunk',\n  description: 'Scrape a URL into structure-aware Markdown chunks & JSON-LD via crawl.cheap',\n  inputSchema: z.object({ url: z.string().url() }),\n  execute: async ({ context }) => {\n    const r = await fetch('https://api.crawl.cheap/v2/scrape', {\n      method: 'POST',\n      headers: { authorization: 'Bearer fc-YOUR_API_KEY', 'content-type': 'application/json' },\n      body: JSON.stringify({ url: context.url, formats: ['markdown', 'chunks', 'jsonLd'] }),\n    });\n    return await r.json();\n  },\n});`,
+    pydantic: `import httpx\nfrom pydantic_ai import Agent, RunContext\n\nagent = Agent('openai:gpt-4o')\n\n@agent.tool\nasync def scrape_web_page(ctx: RunContext[None], url: str) -> str:\n    async with httpx.AsyncClient() as client:\n        r = await client.post('https://api.crawl.cheap/v2/scrape', headers={'Authorization': 'Bearer fc-YOUR_API_KEY'}, json={'url': url, 'formats': ['markdown']})\n        return r.json()['data']['markdown']`,
+    openai: `import requests\nfrom agents import Agent, function_tool\n\n@function_tool\ndef crawl_cheap_scrape(url: str) -> str:\n    r = requests.post('https://api.crawl.cheap/v2/scrape', headers={'Authorization': 'Bearer fc-YOUR_API_KEY'}, json={'url': url, 'formats': ['markdown']})\n    return r.json()['data']['markdown']\n\nagent = Agent(name='WebResearcher', tools=[crawl_cheap_scrape])`,
     crewai: `from crewai_tools import FirecrawlScrapeWebsiteTool\n\nscrape_tool = FirecrawlScrapeWebsiteTool(\n    api_key="fc-YOUR_API_KEY",\n    api_url="https://api.crawl.cheap",\n    url="https://example.com",\n    config={"formats": ["markdown", "links"]},\n)`,
     mcp: `# 1. Claude Code CLI (30 live firecrawl_* tools over Streamable-HTTP)\nclaude mcp add --transport http crawl-cheap https://mcp.crawl.cheap/v2/mcp \\\n  --header "Authorization: Bearer fc-YOUR_API_KEY"\n\n# 2. Cursor / Windsurf (.cursor/mcp.json)\n{\n  "mcpServers": {\n    "crawl-cheap": {\n      "url": "https://mcp.crawl.cheap/v2/mcp",\n      "transport": "streamable-http",\n      "headers": { "Authorization": "Bearer fc-YOUR_API_KEY" }\n    }\n  }\n}`,
-    dify: `# Import into Dify, Flowise, n8n, or OpenAI Custom Actions via OpenAPI 3.1 URL:\nSchema URL: https://api.crawl.cheap/openapi.json\nPlugin Manifest: https://api.crawl.cheap/.well-known/ai-plugin.json\nAuth Header: Authorization: Bearer fc-YOUR_API_KEY`,
+    local: `# 1. Raycast / zsh 1-Line Clipboard Scraper:\ncurl -s -X POST https://api.crawl.cheap/v2/scrape -H "Authorization: Bearer fc-YOUR_API_KEY" -H "Content-Type: application/json" -d '{"url":"https://example.com","formats":["markdown","chunks"]}' | jq -r '.data.markdown' | pbcopy\n\n# 2. Browser Bookmarklet (open current tab in Studio Playground):\njavascript:void(window.open('https://crawl.cheap/app/?url='+encodeURIComponent(location.href)+'&ep=scrape#playground'))`,
+    dify: `# Import into Dify, Flowise, n8n, or OpenAI Custom Actions via OpenAPI 3.1 URL:\nSchema URL: https://api.crawl.cheap/openapi.json\nPlugin Manifest: https://api.crawl.cheap/.well-known/ai-plugin.json\nA2A Agent Card: https://api.crawl.cheap/.well-known/agent-card.json\nAuth Header: Authorization: Bearer fc-YOUR_API_KEY`,
   };
   const intTabs = document.getElementById('intTabs');
   const intBox = document.getElementById('intSnippetBox');
