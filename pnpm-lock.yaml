@@ -5,6 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  '@theme.tools/scheduling': file:vendor/theme-tools/theme.tools-scheduling-1.0.1.tgz
   '@theme-tools/shared-utils': file:vendor/theme-tools/theme-tools-shared-utils-1.0.21.tgz
 
 importers:
@@ -58,6 +59,12 @@ importers:
       '@theme-tools/shared-utils':
         specifier: file:../../vendor/theme-tools/theme-tools-shared-utils-1.0.21.tgz
         version: file:vendor/theme-tools/theme-tools-shared-utils-1.0.21.tgz
+      '@theme.tools/billing':
+        specifier: file:../../vendor/theme-tools/theme.tools-billing-1.0.1.tgz
+        version: file:vendor/theme-tools/theme.tools-billing-1.0.1.tgz(react@19.3.1)
+      '@theme.tools/scheduling':
+        specifier: file:../../vendor/theme-tools/theme.tools-scheduling-1.0.1.tgz
+        version: file:vendor/theme-tools/theme.tools-scheduling-1.0.1.tgz
       hono:
         specifier: ^4.6.14
         version: 4.13.13
@@ -116,7 +123,7 @@ importers:
     dependencies:
       '@theme-tools/ui':
         specifier: file:vendor/theme-tools/theme-tools-ui-1.0.74.tgz
-        version: file:apps/web/vendor/theme-tools/theme-tools-ui-1.0.74.tgz(zod@4.6.7)
+        version: file:apps/web/vendor/theme-tools/theme-tools-ui-1.0.74.tgz(react@19.3.1)(zod@4.6.7)
       '@theme.tools/seo-geo':
         specifier: file:vendor/theme-tools/theme.tools-seo-geo-1.0.3.tgz
         version: file:apps/web/vendor/theme-tools/theme.tools-seo-geo-1.0.3.tgz
@@ -1766,6 +1773,16 @@ packages:
         optional: true
       react-dom:
         optional: true
+
+  '@theme.tools/billing@file:vendor/theme-tools/theme.tools-billing-1.0.1.tgz':
+    resolution: {integrity: sha512-nesyQ9nefdP+anWaat+EvUsYcyOeKUvTC5/A7itcVdN+5jjqbCjtjNHyp3x1vuOltCZkJ66TzXu/KGocWbbywA==, tarball: file:vendor/theme-tools/theme.tools-billing-1.0.1.tgz}
+    version: 1.0.1
+    peerDependencies:
+      react: ^19.0.0
+
+  '@theme.tools/scheduling@file:vendor/theme-tools/theme.tools-scheduling-1.0.1.tgz':
+    resolution: {integrity: sha512-vB/TO0PHImq9vDHjJuDoDZnznnkSgpsy6m1ZHxpt/X+nn/YU9XeqH0N6SmoWbHKXnOVl3BJxyMsl0wJ/1rISIA==, tarball: file:vendor/theme-tools/theme.tools-scheduling-1.0.1.tgz}
+    version: 1.0.1
 
   '@theme.tools/seo-geo@file:apps/web/vendor/theme-tools/theme.tools-seo-geo-1.0.3.tgz':
     resolution: {integrity: sha512-aue0cFuSDTSo6hqS2IETGeVyOiVa0+KOl1i8/dz6dPJV40bvB1+zl5cPFafU9h/H+UsrtwqcCu3WS05I4JaWfQ==, tarball: file:apps/web/vendor/theme-tools/theme.tools-seo-geo-1.0.3.tgz}
@@ -3498,6 +3515,10 @@ packages:
   raw-body@3.0.2:
     resolution: {integrity: sha512-K5zQjDllxWkf7Z5xJdV0/B0WTNqx6vxG70zJE4N0kBs4LovmEYWJzQGxC9bS9RAKu3bgM40lrd5zoLJ12MQ5BA==}
     engines: {node: '>= 0.10'}
+
+  react@19.3.1:
+    resolution: {integrity: sha512-QNhWdt7nrgVWWQG58QuGsAR3jv3Hbe4mb4vz7w2csnHavciZJgda1CPNaldF6eVxv90ud3jUXpKlHL69gO38yw==}
+    engines: {node: '>=0.10.0'}
 
   read-excel-file@9.3.20:
     resolution: {integrity: sha512-vRWkVDwHBzlrc2ic4AdQq43fZLpm/7iAD0vW6Ejmkw66hW90BxZ7zXhLmGSOeNSGKDG6c8Wu9WVecJ1qcpM6XQ==}
@@ -5639,7 +5660,21 @@ snapshots:
     dependencies:
       zod: 4.6.7
 
-  '@theme-tools/ui@file:apps/web/vendor/theme-tools/theme-tools-ui-1.0.74.tgz(zod@4.6.7)':
+  '@theme-tools/ui@file:apps/web/vendor/theme-tools/theme-tools-ui-1.0.74.tgz(react@19.3.1)(zod@4.6.7)':
+    dependencies:
+      '@theme-tools/shared-utils': file:vendor/theme-tools/theme-tools-shared-utils-1.0.21.tgz
+      zod: 4.6.7
+    optionalDependencies:
+      react: 19.3.1
+
+  '@theme.tools/billing@file:vendor/theme-tools/theme.tools-billing-1.0.1.tgz(react@19.3.1)':
+    dependencies:
+      '@theme-tools/shared-utils': file:vendor/theme-tools/theme-tools-shared-utils-1.0.21.tgz
+      '@theme.tools/scheduling': file:vendor/theme-tools/theme.tools-scheduling-1.0.1.tgz
+      react: 19.3.1
+      zod: 4.6.7
+
+  '@theme.tools/scheduling@file:vendor/theme-tools/theme.tools-scheduling-1.0.1.tgz':
     dependencies:
       '@theme-tools/shared-utils': file:vendor/theme-tools/theme-tools-shared-utils-1.0.21.tgz
       zod: 4.6.7
@@ -7530,6 +7565,8 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.7.3
       unpipe: 1.0.0
+
+  react@19.3.1: {}
 
   read-excel-file@9.3.20:
     dependencies:

@@ -10,6 +10,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@theme.tools/billing": "file:../../vendor/theme-tools/theme.tools-billing-1.0.1.tgz",
+    "@theme.tools/scheduling": "file:../../vendor/theme-tools/theme.tools-scheduling-1.0.1.tgz",
     "@theme-tools/shared-utils": "file:../../vendor/theme-tools/theme-tools-shared-utils-1.0.21.tgz",
     "@cloudflare/puppeteer": "^1.4.0",
     "@crawlcheap/contracts": "workspace:*",
