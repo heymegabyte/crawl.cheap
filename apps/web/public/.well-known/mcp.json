@@ -1,0 +1,47 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schemas/server-card/v1.0",
+  "version": "1.0",
+  "protocolVersion": "2025-06-18",
+  "serverInfo": {
+    "name": "crawl.cheap",
+    "title": "crawl.cheap — Firecrawl-Compatible Cloudflare Edge Web Data & AI Engine",
+    "version": "1.0.0",
+    "description": "All 30 pinned firecrawl_* MCP tools over Streamable-HTTP with OAuth 2.1 PKCE S256.",
+    "homepage": "https://crawl.cheap"
+  },
+  "toolsCount": 30,
+  "listableToolsCount": 28,
+  "endpoints": [
+    {
+      "profile": "full",
+      "url": "https://mcp.crawl.cheap/v2/mcp",
+      "transport": "streamable-http",
+      "capabilities": [
+        "tools",
+        "resources",
+        "prompts"
+      ],
+      "auth": {
+        "type": "oauth2",
+        "authorization_server": "https://api.crawl.cheap",
+        "protected_resource_metadata": "https://mcp.crawl.cheap/.well-known/oauth-protected-resource"
+      }
+    },
+    {
+      "profile": "search",
+      "url": "https://mcp.crawl.cheap/v2/mcp-search",
+      "transport": "streamable-http",
+      "capabilities": [
+        "tools"
+      ]
+    },
+    {
+      "profile": "keyless",
+      "url": "https://mcp.crawl.cheap/v2/mcp-keyless",
+      "transport": "streamable-http",
+      "capabilities": [
+        "tools"
+      ]
+    }
+  ]
+}

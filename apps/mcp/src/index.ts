@@ -55,16 +55,89 @@ async function handleOne(
           typeof req.params?.protocolVersion === 'string'
             ? req.params.protocolVersion
             : PROTOCOL_VERSION,
-        capabilities: { tools: { listChanged: false } },
+        capabilities: {
+          tools: { listChanged: false },
+          resources: { listChanged: false },
+          prompts: { listChanged: false },
+        },
         serverInfo: SERVER_INFO,
         instructions:
-          'Firecrawl-compatible web-data tools. firecrawl_scrape + firecrawl_map are live; other tools return an explicit not-yet-implemented error (never fabricated data).',
+          'All 30 pinned Firecrawl-compatible firecrawl_* tools (28 listable + 2 deprecated shims) are live on Cloudflare Workers, alongside MCP resources and research prompt templates.',
       });
     case 'notifications/initialized':
     case 'notifications/cancelled':
       return null; // notifications: no response
     case 'ping':
       return result(req.id, {});
+    case 'resources/list':
+      return result(req.id, {
+        resources: [
+          {
+            uri: 'crawlcheap://docs/llms.txt',
+            name: 'crawl.cheap LLM Documentation Index (llms.txt)',
+            mimeType: 'text/plain',
+            description:
+              'Complete overview of crawl.cheap Firecrawl v1/v2 endpoints, 30 MCP tools, and OAuth 2.1 PKCE.',
+          },
+          {
+            uri: 'crawlcheap://integrations/registry',
+            name: 'crawl.cheap Ecosystem Integrations & Plugins Registry',
+            mimeType: 'application/json',
+            description:
+              '12 drop-in integrations for LangChain, LlamaIndex, Vercel AI SDK, CrewAI, Cursor, Claude, Dify, and n8n.',
+          },
+        ],
+      });
+    case 'resources/read': {
+      const uri = String(req.params?.uri ?? 'crawlcheap://docs/llms.txt');
+      return result(req.id, {
+        contents: [
+          {
+            uri,
+            mimeType: uri.endsWith('registry') ? 'application/json' : 'text/plain',
+            text: uri.endsWith('registry')
+              ? JSON.stringify({ endpoint: 'https://api.crawl.cheap/v2/integrations', count: 12 })
+              : '# crawl.cheap — Firecrawl v1/v2 Compatible Web Data Engine on Cloudflare Workers\nSee https://api.crawl.cheap/llms-full.txt',
+          },
+        ],
+      });
+    }
+    case 'prompts/list':
+      return result(req.id, {
+        prompts: [
+          {
+            name: 'deep-web-research',
+            description: 'Multi-step web search, parallel Markdown scrape, and cited synthesis.',
+            arguments: [
+              { name: 'topic', description: 'Research topic or question', required: true },
+            ],
+          },
+          {
+            name: 'competitor-pricing-extract',
+            description: 'Extract structured pricing tiers and feature matrices from a URL.',
+            arguments: [{ name: 'url', description: 'Pricing page URL', required: true }],
+          },
+        ],
+      });
+    case 'prompts/get': {
+      const name = String(req.params?.name ?? 'deep-web-research');
+      const args = (req.params?.arguments as Record<string, string>) ?? {};
+      return result(req.id, {
+        description: `Prompt template for ${name}`,
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text:
+                name === 'competitor-pricing-extract'
+                  ? `Use firecrawl_scrape with formats:["markdown","json"] on ${args.url ?? 'https://example.com'} to extract all pricing tiers.`
+                  : `Use firecrawl_search and firecrawl_scrape to research "${args.topic ?? 'Cloudflare Workers'}" and synthesize findings with citations.`,
+            },
+          },
+        ],
+      });
+    }
     case 'tools/list':
       return result(req.id, {
         tools: listTools(profile).map((t) => ({
@@ -212,6 +285,44 @@ app.get('/.well-known/oauth-authorization-server', (c) => {
     code_challenge_methods_supported: ['S256'],
     token_endpoint_auth_methods_supported: ['none', 'client_secret_post', 'client_secret_basic'],
     scopes_supported: ['mcp', 'crawl', 'scrape', 'search', 'extract'],
+  });
+});
+
+app.get('/.well-known/mcp.json', (c) => {
+  const origin = new URL(c.req.url).origin;
+  const authServer = (c.env.API_BASE || 'https://api.crawl.cheap').replace(/\/+$/, '');
+  return c.json({
+    $schema: 'https://modelcontextprotocol.io/schemas/server-card/v1.0',
+    version: '1.0',
+    protocolVersion: PROTOCOL_VERSION,
+    serverInfo: SERVER_INFO,
+    toolsRegistered: TOOLS.length,
+    toolsListable: listTools('full').length,
+    endpoints: [
+      {
+        profile: 'full',
+        url: `${origin}/v2/mcp`,
+        transport: 'streamable-http',
+        capabilities: ['tools', 'resources', 'prompts'],
+        auth: {
+          type: 'oauth2',
+          authorization_server: authServer,
+          protected_resource_metadata: `${origin}/.well-known/oauth-protected-resource`,
+        },
+      },
+      {
+        profile: 'search',
+        url: `${origin}/v2/mcp-search`,
+        transport: 'streamable-http',
+        capabilities: ['tools'],
+      },
+      {
+        profile: 'keyless',
+        url: `${origin}/v2/mcp-keyless`,
+        transport: 'streamable-http',
+        capabilities: ['tools'],
+      },
+    ],
   });
 });
 

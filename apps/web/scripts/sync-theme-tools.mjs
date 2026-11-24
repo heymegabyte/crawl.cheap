@@ -148,6 +148,7 @@ const PREVIEW_SPECS = [
   { id: 'section-migrate', accent: '#50aae3', accent2: '#00e5ff', variant: 'terminal' },
   { id: 'section-estimator', accent: '#2ecc71', accent2: '#00e5ff', variant: 'bars' },
   { id: 'section-compat', accent: '#00e5ff', accent2: '#ff8a3d', variant: 'shield' },
+  { id: 'section-integrations', accent: '#7c3aed', accent2: '#00e5ff', variant: 'nodes' },
   { id: 'section-studio', accent: '#00e5ff', accent2: '#7c3aed', variant: 'terminal' },
 ];
 
@@ -267,6 +268,17 @@ export const CRAWL_CHEAP_MEGA_MENU_DATA = {
             alt: 'v1 and v2 OpenAPI Compatibility Matrix',
             href: '/#compat',
             title: '100% Drop-In Parity Across Firecrawl v1 (23 Ops) & v2 (57 Ops)',
+          },
+        },
+        {
+          label: 'Ecosystem Integrations & MCP Plugins (12)',
+          href: '/#integrations',
+          preview: {
+            src: '/assets/previews/section-integrations.svg',
+            alt: 'Ecosystem Integrations & MCP Plugins',
+            href: '/#integrations',
+            title:
+              'Drop-In Plugins for LangChain, LlamaIndex, Vercel AI SDK, CrewAI, Cursor, Claude, Dify & n8n',
           },
         },
         {
@@ -1115,7 +1127,84 @@ const RUNTIME_JS = `/**
         }
       );
     }
+    if (!customElements.get('tt-code-copy')) {
+      customElements.define(
+        'tt-code-copy',
+        class extends HTMLElement {
+          connectedCallback() {
+            this.classList.add('tt-badge');
+            this.style.cursor = 'pointer';
+          }
+        }
+      );
+    }
+    if (!customElements.get('tt-plugin-card')) {
+      customElements.define(
+        'tt-plugin-card',
+        class extends HTMLElement {
+          connectedCallback() {
+            this.classList.add('tt-card', 'tt-card--interactive');
+            this.setAttribute('data-spotlight', 'true');
+          }
+        }
+      );
+    }
+    if (!customElements.get('tt-mcp-deeplink')) {
+      customElements.define(
+        'tt-mcp-deeplink',
+        class extends HTMLElement {
+          connectedCallback() {
+            this.classList.add('tt-btn', 'tt-btn--ghost');
+          }
+        }
+      );
+    }
+    if (!customElements.get('tt-latency-badge')) {
+      customElements.define(
+        'tt-latency-badge',
+        class extends HTMLElement {
+          connectedCallback() {
+            this.classList.add('tt-badge');
+          }
+        }
+      );
+    }
   }
+
+  // Auto-enhance blog article code blocks with 1-click Copy & Try in Studio actions
+  function enhanceArticleCodeBlocks() {
+    var prose = document.getElementById('article-prose-body');
+    if (!prose) return;
+    var pres = prose.querySelectorAll('pre');
+    pres.forEach(function (pre) {
+      if (pre.getAttribute('data-tt-enhanced')) return;
+      pre.setAttribute('data-tt-enhanced', '1');
+      pre.style.position = 'relative';
+      var bar = document.createElement('div');
+      bar.style.cssText = 'display:flex;gap:6px;justify-content:flex-end;margin-bottom:8px;';
+      var copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'tt-badge';
+      copyBtn.style.cssText = 'cursor:pointer;background:rgba(0,229,255,0.12);color:#00e5ff;border:1px solid rgba(0,229,255,0.32);';
+      copyBtn.textContent = 'Copy snippet';
+      copyBtn.addEventListener('click', function () {
+        var codeEl = pre.querySelector('code');
+        var raw = codeEl ? codeEl.innerText : pre.innerText;
+        navigator.clipboard.writeText(raw).catch(function () {});
+        copyBtn.textContent = 'Copied ✓';
+        setTimeout(function () { copyBtn.textContent = 'Copy snippet'; }, 1500);
+      });
+      var studioLink = document.createElement('a');
+      studioLink.href = '/app/#playground';
+      studioLink.className = 'tt-badge';
+      studioLink.style.cssText = 'text-decoration:none;background:rgba(255,255,255,0.05);color:#cbd5e1;border:1px solid rgba(255,255,255,0.14);';
+      studioLink.textContent = 'Try in Playground →';
+      bar.appendChild(copyBtn);
+      bar.appendChild(studioLink);
+      pre.insertBefore(bar, pre.firstChild);
+    });
+  }
+  enhanceArticleCodeBlocks();
 
   document.addEventListener('pointermove', function (e) {
     var spot = e.target && e.target.closest && e.target.closest('[data-spotlight="true"]');
@@ -1570,6 +1659,27 @@ for (const post of posts) {
 
   writeFileSync(resolve(postDir, 'index.html'), articlePageHtml);
   writeFileSync(resolve(publicDir, 'blog', `${post.slug}.html`), articlePageHtml);
+
+  // 4e. Write Agent-Ready Raw Markdown Endpoint (/blog/<slug>/index.md)
+  const rawArticleMd = `---
+title: "${post.title.replace(/"/g, '\\"')}"
+description: "${post.description.replace(/"/g, '\\"')}"
+date: "${post.date}"
+author: "${post.author}"
+canonical_url: "https://crawl.cheap/blog/${post.slug}/"
+approx_tokens: ${Math.ceil(post.body.length / 4)}
+---
+
+# ${post.title}
+
+> ${post.description}
+
+${post.body}
+
+## Verified Primary Sources & Citations
+${(post.bibliography || []).map((b) => `${b.number}. [${b.title}](${b.canonicalUrl}) — ${b.publisher} (${b.sectionLocator})`).join('\n')}
+`;
+  writeFileSync(resolve(postDir, 'index.md'), rawArticleMd);
 }
 
 // ---------------------------------------------------------------------------
@@ -1638,6 +1748,13 @@ const blogIndexHtml = `<!doctype html>
 
     <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:26px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);">
       <input id="blogSearchInput" type="search" placeholder="Search architecture guides (e.g. Durable Objects, OAuth 2.1, PKCE, toMarkdown)…" aria-label="Search engineering blog articles" class="tt-input" style="flex:1 1 260px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;" />
+      <div style="display:flex;gap:6px;flex-wrap:wrap;" role="tablist" aria-label="Filter guides by topic">
+        <button type="button" class="tt-bib-filter-btn is-active" data-blog-tag="all">All Guides (${posts.length})</button>
+        <button type="button" class="tt-bib-filter-btn" data-blog-tag="scraping">Edge Scraping</button>
+        <button type="button" class="tt-bib-filter-btn" data-blog-tag="crawl">Browser Rendering /crawl</button>
+        <button type="button" class="tt-bib-filter-btn" data-blog-tag="oauth">OAuth 2.1 &amp; MCP</button>
+        <button type="button" class="tt-bib-filter-btn" data-blog-tag="parsing">Document Parsing &amp; Co-Pilots</button>
+      </div>
       <span id="blogMatchCount" class="tt-badge">${posts.length} guides</span>
     </div>
 
@@ -1684,17 +1801,29 @@ const blogIndexHtml = `<!doctype html>
       var input = document.getElementById('blogSearchInput');
       var countEl = document.getElementById('blogMatchCount');
       var cards = document.querySelectorAll('[data-blog-card]');
+      var tagBtns = document.querySelectorAll('[data-blog-tag]');
+      var activeTag = 'all';
       if (!input || !cards.length) return;
-      input.addEventListener('input', function () {
+      function applyBlogFilter() {
         var q = (input.value || '').trim().toLowerCase();
         var shown = 0;
         cards.forEach(function (c) {
           var hay = c.getAttribute('data-blog-search') || '';
-          var match = !q || hay.indexOf(q) !== -1;
+          var qMatch = !q || hay.indexOf(q) !== -1;
+          var tMatch = activeTag === 'all' || hay.indexOf(activeTag) !== -1;
+          var match = qMatch && tMatch;
           c.style.display = match ? 'flex' : 'none';
           if (match) shown++;
         });
         if (countEl) countEl.textContent = shown + (shown === 1 ? ' guide' : ' guides');
+      }
+      input.addEventListener('input', applyBlogFilter);
+      tagBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          activeTag = btn.getAttribute('data-blog-tag') || 'all';
+          tagBtns.forEach(function (b) { b.classList.toggle('is-active', b === btn); });
+          applyBlogFilter();
+        });
       });
     })();
   </script>
@@ -1703,6 +1832,95 @@ const blogIndexHtml = `<!doctype html>
 </html>`;
 
 writeFileSync(resolve(blogIndexDir, 'index.html'), blogIndexHtml);
+
+// Write static machine-readable discovery files (.well-known/mcp.json, .well-known/ai-plugin.json, llms.txt, llms-full.txt)
+const wellKnownDir = resolve(publicDir, '.well-known');
+mkdirSync(wellKnownDir, { recursive: true });
+writeFileSync(
+  resolve(wellKnownDir, 'mcp.json'),
+  JSON.stringify(
+    {
+      $schema: 'https://modelcontextprotocol.io/schemas/server-card/v1.0',
+      version: '1.0',
+      protocolVersion: '2025-06-18',
+      serverInfo: {
+        name: 'crawl.cheap',
+        title: 'crawl.cheap — Firecrawl-Compatible Cloudflare Edge Web Data & AI Engine',
+        version: '1.0.0',
+        description:
+          'All 30 pinned firecrawl_* MCP tools over Streamable-HTTP with OAuth 2.1 PKCE S256.',
+        homepage: 'https://crawl.cheap',
+      },
+      toolsCount: 30,
+      listableToolsCount: 28,
+      endpoints: [
+        {
+          profile: 'full',
+          url: 'https://mcp.crawl.cheap/v2/mcp',
+          transport: 'streamable-http',
+          capabilities: ['tools', 'resources', 'prompts'],
+          auth: {
+            type: 'oauth2',
+            authorization_server: 'https://api.crawl.cheap',
+            protected_resource_metadata:
+              'https://mcp.crawl.cheap/.well-known/oauth-protected-resource',
+          },
+        },
+        {
+          profile: 'search',
+          url: 'https://mcp.crawl.cheap/v2/mcp-search',
+          transport: 'streamable-http',
+          capabilities: ['tools'],
+        },
+        {
+          profile: 'keyless',
+          url: 'https://mcp.crawl.cheap/v2/mcp-keyless',
+          transport: 'streamable-http',
+          capabilities: ['tools'],
+        },
+      ],
+    },
+    null,
+    2,
+  ),
+);
+writeFileSync(
+  resolve(wellKnownDir, 'ai-plugin.json'),
+  JSON.stringify(
+    {
+      schema_version: 'v1',
+      name_for_human: 'crawl.cheap Web Data & AI Engine',
+      name_for_model: 'crawl_cheap',
+      description_for_human:
+        '100% Firecrawl v1/v2 compatible web scraping, crawling, mapping, search, document parsing, and browser automation on Cloudflare Workers.',
+      description_for_model:
+        'Use crawl_cheap to scrape web pages into clean Markdown or structured JSON, crawl documentation sites, map URLs, search the web, or parse PDFs/DOCX/XLSX.',
+      auth: { type: 'service_http', authorization_type: 'bearer' },
+      api: { type: 'openapi', url: 'https://api.crawl.cheap/openapi.json' },
+      logo_url: 'https://crawl.cheap/assets/crawl-cheap-icon.png',
+    },
+    null,
+    2,
+  ),
+);
+const staticLlmsTxt = `# crawl.cheap — The Web Data Engine for AI (Firecrawl v1 & v2 Compatible · Cloudflare Workers)
+
+> Open-source, Cloudflare-native web data platform speaking 100% of the Firecrawl v2 (57 operations) and v1 (23 operations) API contract at 50% of Firecrawl's core monthly plan price.
+
+## Core Endpoints & Discovery
+- Production Web & Studio: https://crawl.cheap (Dashboard: https://crawl.cheap/app/)
+- Production API Base URL: https://api.crawl.cheap
+- Remote MCP Server (30 Tools, Streamable-HTTP): https://mcp.crawl.cheap/v2/mcp
+- MCP Server Discovery Card: https://crawl.cheap/.well-known/mcp.json
+- OpenAPI 3.1 Specification: https://api.crawl.cheap/openapi.json
+- Ecosystems & Plugins Registry (12 Integrations): https://api.crawl.cheap/v2/integrations
+- @theme.tools 28-Library Catalog Manifest: https://api.crawl.cheap/v2/catalog
+`;
+writeFileSync(resolve(publicDir, 'llms.txt'), staticLlmsTxt);
+writeFileSync(
+  resolve(publicDir, 'llms-full.txt'),
+  `${staticLlmsTxt}\n## Engineering Guides\n${posts.map((p) => `- [${p.title}](https://crawl.cheap/blog/${p.slug}/): ${p.description}`).join('\n')}\n`,
+);
 
 // In-place PlateJS Inline Editor controller (`/blog/editor.js`)
 const EDITOR_CLIENT_JS = `/**

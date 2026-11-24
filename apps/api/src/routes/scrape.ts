@@ -49,28 +49,58 @@ route.post('/scrape', async (c) => {
   // changeTracking must run fresh (it diffs against history); actions have side effects.
   const cacheable = Boolean(c.env.ARTIFACTS) && !ct && !hasActions;
   const maxAge = parsed.data.maxAge ?? 0;
-  const key = cacheable
-    ? await cacheKey(parsed.data.url, parsed.data as Record<string, unknown>)
-    : null;
+  const isLockdown = parsed.data.lockdown === true;
+  const zeroRetention = parsed.data.zeroDataRetention === true;
+  const key =
+    cacheable || isLockdown
+      ? await cacheKey(parsed.data.url, parsed.data as Record<string, unknown>)
+      : null;
 
   try {
     await assertThreatPolicyAllowed(c.env.DB, teamId, parsed.data.url);
 
+    // Lockdown mode: serve strictly from cache (R2 or recent memory cache) without outbound network requests
+    if (isLockdown) {
+      const r2Cached = key
+        ? await readCache(c.env, key, maxAge > 0 ? maxAge : 7 * 86400_000)
+        : null;
+      const memCached = [...recentScrapeJobs.values()].find(
+        (d) => d.url === parsed.data.url || d.metadata?.sourceURL === parsed.data.url,
+      );
+      const hit = r2Cached ?? memCached ?? null;
+      if (!hit) {
+        return fail(
+          c,
+          404,
+          'No cached data available for URL while lockdown:true is enabled.',
+          'SCRAPE_NO_CACHED_DATA',
+        );
+      }
+      c.header('x-crawlcheap-strategy', 'cache-lockdown');
+      return c.json({
+        success: true as const,
+        data: { ...hit, metadata: { ...hit.metadata, cacheState: 'hit' as const } },
+        scrape_id: crypto.randomUUID(),
+      });
+    }
+
     // Cache read: serve a fresh-enough stored result (no re-fetch of the target).
-    if (key && maxAge > 0) {
+    if (key && maxAge > 0 && cacheable) {
       const cached = await readCache(c.env, key, maxAge);
       if (cached) {
         c.header('x-crawlcheap-strategy', 'cache');
         const scrapeId = crypto.randomUUID();
-        recentScrapeJobs.set(scrapeId, cached);
-        await saveScrapeJob(c.env.DB, {
-          id: scrapeId,
-          teamId,
-          keyId: p.keyId,
-          url: parsed.data.url,
-          document: cached,
-          strategy: 'cache',
-        });
+        if (!zeroRetention) {
+          recentScrapeJobs.set(scrapeId, cached);
+          await saveScrapeJob(c.env.DB, {
+            id: scrapeId,
+            teamId,
+            keyId: p.keyId,
+            url: parsed.data.url,
+            document: cached,
+            strategy: 'cache',
+          });
+        }
         return c.json({ success: true as const, data: cached, scrape_id: scrapeId });
       }
     }
@@ -79,7 +109,7 @@ route.post('/scrape', async (c) => {
     c.header('x-crawlcheap-strategy', strategy);
     if (key && maxAge > 0) document.metadata = { ...document.metadata, cacheState: 'miss' };
 
-    if (key && parsed.data.storeInCache !== false) {
+    if (key && cacheable && parsed.data.storeInCache !== false && !zeroRetention) {
       try {
         await writeCache(c.env, key, document);
       } catch {
@@ -110,19 +140,21 @@ route.post('/scrape', async (c) => {
     }
 
     const scrapeId = crypto.randomUUID();
-    recentScrapeJobs.set(scrapeId, document);
-    if (recentScrapeJobs.size > 500) {
-      const oldest = recentScrapeJobs.keys().next().value;
-      if (oldest) recentScrapeJobs.delete(oldest);
+    if (!zeroRetention) {
+      recentScrapeJobs.set(scrapeId, document);
+      if (recentScrapeJobs.size > 500) {
+        const oldest = recentScrapeJobs.keys().next().value;
+        if (oldest) recentScrapeJobs.delete(oldest);
+      }
+      await saveScrapeJob(c.env.DB, {
+        id: scrapeId,
+        teamId,
+        keyId: p.keyId,
+        url: parsed.data.url,
+        document,
+        strategy,
+      });
     }
-    await saveScrapeJob(c.env.DB, {
-      id: scrapeId,
-      teamId,
-      keyId: p.keyId,
-      url: parsed.data.url,
-      document,
-      strategy,
-    });
 
     if (p.keyId && (document.json !== undefined || document.answer !== undefined)) {
       const approxTokens = Math.max(

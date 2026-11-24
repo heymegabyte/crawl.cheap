@@ -160,18 +160,20 @@ async function main() {
     const titlePos = featuredTitle ? getComputedStyle(featuredTitle).position : '';
     const mmCount = document.querySelectorAll('.tt-mm__item').length;
     const hasEstimatorAnchor = Boolean(document.getElementById('estimator'));
+    const hasIntegrationsSection = Boolean(document.getElementById('integrations') && document.getElementById('intTabs'));
     const bentoSvgCount = document.querySelectorAll('.bento .tile .ic svg').length;
     const statsText = document.querySelector('.stats')?.innerText || '';
-    return { topLinks, hasOldClutter, titlePos, mmCount, hasEstimatorAnchor, bentoSvgCount, statsText };
+    return { topLinks, hasOldClutter, titlePos, mmCount, hasEstimatorAnchor, hasIntegrationsSection, bentoSvgCount, statsText };
   })()`);
   ok(
-    'Navbar simplified to Explore & Guides Mega-Menu (11 items, non-overlapping static preview caption) + Studio + Avatar Circle, #estimator anchor & 14 monochrome SVG bento icons',
+    'Navbar simplified to Explore & Guides Mega-Menu (12 items, non-overlapping static preview caption) + Studio + Avatar Circle, #estimator & #integrations sections, and 14 monochrome SVG bento icons',
     Boolean(
       navOrderCheck &&
       !navOrderCheck.hasOldClutter &&
       navOrderCheck.titlePos === 'static' &&
-      navOrderCheck.mmCount >= 10 &&
+      navOrderCheck.mmCount >= 11 &&
       navOrderCheck.hasEstimatorAnchor &&
+      navOrderCheck.hasIntegrationsSection &&
       navOrderCheck.bentoSvgCount >= 14 &&
       /57/.test(navOrderCheck.statsText) &&
       /30/.test(navOrderCheck.statsText),
@@ -336,6 +338,8 @@ async function main() {
     const hasProfileEditor = Boolean(document.getElementById('profileNameInput') && document.getElementById('btnSaveProfile'));
     const hasMonitorsTable = Boolean(document.getElementById('monitorsTableBody'));
     const hasHealthPill = Boolean(document.getElementById('ovHealthPill'));
+    const hasIntegrationsHub = Boolean(document.getElementById('integrationsSection') && document.getElementById('integrationsGrid'));
+    const hasAdvancedFormats = Boolean(document.querySelector('.fmt[value="branding"]') && document.querySelector('.fmt[value="changeTracking"]') && document.getElementById('optRedactPii'));
 
     return {
       sidebarText,
@@ -352,10 +356,12 @@ async function main() {
       hasProfileEditor,
       hasMonitorsTable,
       hasHealthPill,
+      hasIntegrationsHub,
+      hasAdvancedFormats,
     };
   })()`);
   ok(
-    'Dashboard simplified & Top-15 features active: Settings menu, clean Playground, working Get code, Avatar initials, Cmd+K palette, URL hash routing, language filter, Activity exports, Profile editor, and Monitors table',
+    'Dashboard simplified & Top-35 features active: Settings menu, Integrations & Plugins Hub, clean Playground with advanced formats, working Get code, Avatar initials, Cmd+K palette, URL hash routing, language filter, Activity exports, Profile editor, and Monitors table',
     Boolean(
       dashboardSimplificationCheck &&
       dashboardSimplificationCheck.hasSettingsTab &&
@@ -369,7 +375,9 @@ async function main() {
       dashboardSimplificationCheck.hasActivityExports &&
       dashboardSimplificationCheck.hasProfileEditor &&
       dashboardSimplificationCheck.hasMonitorsTable &&
-      dashboardSimplificationCheck.hasHealthPill,
+      dashboardSimplificationCheck.hasHealthPill &&
+      dashboardSimplificationCheck.hasIntegrationsHub &&
+      dashboardSimplificationCheck.hasAdvancedFormats,
     ),
     JSON.stringify(dashboardSimplificationCheck),
   );

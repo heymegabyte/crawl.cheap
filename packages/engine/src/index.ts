@@ -3,7 +3,7 @@
  * execution planner over a free static-HTTP path (SSRF-guarded fetch → readability
  * extraction → HTML→Markdown) with escalation to the Browser Rendering tier.
  */
-export { scrape, synthesizeDeterministicJson, type ScrapeResult } from './scrape';
+export { scrape, redactPiiText, synthesizeDeterministicJson, type ScrapeResult } from './scrape';
 export {
   mapSite,
   mapSiteWithMeta,

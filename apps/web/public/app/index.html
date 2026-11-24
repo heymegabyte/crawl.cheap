@@ -606,6 +606,7 @@
                   <li role="none"><a class="tt-mm__item" role="menuitem" href="/#estimator" tabindex="-1" data-tt-mm-preview-src="/assets/previews/section-estimator.svg" data-tt-mm-preview-alt="Preflight Cost &amp; Credit Estimator" data-tt-mm-preview-href="/#estimator" data-tt-mm-preview-title="Calculate Exact Credit Burn &amp; Hard Caps Before Starting Any Job">Preflight Cost &amp; Credit Estimator</a></li>
                   <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/" tabindex="-1" data-tt-mm-preview-src="/assets/previews/blog-doc-parsing.svg" data-tt-mm-preview-alt="11-Format Document Parsing &amp; Autonomous Browser Co-Pilots" data-tt-mm-preview-href="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/" data-tt-mm-preview-title="Workers AI toMarkdown(), Vectorize RAG &amp; Autonomous Browser Co-Pilots">Guide: 11-Format Document Parsing &amp; Co-Pilots</a></li>
                   <li role="none"><a class="tt-mm__item" role="menuitem" href="/#compat" tabindex="-1" data-tt-mm-preview-src="/assets/previews/section-compat.svg" data-tt-mm-preview-alt="v1 &amp; v2 OpenAPI Compatibility Matrix" data-tt-mm-preview-href="/#compat" data-tt-mm-preview-title="100% Drop-In Parity Across Firecrawl v1 (23 Ops) &amp; v2 (57 Ops)">v1 &amp; v2 OpenAPI Compatibility Matrix</a></li>
+                  <li role="none"><a class="tt-mm__item" role="menuitem" href="/#integrations" tabindex="-1" data-tt-mm-preview-src="/assets/previews/section-integrations.svg" data-tt-mm-preview-alt="Ecosystem Integrations &amp; MCP Plugins" data-tt-mm-preview-href="/#integrations" data-tt-mm-preview-title="Drop-In Plugins for LangChain, LlamaIndex, Vercel AI SDK, CrewAI, Cursor, Claude, Dify &amp; n8n">Ecosystem Integrations &amp; MCP Plugins (12)</a></li>
                 </ul>
               </div>
               <a class="tt-mm__panel-featured" href="/blog/edge-web-scraping-for-ai-agents/" tabindex="-1">
@@ -646,6 +647,10 @@
     <button class="studio-tab" data-ws="copilot" data-title="Browser Sandbox" data-desc="Control persistent remote browser sessions with selectors or natural language." role="tab" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="8" x2="22" y2="8"/></svg>
       <span>Browser Sandbox</span>
+    </button>
+    <button class="studio-tab" data-ws="integrations" data-title="Integrations &amp; Plugins" data-desc="Connect LangChain, LlamaIndex, Vercel AI SDK, CrewAI, Cursor, Claude Code, Dify, and n8n." role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v6"/><path d="M12 16v6"/><path d="M4.93 4.93l4.24 4.24"/><path d="M14.83 14.83l4.24 4.24"/><path d="M2 12h6"/><path d="M16 12h6"/></svg>
+      <span>Integrations</span>
     </button>
     <div class="sidebar-section-label">Account</div>
     <button class="studio-tab" data-ws="activity" data-title="Activity Logs" data-desc="Inspect recent scrape, crawl, extract, and agent jobs." role="tab" aria-selected="false">
@@ -783,9 +788,14 @@
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="html"> html</label>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="screenshot"> screenshot</label>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="json"> json</label>
+        <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="branding"> branding</label>
+        <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="changeTracking"> changeTracking</label>
+        <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="highlights"> highlights</label>
+        <label style="color:var(--mut);font-size:12px"><input type="checkbox" class="fmt" value="question"> question</label>
         <span style="color:var(--line)">|</span>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" id="optOnlyMain" checked> onlyMainContent</label>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" id="optRemoveB64" checked> removeBase64Images</label>
+        <label style="color:var(--mut);font-size:12px"><input type="checkbox" id="optRedactPii"> redactPII</label>
         <label style="color:var(--mut);font-size:12px"><input type="checkbox" id="optMobile"> mobile</label>
       </div>
 
@@ -867,6 +877,32 @@
         <img id="sessShot" alt="current page" style="display:none;width:100%;border:1px solid var(--line);border-radius:12px;background:#0a0a16" />
       </div>
       <div class="trace-list" id="copilotTrace"></div>
+    </div>
+
+    <!-- 4B. INTEGRATIONS & PLUGINS HUB VIEW -->
+    <div class="card ws-section" data-section="integrations" id="integrationsSection" style="display:none">
+      <div class="row" style="justify-content:space-between;margin-bottom:6px;">
+        <h2>Ecosystem Integrations &amp; MCP Plugins</h2>
+        <div class="row">
+          <a class="btn btn-g" href="/.well-known/mcp.json" target="_blank" rel="noopener" style="padding:6px 10px;font-size:12px;">/.well-known/mcp.json</a>
+          <a class="btn btn-g" href="https://api.crawl.cheap/openapi.json" target="_blank" rel="noopener" style="padding:6px 10px;font-size:12px;">OpenAPI 3.1</a>
+          <a class="btn btn-g" href="/llms.txt" target="_blank" rel="noopener" style="padding:6px 10px;font-size:12px;">llms.txt</a>
+        </div>
+      </div>
+      <div class="hint">Click any integration or plugin below to generate a ready-to-paste snippet pre-filled with your active API key.</div>
+      <div class="tabs" id="intCatTabs">
+        <div class="tab on" data-int-cat="all">All (12)</div>
+        <div class="tab" data-int-cat="ai-frameworks">AI Frameworks (4)</div>
+        <div class="tab" data-int-cat="mcp-ides">MCP &amp; Agentic IDEs (3)</div>
+        <div class="tab" data-int-cat="workflow-builders">Workflow Builders (3)</div>
+        <div class="tab" data-int-cat="edge-cicd">Edge &amp; CI/CD (2)</div>
+      </div>
+      <div class="grid-2" id="integrationsGrid" style="margin-bottom:14px;"></div>
+      <div class="row" style="justify-content:space-between;margin-top:8px;">
+        <span style="font:600 12px var(--mono);color:var(--cyan)" id="intSelectedTitle">Selected Integration Config</span>
+        <button type="button" class="btn btn-p" id="btnCopyIntSnippet" style="padding:6px 12px;font-size:12px;">Copy Config</button>
+      </div>
+      <pre class="out" id="intConfigOut"><span class="muted">Select an integration card above to view its configuration…</span></pre>
     </div>
 
     <!-- 5. ACTIVITY LOGS VIEW -->
@@ -1337,7 +1373,7 @@ async function api(path, opts = {}) {
   return { status: r.status, json };
 }
 
-const VALID_VIEWS = ['overview', 'playground', 'research', 'copilot', 'activity', 'usage', 'keys', 'settings'];
+const VALID_VIEWS = ['overview', 'playground', 'research', 'copilot', 'integrations', 'activity', 'usage', 'keys', 'settings'];
 
 function switchWorkspaceView(ws, updateHash = true) {
   const target = VALID_VIEWS.includes(ws) ? ws : 'overview';
@@ -1382,6 +1418,7 @@ const CMD_PALETTE_ITEMS = [
   { id: 'ws-playground', label: 'Go to Playground', hint: '#playground', run: () => switchWorkspaceView('playground') },
   { id: 'ws-research', label: 'Go to Extract & Research', hint: '#research', run: () => switchWorkspaceView('research') },
   { id: 'ws-copilot', label: 'Go to Browser Sandbox', hint: '#copilot', run: () => switchWorkspaceView('copilot') },
+  { id: 'ws-integrations', label: 'Go to Integrations & MCP Plugins (12)', hint: '#integrations', run: () => switchWorkspaceView('integrations') },
   { id: 'ws-activity', label: 'Go to Activity Logs', hint: '#activity', run: () => switchWorkspaceView('activity') },
   { id: 'ws-usage', label: 'Go to Usage & Billing', hint: '#usage', run: () => switchWorkspaceView('usage') },
   { id: 'ws-keys', label: 'Go to API Keys', hint: '#keys', run: () => switchWorkspaceView('keys') },
@@ -1699,6 +1736,25 @@ function selectedFormats() {
         },
       };
     }
+    if (f === 'changeTracking') {
+      return {
+        type: 'changeTracking',
+        modes: ['git-diff'],
+        tag: 'playground',
+      };
+    }
+    if (f === 'highlights') {
+      return {
+        type: 'highlights',
+        query: prompt || 'domain',
+      };
+    }
+    if (f === 'question') {
+      return {
+        type: 'question',
+        question: prompt || 'What is the primary purpose of this page?',
+      };
+    }
     return f;
   });
 }
@@ -1708,11 +1764,19 @@ function buildReq() {
   const prompt = $('pgPrompt').value.trim();
   const onlyMainContent = $('optOnlyMain') ? $('optOnlyMain').checked : true;
   const removeBase64Images = $('optRemoveB64') ? $('optRemoveB64').checked : true;
+  const redactPII = $('optRedactPii') ? $('optRedactPii').checked : false;
   const mobile = $('optMobile') ? $('optMobile').checked : false;
   if (ep === 'scrape') {
     return {
       path: '/v2/scrape',
-      body: { url: input, formats: selectedFormats(), onlyMainContent, removeBase64Images, mobile },
+      body: {
+        url: input,
+        formats: selectedFormats(),
+        onlyMainContent,
+        removeBase64Images,
+        ...(redactPII ? { redactPII: true } : {}),
+        mobile,
+      },
     };
   }
   if (ep === 'map') return { path: '/v2/map', body: { url: input, limit: 50, ...(prompt ? { search: prompt } : {}) } };
@@ -1773,6 +1837,10 @@ function renderResult(kind, json) {
     const d = json.data || {};
     let s = (d.markdown || '').slice(0, 3500);
     if (d.summary) s = '— summary —\n' + d.summary + '\n\n— markdown —\n' + s;
+    if (d.answer) s += '\n\n— answer —\n' + d.answer;
+    if (d.highlights && d.highlights.length) s += '\n\n— highlights —\n' + d.highlights.join('\n• ');
+    if (d.branding) s += '\n\n— branding —\n' + JSON.stringify(d.branding, null, 2);
+    if (d.changeTracking) s += '\n\n— changeTracking —\n' + JSON.stringify(d.changeTracking, null, 2);
     if (d.json) s += '\n\n— json —\n' + JSON.stringify(d.json, null, 2);
     if (d.links && d.links.length) s += '\n\n— links (' + d.links.length + ') —\n' + d.links.slice(0, 25).join('\n');
     if (d.screenshot) s += '\n\n— screenshot —\n' + d.screenshot;
@@ -2476,8 +2544,88 @@ $('btnInspectCatalog').onclick = async () => {
   $('oauthOut').textContent = JSON.stringify(res.json, null, 2);
 };
 
+// ---- Ecosystem Integrations & MCP Plugins Hub ----
+let cachedIntegrations = [];
+let activeIntCategory = 'all';
+
+function renderIntegrationsGrid() {
+  const grid = $('integrationsGrid');
+  if (!grid) return;
+  const list = activeIntCategory === 'all'
+    ? cachedIntegrations
+    : cachedIntegrations.filter((item) => item.category === activeIntCategory);
+  if (!list.length) {
+    grid.innerHTML = '<div style="color:var(--faint);font-size:13px;">Loading integrations…</div>';
+    return;
+  }
+  grid.innerHTML = list.map((item) => `
+    <tt-plugin-card class="card" style="margin:0;padding:16px;display:flex;flex-direction:column;gap:8px;">
+      <div class="row" style="justify-content:space-between;">
+        <strong style="font-family:var(--disp);font-size:1rem;">${item.name}</strong>
+        <span class="pill">${item.categoryLabel}</span>
+      </div>
+      <div style="font:11.5px var(--mono);color:var(--cyan);">${item.packageOrProtocol}</div>
+      <p style="margin:0;font-size:0.84rem;color:var(--mut);">${item.tagline}</p>
+      <div class="row" style="margin-top:auto;padding-top:6px;">
+        <button type="button" class="btn btn-p" onclick="selectIntegrationConfig('${item.id}', false)" style="padding:6px 11px;font-size:12px;">View Config</button>
+        <button type="button" class="btn btn-g" onclick="selectIntegrationConfig('${item.id}', true)" style="padding:6px 11px;font-size:12px;">Copy Snippet</button>
+        ${item.deepLinkUrl ? `<a class="btn btn-g" href="${item.deepLinkUrl}" style="padding:6px 11px;font-size:12px;">1-Click Install</a>` : ''}
+      </div>
+    </tt-plugin-card>
+  `).join('');
+}
+
+window.selectIntegrationConfig = async (id, copyNow = false) => {
+  const res = await api('/v2/integrations/' + id + '/config', {
+    method: 'POST',
+    body: JSON.stringify({
+      apiKey: key || 'fc-YOUR_API_KEY',
+      targetUrl: ($('pgInput') && $('pgInput').value.trim()) || 'https://example.com',
+    }),
+  });
+  const detail = res.json && res.json.integration;
+  if (detail) {
+    $('intSelectedTitle').textContent = `${detail.name} (${detail.packageOrProtocol})`;
+    $('intConfigOut').textContent = detail.snippet;
+    if (copyNow) {
+      navigator.clipboard.writeText(detail.snippet).catch(() => {});
+      toast(`Copied ${detail.name} config`);
+    }
+  }
+};
+
+async function loadIntegrationsHub() {
+  const res = await api('/v2/integrations?apiKey=' + encodeURIComponent(key || 'fc-YOUR_API_KEY'));
+  if (res.json && Array.isArray(res.json.integrations)) {
+    cachedIntegrations = res.json.integrations;
+    renderIntegrationsGrid();
+    if (cachedIntegrations[0] && $('intConfigOut')) {
+      $('intSelectedTitle').textContent = `${cachedIntegrations[0].name} (${cachedIntegrations[0].packageOrProtocol})`;
+      $('intConfigOut').textContent = cachedIntegrations[0].snippet;
+    }
+  }
+}
+
+document.querySelectorAll('#intCatTabs .tab').forEach((tab) => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#intCatTabs .tab').forEach((t) => t.classList.remove('on'));
+    tab.classList.add('on');
+    activeIntCategory = tab.dataset.intCat || 'all';
+    renderIntegrationsGrid();
+  });
+});
+
+if ($('btnCopyIntSnippet')) {
+  $('btnCopyIntSnippet').onclick = () => {
+    const code = $('intConfigOut').textContent || '';
+    navigator.clipboard.writeText(code).catch(() => {});
+    toast('Copied integration config to clipboard');
+  };
+}
+
 renderKey();
 checkApiHealth();
+loadIntegrationsHub();
 if (key) refreshAccount();
 </script>
 <script src="/theme-tools-runtime.js?v=2" defer></script>

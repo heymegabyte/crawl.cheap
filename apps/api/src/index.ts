@@ -22,6 +22,7 @@ import accountRoute from './routes/account';
 import pricingRoute from './routes/pricing';
 import stubsRoute from './routes/stubs';
 import telemetryRoute, { createTelemetryRouter } from './routes/telemetry';
+import integrationsRoute from './routes/integrations';
 import v1Route from './routes/v1';
 import { recordUsage, creditsUsedThisPeriod, effectiveCap } from './lib/ledger';
 import { runDueMonitors } from './lib/monitor';
@@ -284,8 +285,9 @@ app.get('/webhook-sink/:id', async (c) => {
   return new Response(obj.body, { headers: { 'content-type': 'application/json' } });
 });
 
-// Mount Better Auth + OAuth 2.1 + idmux routes at root
+// Mount Better Auth + OAuth 2.1 + idmux + MCP/OpenAPI/llms.txt discovery routes at root
 app.route('/', authRoute);
+app.route('/', integrationsRoute);
 
 const v2 = new Hono<{ Bindings: Env; Variables: Vars }>();
 v2.route('/', scrapeRoute);
@@ -304,10 +306,13 @@ v2.route('/', accountRoute);
 v2.route('/', pricingRoute);
 v2.route('/', stubsRoute);
 v2.route('/', telemetryRoute);
+v2.route('/', integrationsRoute);
 app.route('/v2', v2);
 app.route('/v1', v1Route);
 app.route('/v1', telemetryRoute);
+app.route('/v1', integrationsRoute);
 app.route('/api', telemetryRoute);
+app.route('/api', integrationsRoute);
 
 app.notFound((c) =>
   c.json(

@@ -17,6 +17,7 @@ import {
   parseSentryDsn,
   parseW3cTraceparentHeader,
   resolveCorrelationContext,
+  redactPiiText,
   runPromptfooSyntheticEvalSuite,
   scrubTelemetryPayload,
   scrubTelemetryText,
@@ -212,6 +213,17 @@ describe('@theme.tools/telemetry 7-Rail Observability & Langfuse Safe (2500ms)',
     expect(THEME_TOOLS_CATALOG_MANIFEST.boundPackages).toContain('@theme.tools/blog');
     expect(THEME_TOOLS_CATALOG_MANIFEST.boundPackages).toContain('@theme.tools/ui');
     expect(THEME_TOOLS_CATALOG_MANIFEST.boundPackages).toContain('@theme.tools/catalog');
+    expect(THEME_TOOLS_CATALOG_MANIFEST.boundPackages).toContain('@theme.tools/integrations');
+    expect(THEME_TOOLS_CATALOG_MANIFEST.boundPackages).toHaveLength(28);
     expect(THEME_TOOLS_CATALOG_MANIFEST.observabilityRails).toHaveLength(7);
+
+    const piiSample =
+      'Contact alice@crawl.cheap or 415-555-0199 with key fc-1234567890abcdefghij at 192.168.1.42';
+    expect(redactPiiText(piiSample, true)).toContain('[REDACTED_EMAIL]');
+    expect(redactPiiText(piiSample, true)).toContain('[REDACTED_PHONE]');
+    expect(redactPiiText(piiSample, true)).toContain('[REDACTED_SECRET]');
+    expect(redactPiiText(piiSample, { replaceStyle: 'mask', entities: ['EMAIL'] })).toContain(
+      '************',
+    );
   });
 });

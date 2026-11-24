@@ -35,11 +35,56 @@ function bytesToBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
-function redactPiiText(text: string): string {
-  return text
-    .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[REDACTED_EMAIL]')
-    .replace(/\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, '[REDACTED_PHONE]')
-    .replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[REDACTED_SSN]');
+export function redactPiiText(
+  text: string,
+  config?:
+    | boolean
+    | {
+        mode?: 'accurate' | 'aggressive' | 'fast';
+        entities?: Array<'PERSON' | 'EMAIL' | 'PHONE' | 'LOCATION' | 'FINANCIAL' | 'SECRET'>;
+        replaceStyle?: 'tag' | 'mask' | 'remove';
+      },
+): string {
+  if (!config || !text) return text;
+  const opts = typeof config === 'object' ? config : {};
+  const entities = new Set(
+    opts.entities && opts.entities.length > 0
+      ? opts.entities
+      : ['EMAIL', 'PHONE', 'FINANCIAL', 'SECRET', 'LOCATION', 'PERSON'],
+  );
+  const style = opts.replaceStyle ?? 'tag';
+  const rep = (tag: string, match: string) => {
+    if (style === 'remove') return '';
+    if (style === 'mask') return '*'.repeat(Math.min(12, Math.max(4, match.length)));
+    return `[REDACTED_${tag}]`;
+  };
+
+  let out = text;
+  if (entities.has('EMAIL')) {
+    out = out.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, (m) => rep('EMAIL', m));
+  }
+  if (entities.has('SECRET')) {
+    out = out
+      .replace(
+        /\b(?:sk-[A-Za-z0-9_-]{16,}|ghp_[A-Za-z0-9]{20,}|fc-[A-Za-z0-9_-]{16,}|cc_live_[A-Za-z0-9_-]{16,}|AKIA[0-9A-Z]{16})\b/g,
+        (m) => rep('SECRET', m),
+      )
+      .replace(/\bBearer\s+[A-Za-z0-9._~+/-]{20,}\b/g, (m) => rep('SECRET', m));
+  }
+  if (entities.has('FINANCIAL')) {
+    out = out
+      .replace(/\b\d{3}-\d{2}-\d{4}\b/g, (m) => rep('SSN', m))
+      .replace(/\b(?:\d[ -]*?){13,16}\b/g, (m) => rep('FINANCIAL', m));
+  }
+  if (entities.has('PHONE')) {
+    out = out.replace(/\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, (m) =>
+      rep('PHONE', m),
+    );
+  }
+  if (entities.has('LOCATION')) {
+    out = out.replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g, (m) => rep('IP', m));
+  }
+  return out;
 }
 
 /** Synthesize a deterministic fallback JSON payload conforming to a JSON Schema when AI is unavailable. */
@@ -107,8 +152,14 @@ export async function scrape(request: ScrapeRequest, env: EngineEnv): Promise<Sc
   }
   if (request.redactPII) {
     const doc = result.document;
-    if (doc.markdown) doc.markdown = redactPiiText(doc.markdown);
-    if (doc.summary) doc.summary = redactPiiText(doc.summary);
+    if (doc.markdown) doc.markdown = redactPiiText(doc.markdown, request.redactPII);
+    if (doc.summary) doc.summary = redactPiiText(doc.summary, request.redactPII);
+    if (doc.html) doc.html = redactPiiText(doc.html, request.redactPII);
+    if (doc.rawHtml) doc.rawHtml = redactPiiText(doc.rawHtml, request.redactPII);
+    if (doc.answer) doc.answer = redactPiiText(doc.answer, request.redactPII);
+    if (Array.isArray(doc.highlights)) {
+      doc.highlights = doc.highlights.map((h) => redactPiiText(h, request.redactPII));
+    }
   }
   return result;
 }
@@ -346,6 +397,56 @@ async function scrapeInner(request: ScrapeRequest, env: EngineEnv): Promise<Scra
   if (formats.has('images')) doc.images = images;
   if (attributes) doc.attributes = attributes;
   if (branding) doc.branding = branding;
+
+  // Audio & Video media discovery formats
+  if (formats.has('audio')) {
+    const audioUrls = new Set<string>();
+    for (const el of root.querySelectorAll(
+      'audio[src], audio source[src], a[href$=".mp3"], a[href$=".wav"], a[href$=".ogg"], a[href$=".m4a"]',
+    )) {
+      const raw = el.getAttribute('src') ?? el.getAttribute('href');
+      if (raw) {
+        try {
+          audioUrls.add(new URL(raw, finalUrl).toString());
+        } catch {}
+      }
+    }
+    doc.audio = [...audioUrls];
+  }
+  if (formats.has('video')) {
+    const videoUrls = new Set<string>();
+    for (const el of root.querySelectorAll(
+      'video[src], video source[src], iframe[src*="youtube.com"], iframe[src*="vimeo.com"], a[href$=".mp4"], a[href$=".webm"]',
+    )) {
+      const raw = el.getAttribute('src') ?? el.getAttribute('href');
+      if (raw) {
+        try {
+          videoUrls.add(new URL(raw, finalUrl).toString());
+        } catch {}
+      }
+    }
+    doc.video = [...videoUrls];
+  }
+  if (formats.has('product')) {
+    doc.product = {
+      name: metadata.ogTitle ?? metadata.title ?? 'Web Product',
+      description: metadata.ogDescription ?? metadata.description ?? summarize(markdown),
+      url: finalUrl,
+      image: metadata.ogImage ?? images[0] ?? null,
+      currency: 'USD',
+    };
+  }
+  if (formats.has('menu')) {
+    const navItems = root
+      .querySelectorAll('nav a, header a')
+      .map((a) => ({
+        label: a.text.trim(),
+        href: a.getAttribute('href') ?? '',
+      }))
+      .filter((item) => item.label.length > 0)
+      .slice(0, 25);
+    doc.menu = { items: navItems };
+  }
 
   // Screenshot capture (browser tier when bound + R2, with deterministic HTTPS asset URL fallback)
   if (formats.has('screenshot')) {

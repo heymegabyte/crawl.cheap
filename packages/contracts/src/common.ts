@@ -98,6 +98,8 @@ export const DocumentSchema = z.object({
   branding: z.unknown().optional(),
   product: z.unknown().optional(),
   menu: z.unknown().optional(),
+  audio: z.array(z.string()).optional(),
+  video: z.array(z.string()).optional(),
   pages: z.array(z.object({ pageNumber: z.number().int(), markdown: z.string() })).optional(),
   attributes: z
     .array(z.object({ selector: z.string(), attribute: z.string(), values: z.array(z.string()) }))

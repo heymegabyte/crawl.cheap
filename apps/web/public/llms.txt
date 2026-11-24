@@ -1,17 +1,12 @@
-# crawl.cheap
+# crawl.cheap — The Web Data Engine for AI (Firecrawl v1 & v2 Compatible · Cloudflare Workers)
 
-> Open-source, Cloudflare-native web data engine that speaks the Firecrawl v2 API. Scrape, crawl, map, search, extract, parse, run AI Search (RAG) and persistent interactive browser sessions — at roughly half Firecrawl's price. Point an existing Firecrawl client at crawl.cheap and keep your code (use a crawl.cheap `cc_` key, never a Firecrawl `fc-` key).
+> Open-source, Cloudflare-native web data platform speaking 100% of the Firecrawl v2 (57 operations) and v1 (23 operations) API contract at 50% of Firecrawl's core monthly plan price.
 
-## API
-- [Live REST API](https://crawl-cheap-api.manhattan.workers.dev): Firecrawl v2-compatible — `POST /v2/scrape` · `/map` · `/crawl` · `/batch/scrape` · `/search` (web/news/images + tbs) · `/extract` · `/parse` · `/agent` · `/monitor` · `/browser` (interactive sessions) · `/ai-search` (semantic RAG)
-- [Remote MCP](https://crawl-cheap-mcp.manhattan.workers.dev/v2/mcp): stateless Streamable-HTTP JSON-RPC, `firecrawl_*` tools (scrape/map/crawl/search/agent/monitor/research)
-
-## Docs
-- [llms-full.txt](https://crawl.cheap/llms-full.txt): the complete knowledge corpus with full endpoint bodies for AI ingestion.
-- [README + quickstart](https://github.com/heymegabyte/crawl.cheap)
-- [Firecrawl compatibility](https://github.com/heymegabyte/crawl.cheap/blob/main/docs/firecrawl-compatibility.md)
-- [Self-hosting](https://github.com/heymegabyte/crawl.cheap/blob/main/deploy/README.md)
-
-## Notes
-- MIT-licensed; self-hostable on your own Cloudflare account with no dependency on crawl.cheap.
-- Compatibility = change the base URL + swap in a crawl.cheap key; request/response business logic is unchanged.
+## Core Endpoints & Discovery
+- Production Web & Studio: https://crawl.cheap (Dashboard: https://crawl.cheap/app/)
+- Production API Base URL: https://api.crawl.cheap
+- Remote MCP Server (30 Tools, Streamable-HTTP): https://mcp.crawl.cheap/v2/mcp
+- MCP Server Discovery Card: https://crawl.cheap/.well-known/mcp.json
+- OpenAPI 3.1 Specification: https://api.crawl.cheap/openapi.json
+- Ecosystems & Plugins Registry (12 Integrations): https://api.crawl.cheap/v2/integrations
+- @theme.tools 28-Library Catalog Manifest: https://api.crawl.cheap/v2/catalog

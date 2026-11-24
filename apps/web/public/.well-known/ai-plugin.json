@@ -1,0 +1,16 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "crawl.cheap Web Data & AI Engine",
+  "name_for_model": "crawl_cheap",
+  "description_for_human": "100% Firecrawl v1/v2 compatible web scraping, crawling, mapping, search, document parsing, and browser automation on Cloudflare Workers.",
+  "description_for_model": "Use crawl_cheap to scrape web pages into clean Markdown or structured JSON, crawl documentation sites, map URLs, search the web, or parse PDFs/DOCX/XLSX.",
+  "auth": {
+    "type": "service_http",
+    "authorization_type": "bearer"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://api.crawl.cheap/openapi.json"
+  },
+  "logo_url": "https://crawl.cheap/assets/crawl-cheap-icon.png"
+}

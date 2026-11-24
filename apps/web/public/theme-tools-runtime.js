@@ -256,7 +256,84 @@
         }
       );
     }
+    if (!customElements.get('tt-code-copy')) {
+      customElements.define(
+        'tt-code-copy',
+        class extends HTMLElement {
+          connectedCallback() {
+            this.classList.add('tt-badge');
+            this.style.cursor = 'pointer';
+          }
+        }
+      );
+    }
+    if (!customElements.get('tt-plugin-card')) {
+      customElements.define(
+        'tt-plugin-card',
+        class extends HTMLElement {
+          connectedCallback() {
+            this.classList.add('tt-card', 'tt-card--interactive');
+            this.setAttribute('data-spotlight', 'true');
+          }
+        }
+      );
+    }
+    if (!customElements.get('tt-mcp-deeplink')) {
+      customElements.define(
+        'tt-mcp-deeplink',
+        class extends HTMLElement {
+          connectedCallback() {
+            this.classList.add('tt-btn', 'tt-btn--ghost');
+          }
+        }
+      );
+    }
+    if (!customElements.get('tt-latency-badge')) {
+      customElements.define(
+        'tt-latency-badge',
+        class extends HTMLElement {
+          connectedCallback() {
+            this.classList.add('tt-badge');
+          }
+        }
+      );
+    }
   }
+
+  // Auto-enhance blog article code blocks with 1-click Copy & Try in Studio actions
+  function enhanceArticleCodeBlocks() {
+    var prose = document.getElementById('article-prose-body');
+    if (!prose) return;
+    var pres = prose.querySelectorAll('pre');
+    pres.forEach(function (pre) {
+      if (pre.getAttribute('data-tt-enhanced')) return;
+      pre.setAttribute('data-tt-enhanced', '1');
+      pre.style.position = 'relative';
+      var bar = document.createElement('div');
+      bar.style.cssText = 'display:flex;gap:6px;justify-content:flex-end;margin-bottom:8px;';
+      var copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'tt-badge';
+      copyBtn.style.cssText = 'cursor:pointer;background:rgba(0,229,255,0.12);color:#00e5ff;border:1px solid rgba(0,229,255,0.32);';
+      copyBtn.textContent = 'Copy snippet';
+      copyBtn.addEventListener('click', function () {
+        var codeEl = pre.querySelector('code');
+        var raw = codeEl ? codeEl.innerText : pre.innerText;
+        navigator.clipboard.writeText(raw).catch(function () {});
+        copyBtn.textContent = 'Copied ✓';
+        setTimeout(function () { copyBtn.textContent = 'Copy snippet'; }, 1500);
+      });
+      var studioLink = document.createElement('a');
+      studioLink.href = '/app/#playground';
+      studioLink.className = 'tt-badge';
+      studioLink.style.cssText = 'text-decoration:none;background:rgba(255,255,255,0.05);color:#cbd5e1;border:1px solid rgba(255,255,255,0.14);';
+      studioLink.textContent = 'Try in Playground →';
+      bar.appendChild(copyBtn);
+      bar.appendChild(studioLink);
+      pre.insertBefore(bar, pre.firstChild);
+    });
+  }
+  enhanceArticleCodeBlocks();
 
   document.addEventListener('pointermove', function (e) {
     var spot = e.target && e.target.closest && e.target.closest('[data-spotlight="true"]');

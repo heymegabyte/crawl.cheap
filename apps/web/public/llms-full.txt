@@ -1,52 +1,18 @@
-# crawl.cheap — Complete Knowledge Corpus
+# crawl.cheap — The Web Data Engine for AI (Firecrawl v1 & v2 Compatible · Cloudflare Workers)
 
-> Open-source, Cloudflare-native web data engine that speaks the Firecrawl v2 API. Scrape, crawl, map, search, extract, parse, run AI Search (RAG) and persistent interactive browser sessions — at roughly half Firecrawl’s price. Point an existing Firecrawl client at crawl.cheap and keep your code.
+> Open-source, Cloudflare-native web data platform speaking 100% of the Firecrawl v2 (57 operations) and v1 (23 operations) API contract at 50% of Firecrawl's core monthly plan price.
 
-MIT-licensed; self-hostable on your own Cloudflare account with no dependency on crawl.cheap.
-Firecrawl v2 compatibility = change the base URL + swap in a crawl.cheap `cc_` key; request/response business logic is unchanged.
-One Cloudflare Worker terminates the REST API; a second serves the marketing site + remote MCP.
+## Core Endpoints & Discovery
+- Production Web & Studio: https://crawl.cheap (Dashboard: https://crawl.cheap/app/)
+- Production API Base URL: https://api.crawl.cheap
+- Remote MCP Server (30 Tools, Streamable-HTTP): https://mcp.crawl.cheap/v2/mcp
+- MCP Server Discovery Card: https://crawl.cheap/.well-known/mcp.json
+- OpenAPI 3.1 Specification: https://api.crawl.cheap/openapi.json
+- Ecosystems & Plugins Registry (12 Integrations): https://api.crawl.cheap/v2/integrations
+- @theme.tools 28-Library Catalog Manifest: https://api.crawl.cheap/v2/catalog
 
-## API
-
-### Firecrawl v2-compatible REST API
-Source: https://api.crawl.cheap
-
-## Firecrawl v2-compatible REST API
-
-Base URL `https://api.crawl.cheap`. Every endpoint mirrors the Firecrawl v2 request/response contract, so an existing Firecrawl client works after changing only the base URL and the API key (use a crawl.cheap `cc_` key, never a Firecrawl `fc-` key).
-
-- `POST /v2/scrape` — fetch one URL as clean markdown / HTML / links / screenshot.
-- `POST /v2/map` — enumerate a site’s URLs from sitemaps + link discovery.
-- `POST /v2/crawl` — recursively crawl a site with include/exclude rules.
-- `POST /v2/batch/scrape` — scrape many URLs in one job.
-- `POST /v2/search` — web / news / images search with `tbs` time filters.
-- `POST /v2/extract` — structured JSON extraction against a schema.
-- `POST /v2/parse` — parse an already-fetched document.
-- `POST /v2/agent` — autonomous multi-step research.
-- `POST /v2/monitor` — scheduled change detection.
-- `POST /v2/browser` — persistent interactive browser sessions.
-- `POST /v2/ai-search` — semantic RAG over crawled content.
-
-### Remote MCP server
-Source: https://crawl-cheap-mcp.manhattan.workers.dev/v2/mcp
-
-## Remote MCP server
-
-A stateless Streamable-HTTP JSON-RPC MCP endpoint at `https://crawl-cheap-mcp.manhattan.workers.dev/v2/mcp`. It exposes `firecrawl_*` tools (scrape, map, crawl, search, agent, monitor, research) so an MCP-capable agent can use crawl.cheap directly as a first-class tool provider.
-
-## Docs
-
-### README + quickstart
-Source: https://github.com/heymegabyte/crawl.cheap
-
-Install, quickstart, and the full endpoint reference.
-
-### Firecrawl compatibility
-Source: https://github.com/heymegabyte/crawl.cheap/blob/main/docs/firecrawl-compatibility.md
-
-Exactly which Firecrawl v2 behaviours are mirrored and how to migrate.
-
-### Self-hosting
-Source: https://github.com/heymegabyte/crawl.cheap/blob/main/deploy/README.md
-
-Deploy crawl.cheap to your own Cloudflare account with no dependency on us.
+## Engineering Guides
+- [Firecrawl-Compatible Edge Scraping: High-Throughput Markdown Extraction for RAG and AI Agents](https://crawl.cheap/blog/edge-web-scraping-for-ai-agents/): OpenAPI contract parity, headless browser rendering pools, anti-bot etiquette, and deterministic HTML-to-Markdown distillation.
+- [Cloudflare Browser Rendering /crawl & Hibernatable Durable Objects: Distributed Web Crawling with WebSocket Watchers](https://crawl.cheap/blog/cloudflare-browser-rendering-crawl-and-durable-objects/): How crawl.cheap orchestrates Cloudflare Browser Rendering /crawl, Hibernatable WebSocket Durable Objects, Markdown for Agents, and HMAC-SHA256 lifecycle webhooks at half of Firecrawl pricing.
+- [OAuth 2.1 PKCE, Better Auth & 30-Tool Remote MCP Servers: Zero-Trust Web Data Pipelines for AI Agents](https://crawl.cheap/blog/oauth-2-1-pkce-and-30-tool-mcp-servers-on-cloudflare-workers/): Complete engineering specification for running RFC 9728 / RFC 8414 OAuth 2.1 with PKCE S256, Google/GitHub/Magic-Link Better Auth, and all 30 Firecrawl MCP tools on Cloudflare Workers.
+- [11-Format Document Parsing & Autonomous Browser Co-Pilots: Workers AI toMarkdown(), Vectorize RAG & 7-Rail Telemetry](https://crawl.cheap/blog/multimodal-document-parsing-and-autonomous-browser-copilots/): Engineering deep-dive into converting PDF, Office, ODF, CSV, RTF, and images to Markdown at the edge, driving persistent Puppeteer sessions with plain-English prompts, and tracing every LLM span with a 2,500ms circuit breaker.

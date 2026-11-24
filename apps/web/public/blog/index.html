@@ -63,6 +63,7 @@
           <li role="none"><a class="tt-mm__item" role="menuitem" href="/#estimator" tabindex="-1" data-tt-mm-preview-src="/assets/previews/section-estimator.svg" data-tt-mm-preview-alt="Preflight Cost &amp; Credit Estimator" data-tt-mm-preview-href="/#estimator" data-tt-mm-preview-title="Calculate Exact Credit Burn &amp; Hard Caps Before Starting Any Job">Preflight Cost &amp; Credit Estimator</a></li>
           <li role="none"><a class="tt-mm__item" role="menuitem" href="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/" tabindex="-1" data-tt-mm-preview-src="/assets/previews/blog-doc-parsing.svg" data-tt-mm-preview-alt="11-Format Document Parsing and Autonomous Browser Co-Pilots" data-tt-mm-preview-href="/blog/multimodal-document-parsing-and-autonomous-browser-copilots/" data-tt-mm-preview-title="Workers AI toMarkdown(), Vectorize RAG &amp; Autonomous Browser Co-Pilots">Guide: 11-Format Document Parsing &amp; Co-Pilots</a></li>
           <li role="none"><a class="tt-mm__item" role="menuitem" href="/#compat" tabindex="-1" data-tt-mm-preview-src="/assets/previews/section-compat.svg" data-tt-mm-preview-alt="v1 and v2 OpenAPI Compatibility Matrix" data-tt-mm-preview-href="/#compat" data-tt-mm-preview-title="100% Drop-In Parity Across Firecrawl v1 (23 Ops) &amp; v2 (57 Ops)">v1 &amp; v2 OpenAPI Compatibility Matrix</a></li>
+          <li role="none"><a class="tt-mm__item" role="menuitem" href="/#integrations" tabindex="-1" data-tt-mm-preview-src="/assets/previews/section-integrations.svg" data-tt-mm-preview-alt="Ecosystem Integrations &amp; MCP Plugins" data-tt-mm-preview-href="/#integrations" data-tt-mm-preview-title="Drop-In Plugins for LangChain, LlamaIndex, Vercel AI SDK, CrewAI, Cursor, Claude, Dify &amp; n8n">Ecosystem Integrations &amp; MCP Plugins (12)</a></li>
           <li role="none"><a class="tt-mm__item" role="menuitem" href="/app/" tabindex="-1" data-tt-mm-preview-src="/assets/previews/section-studio.svg" data-tt-mm-preview-alt="Dashboard and API Playground" data-tt-mm-preview-href="/app/" data-tt-mm-preview-title="Open the Interactive Playground, Activity Logs, API Keys &amp; Billing Dashboard">Dashboard &amp; API Playground (/app/)</a></li>
               </ul>
             </div>
@@ -113,6 +114,13 @@
 
     <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:26px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);">
       <input id="blogSearchInput" type="search" placeholder="Search architecture guides (e.g. Durable Objects, OAuth 2.1, PKCE, toMarkdown)…" aria-label="Search engineering blog articles" class="tt-input" style="flex:1 1 260px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;" />
+      <div style="display:flex;gap:6px;flex-wrap:wrap;" role="tablist" aria-label="Filter guides by topic">
+        <button type="button" class="tt-bib-filter-btn is-active" data-blog-tag="all">All Guides (4)</button>
+        <button type="button" class="tt-bib-filter-btn" data-blog-tag="scraping">Edge Scraping</button>
+        <button type="button" class="tt-bib-filter-btn" data-blog-tag="crawl">Browser Rendering /crawl</button>
+        <button type="button" class="tt-bib-filter-btn" data-blog-tag="oauth">OAuth 2.1 &amp; MCP</button>
+        <button type="button" class="tt-bib-filter-btn" data-blog-tag="parsing">Document Parsing &amp; Co-Pilots</button>
+      </div>
       <span id="blogMatchCount" class="tt-badge">4 guides</span>
     </div>
 
@@ -206,17 +214,29 @@
       var input = document.getElementById('blogSearchInput');
       var countEl = document.getElementById('blogMatchCount');
       var cards = document.querySelectorAll('[data-blog-card]');
+      var tagBtns = document.querySelectorAll('[data-blog-tag]');
+      var activeTag = 'all';
       if (!input || !cards.length) return;
-      input.addEventListener('input', function () {
+      function applyBlogFilter() {
         var q = (input.value || '').trim().toLowerCase();
         var shown = 0;
         cards.forEach(function (c) {
           var hay = c.getAttribute('data-blog-search') || '';
-          var match = !q || hay.indexOf(q) !== -1;
+          var qMatch = !q || hay.indexOf(q) !== -1;
+          var tMatch = activeTag === 'all' || hay.indexOf(activeTag) !== -1;
+          var match = qMatch && tMatch;
           c.style.display = match ? 'flex' : 'none';
           if (match) shown++;
         });
         if (countEl) countEl.textContent = shown + (shown === 1 ? ' guide' : ' guides');
+      }
+      input.addEventListener('input', applyBlogFilter);
+      tagBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          activeTag = btn.getAttribute('data-blog-tag') || 'all';
+          tagBtns.forEach(function (b) { b.classList.toggle('is-active', b === btn); });
+          applyBlogFilter();
+        });
       });
     })();
   </script>

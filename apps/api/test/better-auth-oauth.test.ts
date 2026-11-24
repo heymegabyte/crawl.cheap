@@ -434,4 +434,66 @@ describe('Better Auth + OAuth 2.1 Cloudflare-native Authentication & Firecrawl C
     expect(conc.body.data).toBeDefined();
     expect(typeof conc.body.data.active).toBe('number');
   });
+
+  it('serves 12 ecosystem integrations, plugin config generator, MCP Server Card, OpenAPI 3.1, llms.txt, and lockdown cache mode', async () => {
+    const ints = await req('/v2/integrations');
+    expect(ints.status).toBe(200);
+    expect(ints.body.success).toBe(true);
+    expect(ints.body.total).toBe(12);
+    expect(ints.body.integrations).toHaveLength(12);
+
+    const plugins = await req('/v2/plugins?category=mcp-ides');
+    expect(plugins.status).toBe(200);
+    expect(plugins.body.plugins).toHaveLength(3);
+
+    const cfg = await req('/v2/integrations/langchain/config', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        apiKey: 'fc-test-integration-key',
+        targetUrl: 'https://docs.crawl.cheap',
+      }),
+    });
+    expect(cfg.status).toBe(200);
+    expect(cfg.body.success).toBe(true);
+    expect(cfg.body.integration.snippet).toContain('fc-test-integration-key');
+    expect(cfg.body.integration.snippet).toContain('https://docs.crawl.cheap');
+
+    const mcpCard = await req('/.well-known/mcp.json');
+    expect(mcpCard.status).toBe(200);
+    expect(mcpCard.body.protocolVersion).toBe('2025-06-18');
+    expect(mcpCard.body.toolsCount).toBe(30);
+    expect(mcpCard.body.endpoints).toHaveLength(3);
+
+    const aiPlugin = await req('/.well-known/ai-plugin.json');
+    expect(aiPlugin.status).toBe(200);
+    expect(aiPlugin.body.name_for_model).toBe('crawl_cheap');
+
+    const openapi = await req('/openapi.json');
+    expect(openapi.status).toBe(200);
+    expect(openapi.body.openapi).toBe('3.1.0');
+    expect(openapi.body.paths['/v2/scrape']).toBeDefined();
+
+    const llms = await app.request('https://api.crawl.cheap/llms.txt', {}, { DEMO_MODE: 'true' });
+    expect(llms.status).toBe(200);
+    const llmsText = await llms.text();
+    expect(llmsText).toContain('crawl.cheap');
+    expect(llmsText).toContain('https://mcp.crawl.cheap/v2/mcp');
+
+    const catalog = await req('/v2/catalog');
+    expect(catalog.status).toBe(200);
+    expect(catalog.body.catalog.boundPackages).toHaveLength(28);
+    expect(catalog.body.catalog.integrationsCount).toBe(12);
+
+    const lockdownMiss = await req('/v2/scrape', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        url: 'https://uncached-lockdown-domain-test.example.com/page',
+        lockdown: true,
+      }),
+    });
+    expect(lockdownMiss.status).toBe(404);
+    expect(lockdownMiss.body.code).toBe('SCRAPE_NO_CACHED_DATA');
+  });
 });
