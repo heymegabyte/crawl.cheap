@@ -541,6 +541,31 @@ describe('Better Auth + OAuth 2.1 Cloudflare-native Authentication & Firecrawl C
     expect(catalog.body.catalog.boundPackages).toHaveLength(28);
     expect(catalog.body.catalog.integrationsCount).toBe(20);
 
+    const rotKey = await req('/api/auth/api-key/create', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'rotatable-key', prefix: 'fc-' }),
+    });
+    expect(rotKey.status).toBe(200);
+    const rotated = await req('/api/auth/api-key/rotate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ keyId: rotKey.body.id }),
+    });
+    expect(rotated.status).toBe(200);
+    expect(rotated.body.rotated).toBe(true);
+    expect(rotated.body.apiKey).toMatch(/^fc-/);
+
+    const auditLog = await req('/v2/team/audit-log');
+    expect(auditLog.status).toBe(200);
+    expect(auditLog.body.success).toBe(true);
+    expect(auditLog.body.entries.length).toBeGreaterThanOrEqual(1);
+
+    const invoices = await req('/v2/team/invoices');
+    expect(invoices.status).toBe(200);
+    expect(invoices.body.success).toBe(true);
+    expect(invoices.body.invoices).toHaveLength(1);
+
     const lockdownMiss = await req('/v2/scrape', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

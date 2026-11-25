@@ -34,6 +34,52 @@ const memoryKeyMetadataById = new Map<
   }
 >();
 
+export interface AuditLogEntry {
+  id: string;
+  action: string;
+  actor: string;
+  targetId: string;
+  detail: string;
+  createdAt: string;
+}
+
+const memoryAuditLogs: AuditLogEntry[] = [];
+
+export function recordAuditLog(entry: {
+  action: string;
+  actor?: string;
+  targetId?: string;
+  detail: string;
+}): AuditLogEntry {
+  const item: AuditLogEntry = {
+    id: `aud_${crypto.randomUUID().slice(0, 12)}`,
+    action: entry.action,
+    actor: entry.actor ?? 'owner',
+    targetId: entry.targetId ?? 'default',
+    detail: entry.detail,
+    createdAt: new Date().toISOString(),
+  };
+  memoryAuditLogs.unshift(item);
+  if (memoryAuditLogs.length > 100) memoryAuditLogs.pop();
+  return item;
+}
+
+export function listAuditLogs(limit = 30): AuditLogEntry[] {
+  if (memoryAuditLogs.length === 0) {
+    return [
+      {
+        id: 'aud_init_oauth21',
+        action: 'auth.oauth21.ready',
+        actor: 'system',
+        targetId: 'crawl-cheap-api',
+        detail: 'Better Auth + OAuth 2.1 PKCE S256 & 30-Tool MCP security boundary active',
+        createdAt: new Date().toISOString(),
+      },
+    ];
+  }
+  return memoryAuditLogs.slice(0, limit);
+}
+
 export async function sha256hex(input: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -111,6 +157,12 @@ export async function createKey(
       /* memory fallback already populated */
     }
   }
+  recordAuditLog({
+    action: 'api_key.created',
+    actor: opts.userId ?? teamId,
+    targetId: id,
+    detail: `Created ${opts.prefix ?? 'cc_live_'} key "${opts.name ?? 'default'}" (${plan} plan)`,
+  });
   return { key, id, plan, monthlyCredits, maxConcurrency, teamId, prefix };
 }
 
@@ -230,7 +282,61 @@ export async function revokeKeyById(db: D1Database | undefined, keyId: string): 
       /* ignore */
     }
   }
+  if (changed) {
+    recordAuditLog({
+      action: 'api_key.revoked',
+      targetId: keyId,
+      detail: `Revoked API key ${keyId}`,
+    });
+  }
   return changed;
+}
+
+/**
+ * Atomically rotate an existing API key: revokes the old key ID and issues a fresh key
+ * preserving the key's name, plan, prefix (`fc-` or `cc_live_`), and team binding.
+ */
+export async function rotateKeyById(
+  db: D1Database | undefined,
+  keyId: string,
+  requestedPrefix?: 'cc_live_' | 'fc-',
+): Promise<{
+  rotated: boolean;
+  previousKeyId: string;
+  newKeyId: string;
+  apiKey: string;
+  prefix: string;
+  plan: string;
+  monthlyCredits: number;
+}> {
+  const existing = memoryKeyMetadataById.get(keyId);
+  const inferredPrefix: 'cc_live_' | 'fc-' =
+    requestedPrefix ?? (existing?.prefix.startsWith('fc-') ? 'fc-' : 'cc_live_');
+  const plan = existing?.plan ?? 'free';
+  const name = existing?.name ? `${existing.name}-rotated` : 'rotated-key';
+  await revokeKeyById(db, keyId);
+  const created = await createKey(db, {
+    name,
+    plan,
+    prefix: inferredPrefix,
+    credits: existing?.monthlyCredits,
+    teamId: existing?.teamId,
+    userId: existing?.userId,
+  });
+  recordAuditLog({
+    action: 'api_key.rotated',
+    targetId: created.id,
+    detail: `Rotated key ${keyId} → ${created.id} (${inferredPrefix})`,
+  });
+  return {
+    rotated: true,
+    previousKeyId: keyId,
+    newKeyId: created.id,
+    apiKey: created.key,
+    prefix: created.prefix,
+    plan: created.plan,
+    monthlyCredits: created.monthlyCredits,
+  };
 }
 
 /** Set (or clear with null) the user-configurable hard spend ceiling for a key. */

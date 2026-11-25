@@ -4,7 +4,7 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { z } from 'zod';
 import type { Env } from '../env';
 import type { Vars } from '../lib/auth';
-import { createKey, listKeysForUser, revokeKeyById } from '../lib/keys';
+import { createKey, listKeysForUser, revokeKeyById, rotateKeyById } from '../lib/keys';
 import {
   buildAuthorizationServerMetadata,
   buildProtectedResourceMetadata,
@@ -980,6 +980,22 @@ route.post('/api/auth/api-key/revoke', async (c) => {
   if (!targetId) return c.json({ success: false, revoked: false, error: 'keyId is required' }, 400);
   const ok = await revokeKeyById(c.env.DB, targetId);
   return c.json({ success: ok, revoked: ok, keyId: targetId });
+});
+
+route.post('/api/auth/api-key/rotate', async (c) => {
+  const body = (await c.req.json().catch(() => ({}))) as {
+    keyId?: string;
+    id?: string;
+    prefix?: 'cc_live_' | 'fc-';
+  };
+  const targetId = body.keyId ?? body.id ?? '';
+  if (!targetId) return c.json({ success: false, rotated: false, error: 'keyId is required' }, 400);
+  const res = await rotateKeyById(
+    c.env.DB,
+    targetId,
+    body.prefix === 'fc-' ? 'fc-' : body.prefix === 'cc_live_' ? 'cc_live_' : undefined,
+  );
+  return c.json({ success: true, ...res });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

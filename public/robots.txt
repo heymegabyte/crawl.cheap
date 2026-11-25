@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /webhook/
+Disallow: /mcp/
+
+Sitemap: https://crawl.cheap/sitemap.xml
+# GEO / LLM Discovery: https://crawl.cheap/llms.txt

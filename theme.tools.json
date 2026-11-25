@@ -1,136 +1,165 @@
 {
-  "schemaVersion": "1.0.0",
-  "siteId": "crawl.cheap",
-  "domain": "crawl.cheap",
-  "theme": {
-    "id": "midnight-cyan",
-    "tokenStandard": "W3C DTCG 2025.10 OKLCH",
+  "schemaVersion": 2,
+  "project": "crawl.cheap",
+  "primaryDomain": "crawl.cheap",
+  "archetype": "commercial-field-service-and-client-sites",
+  "consumerMode": "thin-shell",
+  "canonicalUpstream": "https://github.com/heymegabyte/theme.tools",
+  "runtimeAdapterPath": "src/theme-tools-thin-shell.ts",
+  "verifyCommand": "node --experimental-strip-types src/theme-tools-thin-shell.ts --verify",
+  "themeTokens": {
     "background": "#060610",
-    "backgroundOklch": "oklch(11% 0.02 275)",
-    "primary": "#00E5FF",
-    "primaryOklch": "oklch(84% 0.17 198)",
-    "secondary": "#FF8A3D",
-    "secondaryOklch": "oklch(72% 0.19 42)",
-    "transition": "0.333s cubic-bezier(0.22, 1, 0.36, 1)",
+    "accent": "#00E5FF",
+    "colorSpace": "oklch",
+    "transitionDuration": "0.333s",
     "interactionStates": 16,
-    "tactileMicroInteractions": 30
+    "minApcaContrastLc": 60
   },
-  "observability": {
-    "package": "@theme.tools/telemetry",
-    "correlationHeader": "traceparent",
-    "langfuseTimeoutMs": 2500,
-    "langfuseCircuitBreakerStrikes": 3,
-    "langfuseCooldownMs": 60000,
-    "rails": ["cloudflare", "sentry", "posthog", "ga4", "gtm", "langfuse", "promptfoo"]
-  },
-  "bindings": [
+  "boundPackages": [
+    "@theme.tools/themes",
+    "@theme.tools/ui",
+    "@theme.tools/blog",
+    "@theme.tools/catalog",
+    "@theme.tools/testing",
+    "@theme.tools/workflows",
+    "@theme.tools/integrations",
+    "@theme.tools/social",
+    "@theme.tools/scheduling",
+    "@theme.tools/signing",
+    "@theme.tools/forms",
+    "@theme.tools/links",
+    "@theme.tools/keys",
+    "@theme.tools/notifications",
+    "@theme.tools/crm",
+    "@theme.tools/inbox",
+    "@theme.tools/billing",
+    "@theme.tools/status",
+    "@theme.tools/kb",
+    "@theme.tools/dataplane",
+    "@theme.tools/telemetry",
+    "@theme.tools/auth",
+    "@theme.tools/flags",
+    "@theme.tools/agent-ui",
+    "@theme.tools/seo-geo",
+    "@theme.tools/media-video",
+    "@theme.tools/crawl-research",
+    "@theme.tools/i18n-a11y"
+  ],
+  "discoveredScreensAndSectionsCount": 25,
+  "discoveredScreensAndSections": [
+    "packages/contracts/src/account.ts",
+    "packages/contracts/src/actions.ts",
+    "packages/contracts/src/batch.ts",
+    "packages/contracts/src/common.ts",
+    "packages/contracts/src/crawl.ts",
+    "packages/contracts/src/extract.ts",
+    "packages/contracts/src/index.ts",
+    "packages/contracts/src/map.ts",
+    "packages/contracts/src/pricing.ts",
+    "packages/contracts/src/scrape.ts",
+    "packages/contracts/src/search.ts",
+    "packages/contracts/src/webhook.ts",
+    "packages/contracts/test/pricing.test.ts",
+    "packages/contracts/test/scrape-formats.test.ts",
+    "packages/engine/src/browser.ts",
+    "packages/engine/src/catalog-manifest.ts",
+    "packages/engine/src/cf-crawl.ts",
+    "packages/engine/src/chunker.ts",
+    "packages/engine/src/extract-ai.ts",
+    "packages/engine/src/extract-content.ts",
+    "packages/engine/src/fetcher.ts",
+    "packages/engine/src/html-to-markdown.ts",
+    "packages/engine/src/index.ts",
+    "packages/engine/src/interact.ts",
+    "packages/engine/src/map.ts"
+  ],
+  "screenAndSectionBindings": [
     {
-      "package": "@theme.tools/themes",
-      "version": "workspace:*",
-      "tier": 1,
-      "surface": "oklch-tokens-42-themes-16-states"
+      "screenOrRoute": "/* (Global Header & Navigation)",
+      "canonicalSectionComponent": "UniversalMegaMenuNavbar + BrandLogoLockup",
+      "sourceLibrary": "@theme.tools/ui",
+      "interactionStates": 16,
+      "transitionDuration": "0.333s"
     },
     {
-      "package": "@theme.tools/ui",
-      "version": "workspace:*",
-      "tier": 1,
-      "surface": "primitives-tactile-30-custom-elements"
+      "screenOrRoute": "/ (Hero, Bento Feature Grid & Social Proof)",
+      "canonicalSectionComponent": "SpotlightBentoCard + PillCluster + BtfReveal",
+      "sourceLibrary": "@theme.tools/ui",
+      "interactionStates": 16,
+      "transitionDuration": "0.333s"
     },
     {
-      "package": "@theme.tools/blog",
-      "version": "workspace:*",
-      "tier": 1,
-      "surface": "site-widgets-media-multimedia-mega-menu-cms-platejs-editor"
+      "screenOrRoute": "/blog & /blog/:slug (Editorial & Audio Narration)",
+      "canonicalSectionComponent": "Full 100-Component Blog Registry + VoiceKit AudioNarrationPlayer",
+      "sourceLibrary": "@theme.tools/blog",
+      "interactionStates": 16,
+      "transitionDuration": "0.333s"
     },
     {
-      "package": "@theme.tools/catalog",
-      "version": "workspace:*",
-      "tier": 1,
-      "surface": "content-addressed-component-manifest-sbom"
-    },
-    {
-      "package": "@theme.tools/testing",
-      "version": "workspace:*",
-      "tier": 1,
-      "surface": "playwright-6-breakpoint-visual-a11y-verification"
-    },
-    {
-      "package": "@theme.tools/telemetry",
-      "version": "workspace:*",
-      "tier": 3,
-      "surface": "seven-system-observability-sentry-posthog-ga4-gtm-langfuse-2500ms"
-    },
-    {
-      "package": "@theme.tools/auth",
-      "version": "workspace:*",
-      "tier": 3,
-      "surface": "better-auth-oauth21-pkce-s256-dcr"
-    },
-    {
-      "package": "@theme.tools/keys",
-      "version": "workspace:*",
-      "tier": 2,
-      "surface": "api-key-lifecycle-fc-and-cc-live"
-    },
-    {
-      "package": "@theme.tools/billing",
-      "version": "workspace:*",
-      "tier": 2,
-      "surface": "credit-ledger-token-ledger-spend-limit-50pct-firecrawl-parity"
-    },
-    {
-      "package": "@theme.tools/crawl-research",
-      "version": "workspace:*",
-      "tier": 3,
-      "surface": "shared-firecrawl-v1-v2-ssrf-robots-markdown-for-agents"
-    },
-    {
-      "package": "@theme.tools/seo-geo",
-      "version": "workspace:*",
-      "tier": 3,
-      "surface": "sitemap-robots-llms-txt-indexnow-jsonld"
-    },
-    {
-      "package": "@theme.tools/agent-ui",
-      "version": "workspace:*",
-      "tier": 3,
-      "surface": "multi-turn-research-agent-browser-copilot-studio"
-    },
-    {
-      "package": "@theme.tools/i18n-a11y",
-      "version": "workspace:*",
-      "tier": 3,
-      "surface": "wcag22-aaa-apca-contrast-reduced-motion"
-    },
-    {
-      "package": "@theme.tools/status",
-      "version": "workspace:*",
-      "tier": 2,
-      "surface": "health-probes-telemetry-status"
-    },
-    {
-      "package": "@theme.tools/kb",
-      "version": "workspace:*",
-      "tier": 2,
-      "surface": "rag-docs-search-and-support-ask"
-    },
-    {
-      "package": "@theme.tools/workflows",
-      "version": "workspace:*",
-      "tier": 2,
-      "surface": "durable-object-crawl-extract-browser-coordinators"
-    },
-    {
-      "package": "@theme.tools/notifications",
-      "version": "workspace:*",
-      "tier": 2,
-      "surface": "hmac-sha256-lifecycle-webhooks"
-    },
-    {
-      "package": "@theme.tools/flags",
-      "version": "workspace:*",
-      "tier": 3,
-      "surface": "posthog-feature-flag-exposure-edge-toggles"
+      "screenOrRoute": "/status & /api/health/* (Synthetic Probes & Uptime)",
+      "canonicalSectionComponent": "tt-status-badge + tt-uptime-timeline",
+      "sourceLibrary": "@theme.tools/status",
+      "interactionStates": 16,
+      "transitionDuration": "0.333s"
     }
+  ],
+  "blogSystem": {
+    "package": "@theme.tools/blog",
+    "editor": "platejs/react",
+    "fullCatalogEnabled": true,
+    "componentCount": 100,
+    "postIndex": "content/posts/index.json",
+    "routes": [
+      "/blog",
+      "/blog/:slug",
+      "/blog/:slug/edit",
+      "/blog/api/:slug"
+    ]
+  },
+  "voiceAndMediaEngine": {
+    "package": "@theme.tools/media-video",
+    "primaryProvider": "voicekit",
+    "creditsGrantUsd": 17000,
+    "fallbackChain": [
+      "voicekit",
+      "melotts-workers-ai",
+      "piper-local"
+    ],
+    "replacesDeprecated": "elevenlabs"
+  },
+  "telemetry8Pillar": {
+    "package": "@theme.tools/telemetry",
+    "langfuseTimeoutMs": 2500,
+    "circuitBreakerStrikes": 3,
+    "gtmConsentModeV2Default": "G100",
+    "pillars": [
+      "posthog",
+      "sentry",
+      "ga4",
+      "gtm",
+      "langfuse",
+      "cloudflare-rum",
+      "w3c-traceparent",
+      "promptfoo"
+    ]
+  },
+  "cloudflareFreeTierEdge": {
+    "dimensionsEnforced": 13,
+    "wafCustomRules": 5,
+    "rateLimitRules": 1,
+    "securityHeaders": 4,
+    "cacheRules": 2,
+    "compressionAlgorithms": [
+      "zstd",
+      "brotli",
+      "gzip"
+    ],
+    "configRules": 1,
+    "urlNormalizationScope": "both",
+    "zoneSettingsCount": 25
+  },
+  "contributedSharedModules": [
+    "@theme.tools/sdk/streamlined-thin-shell-composer",
+    "@theme.tools/media-video/zero-cost-video-credit-planner"
   ]
 }

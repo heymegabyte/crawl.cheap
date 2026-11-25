@@ -2,7 +2,12 @@ import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { z } from 'zod';
 import { CrawlRequestSchema } from '@crawlcheap/contracts';
-import { SsrfError, UnsupportedSiteError, deriveCrawlParamsFromPrompt } from '@crawlcheap/engine';
+import {
+  SsrfError,
+  UnsupportedSiteError,
+  deriveCrawlParamsFromPrompt,
+  mapSite,
+} from '@crawlcheap/engine';
 import { engineEnv, type Env } from '../env';
 import {
   activeCrawlsRegistry,
@@ -129,6 +134,81 @@ route.post('/crawl/params-preview', async (c) => {
     data: preview,
     ...preview,
   });
+});
+
+// POST /v2/crawl/dry-run — Zero-credit crawl preflight preview (discovers URLs, applies include/exclude filters, estimates credits & 50% Firecrawl savings)
+route.post('/crawl/dry-run', async (c) => {
+  const denied = gate(c);
+  if (denied) return denied;
+  const parsed = await parseBody(
+    c,
+    z.object({
+      url: z.string().url(),
+      limit: z.number().int().min(1).max(1000).default(25),
+      prompt: z.string().max(10000).optional(),
+      includePaths: z.array(z.string()).optional(),
+      excludePaths: z.array(z.string()).optional(),
+    }),
+  );
+  if (!parsed.ok) return parsed.response;
+
+  try {
+    const derived = parsed.data.prompt
+      ? await deriveCrawlParamsFromPrompt(parsed.data.url, parsed.data.prompt, engineEnv(c.env))
+      : null;
+    const includePaths = parsed.data.includePaths ?? derived?.includePaths ?? [];
+    const excludePaths = parsed.data.excludePaths ?? derived?.excludePaths ?? [];
+    const discovered = await mapSite(
+      { url: parsed.data.url, limit: Math.min(200, parsed.data.limit * 3) } as never,
+      engineEnv(c.env),
+    );
+    const matchingUrls = discovered
+      .map((u) => (typeof u === 'string' ? u : u.url))
+      .filter((u) => {
+        try {
+          const p = new URL(u).pathname;
+          if (excludePaths.some((ex) => new RegExp(ex).test(p))) return false;
+          if (includePaths.length > 0 && !includePaths.some((inc) => new RegExp(inc).test(p))) {
+            return false;
+          }
+          return true;
+        } catch {
+          return true;
+        }
+      })
+      .slice(0, parsed.data.limit);
+
+    const pagesCount = Math.max(1, matchingUrls.length);
+    const estimatedCredits = pagesCount;
+    const crawlCheapUsd = Number((estimatedCredits * 0.000495).toFixed(4));
+    const firecrawlUsd = Number((estimatedCredits * 0.00099).toFixed(4));
+
+    return c.json({
+      success: true as const,
+      dryRun: true as const,
+      creditsCharged: 0,
+      seedUrl: parsed.data.url,
+      includePaths,
+      excludePaths,
+      matchingCount: matchingUrls.length,
+      matchingUrls,
+      estimate: {
+        credits: estimatedCredits,
+        crawlCheapUsd,
+        firecrawlUsd,
+        savingsUsd: Number((firecrawlUsd - crawlCheapUsd).toFixed(4)),
+        savingsPercent: 50,
+      },
+    });
+  } catch (err) {
+    if (err instanceof SsrfError) return fail(c, 400, err.message, 'unsafe_domain_blocked');
+    return fail(
+      c,
+      500,
+      err instanceof Error ? err.message : 'Crawl dry-run failed',
+      'CRAWL_DENIAL',
+    );
+  }
 });
 
 // Active / ongoing crawls enumeration (registered before /crawl/:id so "active"/"ongoing" are not captured as :id)

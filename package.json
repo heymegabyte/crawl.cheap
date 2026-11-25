@@ -21,7 +21,8 @@
     "dev": "pnpm --filter @crawlcheap/api dev",
     "deploy:api": "pnpm --filter @crawlcheap/api deploy",
     "lint": "prettier --check .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "verify:theme-tools": "node --experimental-strip-types src/theme-tools-thin-shell.ts --verify"
   },
   "devDependencies": {
     "prettier": "^3.4.2",
@@ -35,5 +36,11 @@
       "@cloudflare/workerd-darwin-arm64",
       "@cloudflare/workerd-darwin-64"
     ]
+  },
+  "themeTools": {
+    "schemaVersion": 2,
+    "consumerMode": "thin-shell",
+    "canonicalPackages": 28,
+    "voiceProvider": "voicekit-17k-grant"
   }
 }

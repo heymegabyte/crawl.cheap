@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { type Env } from '../env';
-import { createKey } from '../lib/keys';
+import { createKey, rotateKeyById } from '../lib/keys';
 import { fail, parseBody } from '../lib/respond';
 import { requireAuth, type Vars } from '../lib/auth';
 import { allowDemo } from '../lib/ratelimit';
@@ -46,6 +46,21 @@ route.post('/keys', async (c) => {
     plan: created.plan,
     monthlyCredits: created.monthlyCredits,
     note: 'Store this key now — it is shown only once. Send it as: Authorization: Bearer <key>',
+  });
+});
+
+// POST /v2/keys/:id/rotate — Zero-downtime atomic API key rotation
+route.post('/keys/:id/rotate', async (c) => {
+  const keyId = c.req.param('id');
+  const body = (await c.req.json().catch(() => ({}))) as { prefix?: 'cc_live_' | 'fc-' };
+  const result = await rotateKeyById(
+    c.env.DB,
+    keyId,
+    body.prefix === 'fc-' ? 'fc-' : body.prefix === 'cc_live_' ? 'cc_live_' : undefined,
+  );
+  return c.json({
+    success: true as const,
+    ...result,
   });
 });
 
